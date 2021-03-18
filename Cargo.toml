@@ -1,0 +1,11 @@
+[package]
+name = "rusty-aquarium"
+version = "0.1.0"
+authors = ["Olle Wreede <olle@wreede.se>"]
+edition = "2018"
+
+[dependencies]
+macroquad = "0.3.0-alpha.15"
+
+[profile.dev.package.'*']
+opt-level = 3
