@@ -5,11 +5,14 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
-    let mut ball_x = SCR_W / 2.;
-    let mut ball_y = SCR_H / 2.;
+    let fish_texture: Texture2D = load_texture("resources/clownfish.png").await;
+
     let mut dx = 30.;
-    let mut dy = 30.;
-    let ball_size = 1.;
+    let mut dy = 10.;
+    let mut fish_x = SCR_W / 2.;
+    let mut fish_y = SCR_H / 2.;
+    let fish_width = 10.;
+    let fish_height = 10. / (fish_texture.width() / fish_texture.height());
 
     // build camera with following coordinate system:
     // (0., 0)     .... (SCR_W, 0.)
@@ -21,24 +24,34 @@ async fn main() {
     });
 
     loop {
-        clear_background(PURPLE);
+        clear_background(DARKBLUE);
 
         let delta = get_frame_time();
 
-        // Move ball
-        ball_x += dx * delta;
-        ball_y += dy * delta;
+        // Move fish
+        fish_x += dx * delta;
+        fish_y += dy * delta;
 
         // Change X direction
-        if ball_x <= ball_size / 2. || ball_x > (SCR_W - ball_size / 2.) {
+        if fish_x <= 0. || fish_x > (SCR_W - fish_width) {
             dx *= -1.;
         }
         // Change Y direction
-        if ball_y <= ball_size / 2. || ball_y > (SCR_H - ball_size / 2.) {
+        if fish_y <= 0. || fish_y > (SCR_H - fish_height) {
             dy *= -1.;
         }
 
-        draw_circle(ball_x, ball_y, ball_size, GREEN);
+        draw_texture_ex(
+            fish_texture,
+            fish_x,
+            fish_y,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(fish_width, fish_height)),
+                flip_x: dx > 0.,
+                ..Default::default()
+            },
+            );
 
         next_frame().await
     }
