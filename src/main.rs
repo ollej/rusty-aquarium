@@ -5,8 +5,10 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
-    let mut dx = 30.;
-    let mut dy = 10.;
+    let mut dx = 25.;
+    let mut dy = 7.;
+
+    let background: Texture2D = load_texture("resources/background.png").await;
 
     let mut fish_x = SCR_W / 2.;
     let mut fish_y = SCR_H / 2.;
@@ -15,7 +17,10 @@ async fn main() {
     let fish_width = 10.;
     let fish_height = 10. / fish_ratio;
 
-    let background: Texture2D = load_texture("resources/background.png").await;
+    let max_x = SCR_W - fish_width / 2.;
+    let min_x = fish_width / 2.;
+    let max_y = SCR_H - fish_height * 1.5;
+    let min_y = fish_height;
 
     // build camera with following coordinate system:
     // (0., 0)     .... (SCR_W, 0.)
@@ -36,11 +41,11 @@ async fn main() {
         fish_y += dy * delta;
 
         // Change X direction
-        if fish_x <= 0. || fish_x > (SCR_W - fish_width) {
+        if fish_x < min_x || fish_x > (max_x - fish_width) {
             dx *= -1.;
         }
         // Change Y direction
-        if fish_y <= 0. || fish_y > (SCR_H - fish_height) {
+        if fish_y < min_y || fish_y > (max_y - fish_height) {
             dy *= -1.;
         }
 
