@@ -5,14 +5,17 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
-    let fish_texture: Texture2D = load_texture("resources/clownfish.png").await;
-
     let mut dx = 30.;
     let mut dy = 10.;
+
     let mut fish_x = SCR_W / 2.;
     let mut fish_y = SCR_H / 2.;
+    let fish_texture: Texture2D = load_texture("resources/clownfish.png").await;
+    let fish_ratio = fish_texture.width() / fish_texture.height();
     let fish_width = 10.;
-    let fish_height = 10. / (fish_texture.width() / fish_texture.height());
+    let fish_height = 10. / fish_ratio;
+
+    let background: Texture2D = load_texture("resources/background.png").await;
 
     // build camera with following coordinate system:
     // (0., 0)     .... (SCR_W, 0.)
@@ -40,6 +43,17 @@ async fn main() {
         if fish_y <= 0. || fish_y > (SCR_H - fish_height) {
             dy *= -1.;
         }
+
+        draw_texture_ex(
+            background,
+            0.,
+            0.,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(SCR_W, SCR_H)),
+                ..Default::default()
+            },
+            );
 
         draw_texture_ex(
             fish_texture,
