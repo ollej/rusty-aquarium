@@ -17,6 +17,7 @@ async fn main() {
     let fish_width = 10.;
     let fish_height = 10. / fish_ratio;
 
+    let direction_change_chance = 1.5;
     let max_x = SCR_W - fish_width / 2.;
     let min_x = fish_width / 2.;
     let max_y = SCR_H - fish_height * 1.5;
@@ -41,11 +42,11 @@ async fn main() {
         fish_y += dy * delta;
 
         // Change X direction
-        if fish_x < min_x || fish_x > (max_x - fish_width) {
+        if fish_x < min_x || fish_x > (max_x - fish_width) || rand::gen_range(0., 100.) < direction_change_chance {
             dx *= -1.;
         }
         // Change Y direction
-        if fish_y < min_y || fish_y > (max_y - fish_height) {
+        if fish_y < min_y || fish_y > (max_y - fish_height) || rand::gen_range(0., 100.) < direction_change_chance {
             dy *= -1.;
         }
 
