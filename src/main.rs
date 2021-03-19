@@ -1,40 +1,39 @@
 use macroquad::prelude::*;
 
 pub struct Fish {
-    id: u64,
     screen_size: Vec2,
     position: Vec2,
     speed: Vec2,
     size: Vec2,
-    direction_change_chance: Vec2,
-    max_position: Vec2,
-    min_position: Vec2,
     texture: Texture2D,
 }
 impl Fish {
     const SPRITE: &'static str = "resources/clownfish.png";
+    const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
+    const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
+    const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2., y: 0.5 };
 
-    fn new(id: u64, start_position: Vec2, screen_size: Vec2, texture: Texture2D) -> Fish {
+    fn new(start_position: Vec2, screen_size: Vec2, texture: Texture2D) -> Fish {
         Fish {
-            id,
             screen_size,
             position: start_position,
             speed: Vec2 { x: 25., y: 7. },
             size: Vec2 { x: 10., y: 10. / (texture.width() / texture.height()) },
-            direction_change_chance: Vec2 { x: 2., y: 0.5 },
-            max_position: Vec2 { x: 5., y: 10. },
-            min_position: Vec2 { x: 5., y: 10. },
             texture: texture,
         }
     }
 
     fn tick(&mut self, delta: f32) {
         // Change X direction
-        if self.position.x < self.min_position.x || self.position.x > (self.screen_size.x - self.max_position.x - self.size.x) || rand::gen_range(0., 100.) < self.direction_change_chance.x {
+        if self.position.x < Fish::MIN_POSITION.x
+            || self.position.x > (self.screen_size.x - Fish::MAX_POSITION.x - self.size.x)
+                || rand::gen_range(0., 100.) < Fish::DIRECTION_CHANGE_CHANCE.x {
             self.speed.x *= -1.;
         }
         // Change Y direction
-        if self.position.y < self.min_position.y || self.position.y > (self.screen_size.y - self.max_position.y) || rand::gen_range(0., 100.) < self.direction_change_chance.y {
+        if self.position.y < Fish::MIN_POSITION.y
+            || self.position.y > (self.screen_size.y - Fish::MAX_POSITION.y)
+                || rand::gen_range(0., 100.) < Fish::DIRECTION_CHANGE_CHANCE.y {
             self.speed.y *= -1.;
         }
 
@@ -76,9 +75,16 @@ async fn main() {
     let background: Texture2D = load_texture("resources/background.png").await;
     let fish_texture: Texture2D = load_texture(Fish::SPRITE).await;
 
-    let screen_size = Vec2 { x: SCR_W, y: SCR_H };
-    let mut fish = Fish::new(1, Vec2 { x: SCR_W / 2., y: SCR_H / 2. }, screen_size, fish_texture);
     let mut first_frame = true;
+    let screen_size = Vec2 { x: SCR_W, y: SCR_H };
+    let mut fishies = Vec::new();
+
+    for _ in 0..10 {
+        let start_pos = vec2(
+            rand::gen_range(Fish::MIN_POSITION.x, Fish::MAX_POSITION.x),
+            rand::gen_range(Fish::MIN_POSITION.y, Fish::MAX_POSITION.y));
+        fishies.push(Fish::new(start_pos, screen_size, fish_texture));
+    }
 
     // build camera with following coordinate system:
     // (0., 0)     .... (SCR_W, 0.)
@@ -101,7 +107,9 @@ async fn main() {
 
         let delta = get_frame_time();
 
-        fish.tick(delta);
+        for fish in fishies.iter_mut() {
+            fish.tick(delta);
+        }
 
         // Draw background
         draw_texture_ex(
@@ -114,7 +122,9 @@ async fn main() {
                 ..Default::default()
             },
             );
-        fish.draw();
+        for fish in fishies.iter_mut() {
+            fish.draw();
+        }
 
         next_frame().await
     }
