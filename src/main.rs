@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use macroquad::rand::ChooseRandom;
 
 pub struct Fish {
     screen_size: Vec2,
@@ -22,10 +23,14 @@ impl Fish {
         Fish {
             screen_size,
             position: start_position,
-            speed: Vec2 { x: 25., y: 7. },
+            speed: Vec2 { x: 25. * Fish::random_direction(), y: 7. },
             size: Vec2 { x: Fish::SIZE, y: fish_height },
             texture: texture,
         }
+    }
+
+    fn random_direction() -> f32 {
+        return *vec![-1., 1.].choose().unwrap();
     }
 
     fn tick(&mut self, delta: f32) {
