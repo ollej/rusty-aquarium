@@ -6,13 +6,14 @@ pub struct Fish {
     position: Vec2,
     speed: Vec2,
     size: Vec2,
+    max_position: Vec2,
     texture: Texture2D,
 }
 impl Fish {
     const SPRITE: &'static str = "resources/clownfish.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
-    const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2., y: 0.5 };
+    const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
     const SIZE: f32 = 10.;
 
     fn new(screen_size: Vec2, texture: Texture2D) -> Fish {
@@ -20,11 +21,16 @@ impl Fish {
         let start_position = vec2(
             rand::gen_range(Fish::MIN_POSITION.x, screen_size.x - Fish::MAX_POSITION.x - Fish::SIZE - 1.),
             rand::gen_range(Fish::MIN_POSITION.y, screen_size.y - Fish::MAX_POSITION.y - fish_height - 1.));
+        let size = Vec2 { x: Fish::SIZE, y: fish_height };
         Fish {
             screen_size,
             position: start_position,
             speed: Vec2 { x: 25. * Fish::random_direction(), y: 7. },
-            size: Vec2 { x: Fish::SIZE, y: fish_height },
+            size: size,
+            max_position: Vec2 {
+                x: screen_size.x - Fish::MAX_POSITION.x - size.x,
+                y: screen_size.y - Fish::MAX_POSITION.y
+            },
             texture: texture,
         }
     }
@@ -33,19 +39,35 @@ impl Fish {
         return *vec![-1., 1.].choose().unwrap();
     }
 
+    fn random_percent() -> f32 {
+        return rand::gen_range(0., 100.);
+    }
+
     fn tick(&mut self, delta: f32) {
         self.update_position(delta);
 
         // Change X direction
-        if self.position.x < Fish::MIN_POSITION.x
-            || self.position.x > (self.screen_size.x - Fish::MAX_POSITION.x - self.size.x)
-                || rand::gen_range(0., 100.) < Fish::DIRECTION_CHANGE_CHANCE.x {
+        if self.position.x < Fish::MIN_POSITION.x {
+            self.speed.x *= -1.;
+            self.position.x = Fish::MIN_POSITION.x;
+        }
+        if self.position.x > self.max_position.x {
+            self.speed.x *= -1.;
+            self.position.x = self.max_position.x;
+        }
+        if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
             self.speed.x *= -1.;
         }
         // Change Y direction
-        if self.position.y < Fish::MIN_POSITION.y
-            || self.position.y > (self.screen_size.y - Fish::MAX_POSITION.y)
-                || rand::gen_range(0., 100.) < Fish::DIRECTION_CHANGE_CHANCE.y {
+        if self.position.y < Fish::MIN_POSITION.y {
+            self.speed.y *= -1.;
+            self.position.y = Fish::MIN_POSITION.y;
+        }
+        if self.position.y > self.max_position.y {
+            self.speed.y *= -1.;
+            self.position.y = self.max_position.y;
+        }
+        if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
             self.speed.y *= -1.;
         }
     }
