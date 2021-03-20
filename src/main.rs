@@ -1,9 +1,55 @@
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
 
-pub struct Fish {
+#[derive(Copy, Clone)]
+pub struct Motion {
     position: Vec2,
     speed: Vec2,
+}
+
+pub enum Movement {
+    Random,
+}
+impl Movement {
+    fn tick(&mut self, motion: Motion, max_position: Vec2) -> Motion {
+        return match self {
+            Movement::Random => Movement::tick_random(motion, max_position)
+        }
+    }
+
+    fn tick_random(mut motion: Motion, max_position: Vec2) -> Motion {
+        // Change X direction
+        if motion.position.x < Fish::MIN_POSITION.x {
+            motion.speed.x *= -1.;
+            motion.position.x = Fish::MIN_POSITION.x;
+        }
+        if motion.position.x > max_position.x {
+            motion.speed.x *= -1.;
+            motion.position.x = max_position.x;
+        }
+        if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
+            motion.speed.x *= -1.;
+        }
+        // Change Y direction
+        if motion.position.y < Fish::MIN_POSITION.y {
+            motion.speed.y *= -1.;
+            motion.position.y = Fish::MIN_POSITION.y;
+        }
+        if motion.position.y > max_position.y {
+            motion.speed.y *= -1.;
+            motion.position.y = max_position.y;
+        }
+        if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
+            motion.speed.y *= -1.;
+        }
+
+        return motion;
+    }
+}
+
+pub struct Fish {
+    motion: Motion,
+    movement: Movement,
     size: Vec2,
     max_position: Vec2,
     texture: Texture2D,
@@ -30,16 +76,19 @@ impl Fish {
             rand::gen_range(Fish::MIN_POSITION.y, screen_size.y - Fish::MAX_POSITION.y - fish_height - 1.));
         let size = Vec2 { x: Fish::SIZE, y: fish_height };
         Fish {
-            position: start_position,
-            speed: Vec2 {
-                x: 25. * Fish::random_direction() * Fish::random_speed_modifier(),
-                y: 7. * Fish::random_speed_modifier()
+            motion: Motion {
+                position: start_position,
+                speed: Vec2 {
+                    x: 25. * Fish::random_direction() * Fish::random_speed_modifier(),
+                    y: 7. * Fish::random_speed_modifier()
+                },
             },
             size: size,
             max_position: Vec2 {
                 x: screen_size.x - Fish::MAX_POSITION.x - size.x,
                 y: screen_size.y - Fish::MAX_POSITION.y
             },
+            movement: Movement::Random,
             texture: texture,
         }
     }
@@ -57,47 +106,26 @@ impl Fish {
     }
 
     fn tick(&mut self, delta: f32) {
-        self.update_position(delta);
-
-        // Change X direction
-        if self.position.x < Fish::MIN_POSITION.x {
-            self.speed.x *= -1.;
-            self.position.x = Fish::MIN_POSITION.x;
-        }
-        if self.position.x > self.max_position.x {
-            self.speed.x *= -1.;
-            self.position.x = self.max_position.x;
-        }
-        if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
-            self.speed.x *= -1.;
-        }
-        // Change Y direction
-        if self.position.y < Fish::MIN_POSITION.y {
-            self.speed.y *= -1.;
-            self.position.y = Fish::MIN_POSITION.y;
-        }
-        if self.position.y > self.max_position.y {
-            self.speed.y *= -1.;
-            self.position.y = self.max_position.y;
-        }
-        if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
-            self.speed.y *= -1.;
-        }
+        let motion = self.movement.tick(self.motion, self.max_position);
+        self.move_position(delta, motion);
     }
 
-    fn update_position(&mut self, delta: f32) {
+    fn move_position(&mut self, delta: f32, motion: Motion) {
         //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
-        self.position = Vec2 {
-            x: self.position.x + self.speed.x * delta,
-            y: self.position.y + self.speed.y * delta
-        };
+        self.motion = Motion {
+            position: Vec2 {
+                x: motion.position.x + motion.speed.x * delta,
+                y: motion.position.y + motion.speed.y * delta
+            },
+            speed: motion.speed,
+        }
     }
 
     fn draw(&mut self) {
         draw_texture_ex(
             self.texture,
-            self.position.x,
-            self.position.y,
+            self.motion.position.x,
+            self.motion.position.y,
             WHITE,
             DrawTextureParams {
                 dest_size: Some(self.size),
@@ -108,7 +136,7 @@ impl Fish {
     }
 
     fn direction(&mut self) -> bool {
-        return self.speed.x > 0.;
+        return self.motion.speed.x > 0.;
     }
 }
 
