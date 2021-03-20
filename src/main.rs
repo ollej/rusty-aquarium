@@ -11,6 +11,7 @@ pub struct Fish {
 impl Fish {
     const SPRITE_CLOWNFISH: &'static str = "resources/clownfish.png";
     const SPRITE_ANGELFISH: &'static str = "resources/angelfish.png";
+    const SPRITE_GOLDFISH: &'static str = "resources/goldfish.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
@@ -111,9 +112,10 @@ async fn main() {
     const SCR_H: f32 = 62.5;
 
     let background: Texture2D = load_texture("resources/background.png").await;
-    let clownfish_texture: Texture2D = load_texture(Fish::SPRITE_CLOWNFISH).await;
-    let angelfish_texture: Texture2D = load_texture(Fish::SPRITE_ANGELFISH).await;
-    let fish_textures = vec![clownfish_texture, angelfish_texture];
+    let fish_textures = vec![
+        load_texture(Fish::SPRITE_CLOWNFISH).await,
+        load_texture(Fish::SPRITE_ANGELFISH).await,
+        load_texture(Fish::SPRITE_GOLDFISH).await];
 
     let mut first_frame = true;
     let screen_size = Vec2 { x: SCR_W, y: SCR_H };
