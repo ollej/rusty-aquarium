@@ -12,6 +12,12 @@ impl Fish {
     const SPRITE_CLOWNFISH: &'static str = "resources/clownfish.png";
     const SPRITE_ANGELFISH: &'static str = "resources/angelfish.png";
     const SPRITE_GOLDFISH: &'static str = "resources/goldfish.png";
+    const SPRITE_YELLOWFISH: &'static str = "resources/yellowfish.png";
+    const SPRITE_SEAHORSE: &'static str = "resources/seahorse.png";
+    const SPRITE_ROYALGRAMMA: &'static str = "resources/royalgramma.png";
+    const SPRITE_BUTTERFLYFISH: &'static str = "resources/butterflyfish.png";
+    const SPRITE_LIONFISH: &'static str = "resources/lionfish.png";
+    const SPRITE_TURTLE: &'static str = "resources/turtle.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
@@ -115,13 +121,20 @@ async fn main() {
     let fish_textures = vec![
         load_texture(Fish::SPRITE_CLOWNFISH).await,
         load_texture(Fish::SPRITE_ANGELFISH).await,
-        load_texture(Fish::SPRITE_GOLDFISH).await];
+        load_texture(Fish::SPRITE_GOLDFISH).await,
+        load_texture(Fish::SPRITE_YELLOWFISH).await,
+        load_texture(Fish::SPRITE_SEAHORSE).await,
+        load_texture(Fish::SPRITE_ROYALGRAMMA).await,
+        load_texture(Fish::SPRITE_BUTTERFLYFISH).await,
+        load_texture(Fish::SPRITE_LIONFISH).await,
+        load_texture(Fish::SPRITE_TURTLE).await,
+    ];
 
     let mut first_frame = true;
     let screen_size = Vec2 { x: SCR_W, y: SCR_H };
     let mut fishies = Vec::new();
 
-    for _ in 0..10 {
+    for _ in 0..20 {
         let texture = fish_textures.choose().unwrap();
         fishies.push(Fish::new(screen_size, *texture));
     }
