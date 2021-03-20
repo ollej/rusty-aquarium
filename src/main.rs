@@ -2,7 +2,6 @@ use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
 
 pub struct Fish {
-    screen_size: Vec2,
     position: Vec2,
     speed: Vec2,
     size: Vec2,
@@ -23,9 +22,11 @@ impl Fish {
             rand::gen_range(Fish::MIN_POSITION.y, screen_size.y - Fish::MAX_POSITION.y - fish_height - 1.));
         let size = Vec2 { x: Fish::SIZE, y: fish_height };
         Fish {
-            screen_size,
             position: start_position,
-            speed: Vec2 { x: 25. * Fish::random_direction(), y: 7. },
+            speed: Vec2 {
+                x: 25. * Fish::random_direction() * Fish::random_speed_modifier(),
+                y: 7. * Fish::random_speed_modifier()
+            },
             size: size,
             max_position: Vec2 {
                 x: screen_size.x - Fish::MAX_POSITION.x - size.x,
@@ -41,6 +42,10 @@ impl Fish {
 
     fn random_percent() -> f32 {
         return rand::gen_range(0., 100.);
+    }
+
+    fn random_speed_modifier() -> f32 {
+        return rand::gen_range(0.5, 1.1);
     }
 
     fn tick(&mut self, delta: f32) {
