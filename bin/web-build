@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+cargo build  --target wasm32-unknown-unknown
+cp target/wasm32-unknown-unknown/debug/rusty-aquarium.wasm public/
+mkdir -p public/resources
+cp -pR resources/ public/resources/

@@ -9,3 +9,7 @@ macroquad = "0.3.0-alpha.15"
 
 [profile.dev.package.'*']
 opt-level = 3
+
+[package.metadata.scripts]
+web-build = "bin/web-build"
+web-serve = "bin/web-serve"
