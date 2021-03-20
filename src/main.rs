@@ -9,7 +9,8 @@ pub struct Fish {
     texture: Texture2D,
 }
 impl Fish {
-    const SPRITE: &'static str = "resources/clownfish.png";
+    const SPRITE_CLOWNFISH: &'static str = "resources/clownfish.png";
+    const SPRITE_ANGELFISH: &'static str = "resources/angelfish.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
@@ -110,14 +111,17 @@ async fn main() {
     const SCR_H: f32 = 62.5;
 
     let background: Texture2D = load_texture("resources/background.png").await;
-    let fish_texture: Texture2D = load_texture(Fish::SPRITE).await;
+    let clownfish_texture: Texture2D = load_texture(Fish::SPRITE_CLOWNFISH).await;
+    let angelfish_texture: Texture2D = load_texture(Fish::SPRITE_ANGELFISH).await;
+    let fish_textures = vec![clownfish_texture, angelfish_texture];
 
     let mut first_frame = true;
     let screen_size = Vec2 { x: SCR_W, y: SCR_H };
     let mut fishies = Vec::new();
 
     for _ in 0..10 {
-        fishies.push(Fish::new(screen_size, fish_texture));
+        let texture = fish_textures.choose().unwrap();
+        fishies.push(Fish::new(screen_size, *texture));
     }
 
     // build camera with following coordinate system:
