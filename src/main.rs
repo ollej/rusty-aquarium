@@ -64,18 +64,16 @@ impl Fish {
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
     const SIZE: f32 = 7.;
 
-    fn new(fish_size: f32, bounding_box: Rect, movement: Movement, texture: Texture2D) -> Fish {
+    fn new(fish_size: f32, speed: Vec2, bounding_box: Rect, movement: Movement, texture: Texture2D) -> Fish {
         let fish_height = fish_size / (texture.width() / texture.height());
         let size = vec2(fish_size, fish_height);
         let bbox_adjusted = Fish::adjust_bounding_box(bounding_box, size);
         let start_position = Fish::random_start_position(bbox_adjusted);
+        let speed_adjusted = Fish::adjust_speed_randomly(speed);
         Fish {
             motion: Motion {
                 position: start_position,
-                speed: vec2(
-                    12. * Fish::random_direction() * Fish::random_speed_modifier(),
-                    4. * Fish::random_speed_modifier(),
-                ),
+                speed: speed_adjusted,
                 rotation: 0.,
             },
             size: size,
@@ -93,6 +91,13 @@ impl Fish {
             w: bounding_box.w - size.x,
             h: bounding_box.h - size.y,
         };
+    }
+
+    fn adjust_speed_randomly(speed: Vec2) -> Vec2 {
+        return vec2(
+            speed.x * Fish::random_speed_modifier() * Fish::random_direction(),
+            speed.y * Fish::random_speed_modifier(),
+        );
     }
 
     fn random_start_position(bounding_box: Rect) -> Vec2 {
@@ -185,7 +190,8 @@ async fn main() {
     for _ in 0..20 {
         let texture = fish_textures.choose().unwrap();
         let size = Fish::SIZE * rand::gen_range(0.6, 1.4);
-        fishies.push(Fish::new(size, bounding_box, Movement::Random, *texture));
+        let speed = vec2(12., 4.);
+        fishies.push(Fish::new(size, speed, bounding_box, Movement::Random, *texture));
     }
 
     // build camera with following coordinate system:
