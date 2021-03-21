@@ -12,28 +12,30 @@ pub enum Movement {
     Random,
 }
 impl Movement {
-    fn tick(&mut self, motion: Motion, max_position: Vec2) -> Motion {
+    fn tick(&mut self, motion: Motion, bounding_box: Rect) -> Motion {
         return match self {
-            Movement::Random => Movement::tick_random(motion, max_position)
+            Movement::Random => Movement::tick_random(motion, bounding_box)
         }
     }
 
-    fn tick_random(mut motion: Motion, max_position: Vec2) -> Motion {
+    fn tick_random(mut motion: Motion, bounding_box: Rect) -> Motion {
         // Change X direction
-        if motion.position.x < Fish::MIN_POSITION.x
-            || motion.position.x > max_position.x
+        if motion.position.x < bounding_box.x
+            || motion.position.x > bounding_box.right()
                 || Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
             motion.speed.x *= -1.;
         }
         // Change Y direction
-        if motion.position.y < Fish::MIN_POSITION.y
-            || motion.position.y > max_position.y
+        if motion.position.y < bounding_box.y
+            || motion.position.y > bounding_box.bottom()
                 || Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
             motion.speed.y *= -1.;
         }
 
         // Clamp to bounding box
-        motion.position = motion.position.max(Fish::MIN_POSITION).min(max_position);
+        motion.position = motion.position
+            .max(bounding_box.point())
+            .min(vec2(bounding_box.right(), bounding_box.bottom()));
 
         return motion;
     }
@@ -43,7 +45,8 @@ pub struct Fish {
     motion: Motion,
     movement: Movement,
     size: Vec2,
-    max_position: Vec2,
+    //bounding_box: Rect,
+    bounding_box_adjusted: Rect,
     texture: Texture2D,
 }
 impl Fish {
@@ -56,32 +59,36 @@ impl Fish {
     const SPRITE_BUTTERFLYFISH: &'static str = "resources/butterflyfish.png";
     const SPRITE_LIONFISH: &'static str = "resources/lionfish.png";
     const SPRITE_TURTLE: &'static str = "resources/turtle.png";
-    const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
-    const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
+    const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
+    const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
     const SIZE: f32 = 7.;
 
-    fn new(screen_size: Vec2, texture: Texture2D) -> Fish {
+    fn new(bounding_box: Rect, movement: Movement, texture: Texture2D) -> Fish {
         let fish_height = Fish::SIZE / (texture.width() / texture.height());
+        let size = vec2(Fish::SIZE, fish_height);
+        let bbox_adjusted = Rect {
+            x: bounding_box.x,
+            y: bounding_box.y,
+            w: bounding_box.w - size.x,
+            h: bounding_box.h - size.y,
+        };
         let start_position = vec2(
-            rand::gen_range(Fish::MIN_POSITION.x, screen_size.x - Fish::MAX_POSITION.x - Fish::SIZE),
-            rand::gen_range(Fish::MIN_POSITION.y, screen_size.y - Fish::MAX_POSITION.y - fish_height));
-        let size = Vec2 { x: Fish::SIZE, y: fish_height };
+            rand::gen_range(bbox_adjusted.x, bbox_adjusted.right()),
+            rand::gen_range(bbox_adjusted.y, bbox_adjusted.bottom()));
         Fish {
             motion: Motion {
                 position: start_position,
-                speed: Vec2 {
-                    x: 12. * Fish::random_direction() * Fish::random_speed_modifier(),
-                    y: 4. * Fish::random_speed_modifier()
-                },
+                speed: vec2(
+                    12. * Fish::random_direction() * Fish::random_speed_modifier(),
+                    4. * Fish::random_speed_modifier(),
+                ),
                 rotation: 0.,
             },
             size: size,
-            max_position: Vec2 {
-                x: screen_size.x - Fish::MAX_POSITION.x - size.x,
-                y: screen_size.y - Fish::MAX_POSITION.y
-            },
-            movement: Movement::Random,
+            //bounding_box: bounding_box,
+            bounding_box_adjusted: bbox_adjusted,
+            movement: movement,
             texture: texture,
         }
     }
@@ -99,7 +106,7 @@ impl Fish {
     }
 
     fn tick(&mut self, delta: f32) {
-        let motion = self.movement.tick(self.motion, self.max_position);
+        let motion = self.movement.tick(self.motion, self.bounding_box_adjusted);
         self.move_position(delta, motion);
     }
 
@@ -159,12 +166,17 @@ async fn main() {
     ];
 
     let mut first_frame = true;
-    let screen_size = Vec2 { x: SCR_W, y: SCR_H };
     let mut fishies = Vec::new();
+    let bounding_box = Rect {
+        x: Fish::MIN_POSITION.x,
+        y: Fish::MIN_POSITION.y,
+        w: SCR_W - Fish::MAX_POSITION.x - Fish::MIN_POSITION.x,
+        h: SCR_H - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
+    };
 
     for _ in 0..20 {
         let texture = fish_textures.choose().unwrap();
-        fishies.push(Fish::new(screen_size, *texture));
+        fishies.push(Fish::new(bounding_box, Movement::Random, *texture));
     }
 
     // build camera with following coordinate system:
