@@ -64,18 +64,11 @@ impl Fish {
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
     const SIZE: f32 = 7.;
 
-    fn new(bounding_box: Rect, movement: Movement, texture: Texture2D) -> Fish {
-        let fish_height = Fish::SIZE / (texture.width() / texture.height());
-        let size = vec2(Fish::SIZE, fish_height);
-        let bbox_adjusted = Rect {
-            x: bounding_box.x,
-            y: bounding_box.y,
-            w: bounding_box.w - size.x,
-            h: bounding_box.h - size.y,
-        };
-        let start_position = vec2(
-            rand::gen_range(bbox_adjusted.x, bbox_adjusted.right()),
-            rand::gen_range(bbox_adjusted.y, bbox_adjusted.bottom()));
+    fn new(fish_size: f32, bounding_box: Rect, movement: Movement, texture: Texture2D) -> Fish {
+        let fish_height = fish_size / (texture.width() / texture.height());
+        let size = vec2(fish_size, fish_height);
+        let bbox_adjusted = Fish::adjust_bounding_box(bounding_box, size);
+        let start_position = Fish::random_start_position(bbox_adjusted);
         Fish {
             motion: Motion {
                 position: start_position,
@@ -91,6 +84,21 @@ impl Fish {
             movement: movement,
             texture: texture,
         }
+    }
+
+    fn adjust_bounding_box(bounding_box: Rect, size: Vec2) -> Rect {
+        return Rect {
+            x: bounding_box.x,
+            y: bounding_box.y,
+            w: bounding_box.w - size.x,
+            h: bounding_box.h - size.y,
+        };
+    }
+
+    fn random_start_position(bounding_box: Rect) -> Vec2 {
+        return vec2(
+            rand::gen_range(bounding_box.x, bounding_box.right()),
+            rand::gen_range(bounding_box.y, bounding_box.bottom()));
     }
 
     fn random_direction() -> f32 {
@@ -176,7 +184,8 @@ async fn main() {
 
     for _ in 0..20 {
         let texture = fish_textures.choose().unwrap();
-        fishies.push(Fish::new(bounding_box, Movement::Random, *texture));
+        let size = Fish::SIZE * rand::gen_range(0.6, 1.4);
+        fishies.push(Fish::new(size, bounding_box, Movement::Random, *texture));
     }
 
     // build camera with following coordinate system:
