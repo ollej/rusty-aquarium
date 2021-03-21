@@ -27,11 +27,6 @@ impl Movement {
             motion.idle = motion.idle ^ (Fish::random_percent() < Fish::CHANCE_IDLE_START);
         }
 
-        if motion.idle {
-            motion.rotation = 0.;
-            return motion;
-        }
-
         // Change X direction
         if motion.position.x < bounding_box.x
             || motion.position.x > bounding_box.right()
@@ -142,11 +137,6 @@ impl Fish {
     fn move_position(&mut self, delta: f32, motion: Motion) {
         //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
 
-        if motion.idle {
-            self.motion = motion;
-            return;
-        }
-
         let new_position = motion.position + motion.speed * delta;
         let mut rotation = self.motion.position.angle_between(new_position) * motion.speed.x * motion.speed.y;
         if self.swims_right() {
@@ -155,7 +145,7 @@ impl Fish {
 
         //debug!("rotation: {} new_pos: {} old_pos: {}", rotation, new_position, self.motion.position);
         self.motion = Motion {
-            position: new_position,
+            position: if motion.idle { motion.position } else { new_position },
             speed: motion.speed,
             rotation: rotation,
             idle: motion.idle,
