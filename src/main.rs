@@ -20,25 +20,20 @@ impl Movement {
 
     fn tick_random(mut motion: Motion, max_position: Vec2) -> Motion {
         // Change X direction
-        if motion.position.x < Fish::MIN_POSITION.x {
-            motion.speed.x *= -1.;
-            motion.position.x = Fish::MIN_POSITION.x;
-        } else if motion.position.x > max_position.x {
-            motion.speed.x *= -1.;
-            motion.position.x = max_position.x;
-        } else if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
+        if motion.position.x < Fish::MIN_POSITION.x
+            || motion.position.x > max_position.x
+                || Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
             motion.speed.x *= -1.;
         }
         // Change Y direction
-        if motion.position.y < Fish::MIN_POSITION.y {
-            motion.speed.y *= -1.;
-            motion.position.y = Fish::MIN_POSITION.y;
-        } else if motion.position.y > max_position.y {
-            motion.speed.y *= -1.;
-            motion.position.y = max_position.y;
-        } else if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
+        if motion.position.y < Fish::MIN_POSITION.y
+            || motion.position.y > max_position.y
+                || Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
             motion.speed.y *= -1.;
         }
+
+        // Clamp to bounding box
+        motion.position = motion.position.max(Fish::MIN_POSITION).min(max_position);
 
         return motion;
     }
@@ -111,12 +106,9 @@ impl Fish {
     fn move_position(&mut self, delta: f32, motion: Motion) {
         //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
 
-        let new_position = Vec2 {
-            x: motion.position.x + motion.speed.x * delta,
-            y: motion.position.y + motion.speed.y * delta,
-        };
+        let new_position = motion.position + motion.speed * delta;
         let mut rotation = self.motion.position.angle_between(new_position) * motion.speed.x * motion.speed.y;
-        if self.direction() {
+        if self.swims_right() {
             rotation *= -1.;
         }
 
@@ -136,14 +128,14 @@ impl Fish {
             WHITE,
             DrawTextureParams {
                 dest_size: Some(self.size),
-                flip_x: self.direction(),
+                flip_x: self.swims_right(),
                 rotation: self.motion.rotation,
                 ..Default::default()
             },
             );
     }
 
-    fn direction(&mut self) -> bool {
+    fn swims_right(&mut self) -> bool {
         return self.motion.speed.x > 0.;
     }
 }
