@@ -6,6 +6,7 @@ pub struct Motion {
     position: Vec2,
     speed: Vec2,
     rotation: f32,
+    idle: bool,
 }
 
 pub enum Movement {
@@ -19,6 +20,18 @@ impl Movement {
     }
 
     fn tick_random(mut motion: Motion, bounding_box: Rect) -> Motion {
+        // Randomly change idle flag
+        if motion.idle {
+            motion.idle = motion.idle ^ (Fish::random_percent() < Fish::CHANCE_IDLE_END);
+        } else {
+            motion.idle = motion.idle ^ (Fish::random_percent() < Fish::CHANCE_IDLE_START);
+        }
+
+        if motion.idle {
+            motion.rotation = 0.;
+            return motion;
+        }
+
         // Change X direction
         if motion.position.x < bounding_box.x
             || motion.position.x > bounding_box.right()
@@ -62,6 +75,8 @@ impl Fish {
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
+    const CHANCE_IDLE_START: f32 = 0.05;
+    const CHANCE_IDLE_END: f32 = 0.75;
     const SIZE: f32 = 7.;
 
     fn new(fish_size: f32, speed: Vec2, bounding_box: Rect, movement: Movement, texture: Texture2D) -> Fish {
@@ -75,6 +90,7 @@ impl Fish {
                 position: start_position,
                 speed: speed_adjusted,
                 rotation: 0.,
+                idle: false,
             },
             size: size,
             //bounding_box: bounding_box,
@@ -126,6 +142,11 @@ impl Fish {
     fn move_position(&mut self, delta: f32, motion: Motion) {
         //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
 
+        if motion.idle {
+            self.motion = motion;
+            return;
+        }
+
         let new_position = motion.position + motion.speed * delta;
         let mut rotation = self.motion.position.angle_between(new_position) * motion.speed.x * motion.speed.y;
         if self.swims_right() {
@@ -137,6 +158,7 @@ impl Fish {
             position: new_position,
             speed: motion.speed,
             rotation: rotation,
+            idle: motion.idle,
         }
     }
 
