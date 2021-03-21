@@ -8,7 +8,7 @@ Demo
 
 Run the Rusty Aquarium in your browser:
 
- * https://ollej.github.io/rusty-aquarium/public/
+ * https://ollej.github.io/rusty-aquarium/demo/
 
 Build scripts
 -------------
