@@ -5,6 +5,7 @@ use macroquad::rand::ChooseRandom;
 pub struct Motion {
     position: Vec2,
     speed: Vec2,
+    rotation: f32,
 }
 
 pub enum Movement {
@@ -22,24 +23,20 @@ impl Movement {
         if motion.position.x < Fish::MIN_POSITION.x {
             motion.speed.x *= -1.;
             motion.position.x = Fish::MIN_POSITION.x;
-        }
-        if motion.position.x > max_position.x {
+        } else if motion.position.x > max_position.x {
             motion.speed.x *= -1.;
             motion.position.x = max_position.x;
-        }
-        if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
+        } else if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
             motion.speed.x *= -1.;
         }
         // Change Y direction
         if motion.position.y < Fish::MIN_POSITION.y {
             motion.speed.y *= -1.;
             motion.position.y = Fish::MIN_POSITION.y;
-        }
-        if motion.position.y > max_position.y {
+        } else if motion.position.y > max_position.y {
             motion.speed.y *= -1.;
             motion.position.y = max_position.y;
-        }
-        if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
+        } else if Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
             motion.speed.y *= -1.;
         }
 
@@ -67,21 +64,22 @@ impl Fish {
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 10. };
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
-    const SIZE: f32 = 10.;
+    const SIZE: f32 = 7.;
 
     fn new(screen_size: Vec2, texture: Texture2D) -> Fish {
         let fish_height = Fish::SIZE / (texture.width() / texture.height());
         let start_position = vec2(
-            rand::gen_range(Fish::MIN_POSITION.x, screen_size.x - Fish::MAX_POSITION.x - Fish::SIZE - 1.),
-            rand::gen_range(Fish::MIN_POSITION.y, screen_size.y - Fish::MAX_POSITION.y - fish_height - 1.));
+            rand::gen_range(Fish::MIN_POSITION.x, screen_size.x - Fish::MAX_POSITION.x - Fish::SIZE),
+            rand::gen_range(Fish::MIN_POSITION.y, screen_size.y - Fish::MAX_POSITION.y - fish_height));
         let size = Vec2 { x: Fish::SIZE, y: fish_height };
         Fish {
             motion: Motion {
                 position: start_position,
                 speed: Vec2 {
-                    x: 25. * Fish::random_direction() * Fish::random_speed_modifier(),
-                    y: 7. * Fish::random_speed_modifier()
+                    x: 12. * Fish::random_direction() * Fish::random_speed_modifier(),
+                    y: 4. * Fish::random_speed_modifier()
                 },
+                rotation: 0.,
             },
             size: size,
             max_position: Vec2 {
@@ -112,12 +110,21 @@ impl Fish {
 
     fn move_position(&mut self, delta: f32, motion: Motion) {
         //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
+
+        let new_position = Vec2 {
+            x: motion.position.x + motion.speed.x * delta,
+            y: motion.position.y + motion.speed.y * delta,
+        };
+        let mut rotation = self.motion.position.angle_between(new_position) * motion.speed.x * motion.speed.y;
+        if self.direction() {
+            rotation *= -1.;
+        }
+
+        //debug!("rotation: {} new_pos: {} old_pos: {}", rotation, new_position, self.motion.position);
         self.motion = Motion {
-            position: Vec2 {
-                x: motion.position.x + motion.speed.x * delta,
-                y: motion.position.y + motion.speed.y * delta
-            },
+            position: new_position,
             speed: motion.speed,
+            rotation: rotation,
         }
     }
 
@@ -130,6 +137,7 @@ impl Fish {
             DrawTextureParams {
                 dest_size: Some(self.size),
                 flip_x: self.direction(),
+                rotation: self.motion.rotation,
                 ..Default::default()
             },
             );
