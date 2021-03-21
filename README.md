@@ -3,6 +3,13 @@ Rusty Aquairum
 
 A monitoring visualization as an aquarium written in Rust.
 
+Demo
+----
+
+Run the Rusty Aquarium in your browser:
+
+ * https://ollej.github.io/rusty-aquarium/public/
+
 Build scripts
 -------------
 
