@@ -1,4 +1,4 @@
-Rusty Aquairum
+Rusty Aquarium
 ==============
 
 A monitoring visualization as an aquarium written in Rust.
