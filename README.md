@@ -14,6 +14,10 @@ Download a windows exe file:
 
  * [Windows Exe](https://ollej.github.io/rusty-aquarium/demo/rusty-aquarium-win.zip)
 
+Download an Android APK package:
+
+ * [Android APK](https://ollej.github.io/rusty-aquarium/demo/rusty-aquarium.apk)
+
 Build scripts
 -------------
 
@@ -36,5 +40,10 @@ cargo run-script serve-web
 ### Build windows binary and copy to `public/`
 ```
 cargo run-script build-win
+```
+
+### Build Android APK and copy to `public/`
+```
+cargo run-script build-apk
 ```
 
