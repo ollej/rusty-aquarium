@@ -12,11 +12,11 @@ Run the Rusty Aquarium in your browser:
 
 Download a windows exe file:
 
- * [Windows Exe](https://ollej.github.io/rusty-aquarium/demo/rusty-aquarium-win.zip)
+ * [Windows Exe](https://github.com/ollej/rusty-aquarium/releases/download/v0.1.0/rusty-aquarium-win.zip)
 
 Download an Android APK package:
 
- * [Android APK](https://ollej.github.io/rusty-aquarium/demo/rusty-aquarium.apk)
+ * [Android APK](https://github.com/ollej/rusty-aquarium/releases/download/v0.1.0/rusty-aquarium.apk)
 
 Build scripts
 -------------
