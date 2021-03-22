@@ -10,6 +10,10 @@ Run the Rusty Aquarium in your browser:
 
  * [Web demo](https://ollej.github.io/rusty-aquarium/demo/)
 
+Download a windows exe file:
+
+ * [Windows Exe](https://ollej.github.io/rusty-aquarium/demo/rusty-aquarium-win.zip)
+
 Build scripts
 -------------
 
@@ -21,10 +25,16 @@ cargo install cargo-run-script
 
 ### Build a web package in `public/`
 ```
-cargo run-script web-build
+cargo run-script build-web
 ```
 
 ### Start a web server
 ```
-cargo run-script web-serve
+cargo run-script serve-web
 ```
+
+### Build windows binary and copy to `public/`
+```
+cargo run-script build-win
+```
+

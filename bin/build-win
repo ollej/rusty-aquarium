@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+# Build for windows
+cargo build --target x86_64-pc-windows-gnu
+
+# Package windows zip
+cp target/x86_64-pc-windows-gnu/debug/rusty-aquarium.exe demo/
+cd demo
+zip -ruq rusty-aquarium-win.zip rusty-aquarium.exe resources/*
+rm rusty-aquarium.exe

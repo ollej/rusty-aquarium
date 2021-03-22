@@ -11,5 +11,6 @@ macroquad = "0.3.0-alpha.15"
 opt-level = 3
 
 [package.metadata.scripts]
-web-build = "bin/web-build"
-web-serve = "bin/web-serve"
+build-web = "bin/build-web"
+serve-web = "bin/serve-web"
+build-win = "bin/build-win"
