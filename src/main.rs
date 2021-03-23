@@ -58,15 +58,15 @@ pub struct Fish {
     texture: Texture2D,
 }
 impl Fish {
-    const SPRITE_CLOWNFISH: &'static str = "resources/clownfish.png";
-    const SPRITE_ANGELFISH: &'static str = "resources/angelfish.png";
-    const SPRITE_GOLDFISH: &'static str = "resources/goldfish.png";
-    const SPRITE_YELLOWFISH: &'static str = "resources/yellowfish.png";
-    const SPRITE_SEAHORSE: &'static str = "resources/seahorse.png";
-    const SPRITE_ROYALGRAMMA: &'static str = "resources/royalgramma.png";
-    const SPRITE_BUTTERFLYFISH: &'static str = "resources/butterflyfish.png";
-    const SPRITE_LIONFISH: &'static str = "resources/lionfish.png";
-    const SPRITE_TURTLE: &'static str = "resources/turtle.png";
+    const SPRITE_CLOWNFISH: &'static str = "assets/clownfish.png";
+    const SPRITE_ANGELFISH: &'static str = "assets/angelfish.png";
+    const SPRITE_GOLDFISH: &'static str = "assets/goldfish.png";
+    const SPRITE_YELLOWFISH: &'static str = "assets/yellowfish.png";
+    const SPRITE_SEAHORSE: &'static str = "assets/seahorse.png";
+    const SPRITE_ROYALGRAMMA: &'static str = "assets/royalgramma.png";
+    const SPRITE_BUTTERFLYFISH: &'static str = "assets/butterflyfish.png";
+    const SPRITE_LIONFISH: &'static str = "assets/lionfish.png";
+    const SPRITE_TURTLE: &'static str = "assets/turtle.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
@@ -177,7 +177,7 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
-    let background: Texture2D = load_texture("resources/background.png").await;
+    let background: Texture2D = load_texture("assets/background.png").await;
     let fish_textures = vec![
         load_texture(Fish::SPRITE_CLOWNFISH).await,
         load_texture(Fish::SPRITE_ANGELFISH).await,
