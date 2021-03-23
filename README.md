@@ -10,13 +10,9 @@ Run the Rusty Aquarium in your browser:
 
  * [Web demo](https://ollej.github.io/rusty-aquarium/demo/)
 
-Download a windows exe file:
+Download a Windows exe or an Android APK:
 
- * [Windows Exe](https://github.com/ollej/rusty-aquarium/releases/download/v0.1.0/rusty-aquarium-win.zip)
-
-Download an Android APK package:
-
- * [Android APK](https://github.com/ollej/rusty-aquarium/releases/download/v0.1.0/rusty-aquarium.apk)
+ * [Latest Release](https://github.com/ollej/rusty-aquarium/releases/latest)
 
 Build scripts
 -------------
@@ -27,7 +23,7 @@ The build scripts require the `cargo-run-scripts` package to be installed.
 cargo install cargo-run-script
 ```
 
-### Build a web package in `public/`
+### Build a web package in `demo/`
 ```
 cargo run-script build-web
 ```
@@ -37,12 +33,12 @@ cargo run-script build-web
 cargo run-script serve-web
 ```
 
-### Build windows binary and copy to `public/`
+### Build windows binary
 ```
 cargo run-script build-win
 ```
 
-### Build Android APK and copy to `public/`
+### Build Android APK
 ```
 cargo run-script build-apk
 ```
