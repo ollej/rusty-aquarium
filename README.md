@@ -14,6 +14,11 @@ Download a Windows exe or an Android APK:
 
  * [Latest Release](https://github.com/ollej/rusty-aquarium/releases/latest)
 
+License
+=======
+
+Rusty Aquarium is released under The MIT License. See LICENSE file for more details.
+
 Build scripts
 -------------
 
