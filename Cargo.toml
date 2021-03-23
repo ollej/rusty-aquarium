@@ -5,7 +5,7 @@ authors = ["Olle Wreede <olle@wreede.se>"]
 edition = "2018"
 
 [dependencies]
-macroquad = "0.3.0-alpha.15"
+macroquad = "0.3.0-alpha.16"
 
 # Doesn't work with android build
 [profile.dev.package.'*']
