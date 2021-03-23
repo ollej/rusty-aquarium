@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+# Build for windows
+export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=x86_64-unknown-linux-gnu-gcc
+cargo build --target x86_64-unknown-linux-gnu
+
+# Package windows zip
+#cp target/x86_64-unknown-linux-gnu/debug/rusty-aquarium ./
+#zip -ruq target/rusty-aquarium-linux.zip rusty-aquarium assets/*
+#rm rusty-aquarium
