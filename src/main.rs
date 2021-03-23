@@ -45,9 +45,9 @@ impl Motion {
 
     fn random_idling(&mut self) {
         if self.idle {
-            self.idle = self.idle ^ (Movement::random_percent() < Movement::CHANCE_IDLE_END);
+            self.idle = self.idle ^ (Motion::random_percent() < Movement::CHANCE_IDLE_END);
         } else {
-            self.idle = self.idle ^ (Movement::random_percent() < Movement::CHANCE_IDLE_START);
+            self.idle = self.idle ^ (Motion::random_percent() < Movement::CHANCE_IDLE_START);
         }
     }
 
@@ -61,10 +61,10 @@ impl Motion {
     }
 
     fn change_direction_randomly(&mut self) {
-        if Movement::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.x {
+        if Motion::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.x {
             self.acceleration.x *= -1.;
         }
-        if Movement::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.y {
+        if Motion::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.y {
             self.acceleration.y *= -1.;
         }
     }
@@ -74,9 +74,16 @@ impl Motion {
             .max(bounding_box.point())
             .min(vec2(bounding_box.right(), bounding_box.bottom()));
     }
+
+    fn random_percent() -> f32 {
+        return rand::gen_range(0., 100.);
+    }
 }
 
+#[derive(Copy, Clone)]
 pub enum Movement {
+    SingleSpeed,
+    Accelerating,
     Random,
 }
 impl Movement {
@@ -84,10 +91,31 @@ impl Movement {
     const CHANCE_IDLE_START: f32 = 0.05;
     const CHANCE_IDLE_END: f32 = 0.75;
 
+    fn random() -> Movement {
+        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::Random].choose().unwrap();
+    }
+
     fn tick(&mut self, motion: Motion, bounding_box: Rect) -> Motion {
         return match self {
-            Movement::Random => Movement::tick_random(motion, bounding_box)
+            Movement::SingleSpeed => Movement::tick_single_speed(motion, bounding_box),
+            Movement::Accelerating => Movement::tick_accelerating(motion, bounding_box),
+            Movement::Random => Movement::tick_random(motion, bounding_box),
         }
+    }
+
+    fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
+        motion.change_direction_by_bounding_box(bounding_box);
+        motion.change_direction_randomly();
+        motion.clamp(bounding_box);
+        return motion;
+    }
+
+    fn tick_accelerating(mut motion: Motion, bounding_box: Rect) -> Motion {
+        motion.accelerate();
+        motion.change_direction_by_bounding_box(bounding_box);
+        motion.change_direction_randomly();
+        motion.clamp(bounding_box);
+        return motion;
     }
 
     fn tick_random(mut motion: Motion, bounding_box: Rect) -> Motion {
@@ -98,11 +126,6 @@ impl Movement {
         motion.clamp(bounding_box);
         return motion;
     }
-
-    fn random_percent() -> f32 {
-        return rand::gen_range(0., 100.);
-    }
-
 }
 
 pub struct Fish {
@@ -238,7 +261,7 @@ async fn main() {
         let texture = fish_textures.choose().unwrap();
         let size = Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4);
         let max_speed = vec2(rand::gen_range(8., 14.), rand::gen_range(2.5, 4.5));
-        fishies.push(Fish::new(size, max_speed, bounding_box, Movement::Random, *texture));
+        fishies.push(Fish::new(size, max_speed, bounding_box, Movement::random(), *texture));
     }
 
     // build camera with following coordinate system:
