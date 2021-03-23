@@ -5,6 +5,8 @@ use macroquad::rand::ChooseRandom;
 pub struct Motion {
     position: Vec2,
     speed: Vec2,
+    max_speed: Vec2,
+    acceleration: Vec2,
     rotation: f32,
     idle: bool,
 }
@@ -19,9 +21,58 @@ impl Motion {
         return Motion {
             position: position,
             speed: motion.speed,
+            max_speed: motion.max_speed,
+            acceleration: motion.acceleration,
             rotation: rotation,
             idle: motion.idle,
         }
+    }
+
+    fn accelerate(&mut self) {
+        if self.speed.x < self.max_speed.x && self.acceleration.x > 0. {
+            self.speed.x += self.acceleration.x;
+        }
+        if self.speed.x > -self.max_speed.x && self.acceleration.x <= 0. {
+            self.speed.x += self.acceleration.x;
+        }
+        if self.speed.y < self.max_speed.y && self.acceleration.y > 0. {
+            self.speed.y += self.acceleration.y;
+        }
+        if self.speed.y > -self.max_speed.y && self.acceleration.y <= 0. {
+            self.speed.y += self.acceleration.y;
+        }
+    }
+
+    fn random_idling(&mut self) {
+        if self.idle {
+            self.idle = self.idle ^ (Movement::random_percent() < Movement::CHANCE_IDLE_END);
+        } else {
+            self.idle = self.idle ^ (Movement::random_percent() < Movement::CHANCE_IDLE_START);
+        }
+    }
+
+    fn change_direction_by_bounding_box(&mut self, bounding_box: Rect) {
+        if self.position.x < bounding_box.x || self.position.x > bounding_box.right() {
+            self.speed.x *= -1.;
+        }
+        if self.position.y < bounding_box.y || self.position.y > bounding_box.bottom() {
+            self.speed.y *= -1.;
+        }
+    }
+
+    fn change_direction_randomly(&mut self) {
+        if Movement::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.x {
+            self.acceleration.x *= -1.;
+        }
+        if Movement::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.y {
+            self.acceleration.y *= -1.;
+        }
+    }
+
+    fn clamp(&mut self, bounding_box: Rect) {
+        self.position = self.position
+            .max(bounding_box.point())
+            .min(vec2(bounding_box.right(), bounding_box.bottom()));
     }
 }
 
@@ -40,31 +91,11 @@ impl Movement {
     }
 
     fn tick_random(mut motion: Motion, bounding_box: Rect) -> Motion {
-        // Randomly change idle flag
-        if motion.idle {
-            motion.idle = motion.idle ^ (Movement::random_percent() < Movement::CHANCE_IDLE_END);
-        } else {
-            motion.idle = motion.idle ^ (Movement::random_percent() < Movement::CHANCE_IDLE_START);
-        }
-
-        // Change X direction
-        if motion.position.x < bounding_box.x
-            || motion.position.x > bounding_box.right()
-                || Movement::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.x {
-            motion.speed.x *= -1.;
-        }
-        // Change Y direction
-        if motion.position.y < bounding_box.y
-            || motion.position.y > bounding_box.bottom()
-                || Movement::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.y {
-            motion.speed.y *= -1.;
-        }
-
-        // Clamp to bounding box
-        motion.position = motion.position
-            .max(bounding_box.point())
-            .min(vec2(bounding_box.right(), bounding_box.bottom()));
-
+        motion.accelerate();
+        motion.random_idling();
+        motion.change_direction_by_bounding_box(bounding_box);
+        motion.change_direction_randomly();
+        motion.clamp(bounding_box);
         return motion;
     }
 
@@ -78,7 +109,6 @@ pub struct Fish {
     motion: Motion,
     movement: Movement,
     size: Vec2,
-    //max_speed: Vec2,
     //bounding_box: Rect,
     bounding_box_adjusted: Rect,
     texture: Texture2D,
@@ -110,11 +140,12 @@ impl Fish {
             motion: Motion {
                 position: Fish::random_start_position(bbox_adjusted),
                 speed: Fish::random_start_speed(max_speed),
+                max_speed: max_speed,
+                acceleration: Fish::random_acceleration(),
                 rotation: 0.,
                 idle: false,
             },
             size: size,
-            //max_speed: max_speed,
             //bounding_box: bounding_box,
             bounding_box_adjusted: bbox_adjusted,
             movement: movement,
@@ -131,6 +162,12 @@ impl Fish {
         };
     }
 
+    fn random_start_position(bounding_box: Rect) -> Vec2 {
+        return vec2(
+            rand::gen_range(bounding_box.x, bounding_box.right()),
+            rand::gen_range(bounding_box.y, bounding_box.bottom()));
+    }
+
     fn random_start_speed(max_speed: Vec2) -> Vec2 {
         return vec2(
             rand::gen_range(-max_speed.x, max_speed.x),
@@ -138,10 +175,11 @@ impl Fish {
         );
     }
 
-    fn random_start_position(bounding_box: Rect) -> Vec2 {
+    fn random_acceleration() -> Vec2 {
         return vec2(
-            rand::gen_range(bounding_box.x, bounding_box.right()),
-            rand::gen_range(bounding_box.y, bounding_box.bottom()));
+            rand::gen_range(0.1, 0.2),
+            rand::gen_range(0.1, 0.2),
+        );
     }
 
     fn tick(&mut self, delta: f32) {
@@ -199,8 +237,8 @@ async fn main() {
     for _ in 0..20 {
         let texture = fish_textures.choose().unwrap();
         let size = Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4);
-        let speed = vec2(12., 4.);
-        fishies.push(Fish::new(size, speed, bounding_box, Movement::Random, *texture));
+        let max_speed = vec2(rand::gen_range(8., 14.), rand::gen_range(2.5, 4.5));
+        fishies.push(Fish::new(size, max_speed, bounding_box, Movement::Random, *texture));
     }
 
     // build camera with following coordinate system:
