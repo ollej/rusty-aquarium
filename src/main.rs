@@ -8,6 +8,22 @@ pub struct Motion {
     rotation: f32,
     idle: bool,
 }
+impl Motion {
+    fn move_position(&mut self, delta: f32, motion: Motion) -> Motion {
+        //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
+
+        let position = if motion.idle { motion.position } else { motion.position + motion.speed * delta };
+        let rotation = if motion.speed.x * motion.speed.y > 0. { 0.3 } else { -0.3 };
+
+        //debug!("rotation: {} new_pos: {} old_pos: {}", rotation, new_position, self.motion.position);
+        return Motion {
+            position: position,
+            speed: motion.speed,
+            rotation: rotation,
+            idle: motion.idle,
+        }
+    }
+}
 
 pub enum Movement {
     Random,
@@ -131,25 +147,7 @@ impl Fish {
 
     fn tick(&mut self, delta: f32) {
         let motion = self.movement.tick(self.motion, self.bounding_box_adjusted);
-        self.move_position(delta, motion);
-    }
-
-    fn move_position(&mut self, delta: f32, motion: Motion) {
-        //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
-
-        let new_position = motion.position + motion.speed * delta;
-        let mut rotation = self.motion.position.angle_between(new_position) * motion.speed.x * motion.speed.y;
-        if self.swims_right() {
-            rotation *= -1.;
-        }
-
-        //debug!("rotation: {} new_pos: {} old_pos: {}", rotation, new_position, self.motion.position);
-        self.motion = Motion {
-            position: if motion.idle { motion.position } else { new_position },
-            speed: motion.speed,
-            rotation: rotation,
-            idle: motion.idle,
-        }
+        self.motion = self.motion.move_position(delta, motion);
     }
 
     fn draw(&mut self) {
