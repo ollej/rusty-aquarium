@@ -29,6 +29,10 @@ pub enum Movement {
     Random,
 }
 impl Movement {
+    const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
+    const CHANCE_IDLE_START: f32 = 0.05;
+    const CHANCE_IDLE_END: f32 = 0.75;
+
     fn tick(&mut self, motion: Motion, bounding_box: Rect) -> Motion {
         return match self {
             Movement::Random => Movement::tick_random(motion, bounding_box)
@@ -38,21 +42,21 @@ impl Movement {
     fn tick_random(mut motion: Motion, bounding_box: Rect) -> Motion {
         // Randomly change idle flag
         if motion.idle {
-            motion.idle = motion.idle ^ (Fish::random_percent() < Fish::CHANCE_IDLE_END);
+            motion.idle = motion.idle ^ (Movement::random_percent() < Movement::CHANCE_IDLE_END);
         } else {
-            motion.idle = motion.idle ^ (Fish::random_percent() < Fish::CHANCE_IDLE_START);
+            motion.idle = motion.idle ^ (Movement::random_percent() < Movement::CHANCE_IDLE_START);
         }
 
         // Change X direction
         if motion.position.x < bounding_box.x
             || motion.position.x > bounding_box.right()
-                || Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.x {
+                || Movement::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.x {
             motion.speed.x *= -1.;
         }
         // Change Y direction
         if motion.position.y < bounding_box.y
             || motion.position.y > bounding_box.bottom()
-                || Fish::random_percent() < Fish::DIRECTION_CHANGE_CHANCE.y {
+                || Movement::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.y {
             motion.speed.y *= -1.;
         }
 
@@ -63,12 +67,18 @@ impl Movement {
 
         return motion;
     }
+
+    fn random_percent() -> f32 {
+        return rand::gen_range(0., 100.);
+    }
+
 }
 
 pub struct Fish {
     motion: Motion,
     movement: Movement,
     size: Vec2,
+    //max_speed: Vec2,
     //bounding_box: Rect,
     bounding_box_adjusted: Rect,
     texture: Texture2D,
@@ -85,25 +95,26 @@ impl Fish {
     const SPRITE_TURTLE: &'static str = "assets/turtle.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
-    const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
-    const CHANCE_IDLE_START: f32 = 0.05;
-    const CHANCE_IDLE_END: f32 = 0.75;
-    const SIZE: f32 = 7.;
+    const DEFAULT_SPRITE_WIDTH: f32 = 7.;
 
-    fn new(fish_size: f32, speed: Vec2, bounding_box: Rect, movement: Movement, texture: Texture2D) -> Fish {
+    fn new(
+        fish_size: f32,
+        max_speed: Vec2,
+        bounding_box: Rect,
+        movement: Movement,
+        texture: Texture2D) -> Fish {
         let fish_height = fish_size / (texture.width() / texture.height());
         let size = vec2(fish_size, fish_height);
         let bbox_adjusted = Fish::adjust_bounding_box(bounding_box, size);
-        let start_position = Fish::random_start_position(bbox_adjusted);
-        let speed_adjusted = Fish::adjust_speed_randomly(speed);
         Fish {
             motion: Motion {
-                position: start_position,
-                speed: speed_adjusted,
+                position: Fish::random_start_position(bbox_adjusted),
+                speed: Fish::random_start_speed(max_speed),
                 rotation: 0.,
                 idle: false,
             },
             size: size,
+            //max_speed: max_speed,
             //bounding_box: bounding_box,
             bounding_box_adjusted: bbox_adjusted,
             movement: movement,
@@ -120,10 +131,10 @@ impl Fish {
         };
     }
 
-    fn adjust_speed_randomly(speed: Vec2) -> Vec2 {
+    fn random_start_speed(max_speed: Vec2) -> Vec2 {
         return vec2(
-            speed.x * Fish::random_speed_modifier() * Fish::random_direction(),
-            speed.y * Fish::random_speed_modifier(),
+            rand::gen_range(-max_speed.x, max_speed.x),
+            rand::gen_range(-max_speed.y, max_speed.y),
         );
     }
 
@@ -131,18 +142,6 @@ impl Fish {
         return vec2(
             rand::gen_range(bounding_box.x, bounding_box.right()),
             rand::gen_range(bounding_box.y, bounding_box.bottom()));
-    }
-
-    fn random_direction() -> f32 {
-        return *vec![-1., 1.].choose().unwrap();
-    }
-
-    fn random_percent() -> f32 {
-        return rand::gen_range(0., 100.);
-    }
-
-    fn random_speed_modifier() -> f32 {
-        return rand::gen_range(0.5, 1.1);
     }
 
     fn tick(&mut self, delta: f32) {
@@ -199,7 +198,7 @@ async fn main() {
 
     for _ in 0..20 {
         let texture = fish_textures.choose().unwrap();
-        let size = Fish::SIZE * rand::gen_range(0.6, 1.4);
+        let size = Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4);
         let speed = vec2(12., 4.);
         fishies.push(Fish::new(size, speed, bounding_box, Movement::Random, *texture));
     }
