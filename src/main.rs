@@ -72,11 +72,11 @@ impl Motion {
         }
     }
 
-    fn change_direction_randomly(&mut self) {
-        if Motion::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.x {
+    fn change_direction_randomly(&mut self, change_chance: Vec2) {
+        if Motion::random_percent() < change_chance.x {
             self.acceleration.x *= -1.;
         }
-        if Motion::random_percent() < Movement::DIRECTION_CHANGE_CHANCE.y {
+        if Motion::random_percent() < change_chance.y {
             self.acceleration.y *= -1.;
         }
     }
@@ -114,20 +114,12 @@ impl Movement {
     }
 
     fn random() -> Movement {
-        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::Random].choose().unwrap();
-    }
-
-    fn tick_crab(mut motion: Motion, bounding_box: Rect) -> Motion {
-        motion.accelerate();
-        motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_direction_randomly();
-        motion.clamp(bounding_box);
-        return motion;
+        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::EdgeIdling, Movement::Random].choose().unwrap();
     }
 
     fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_direction_randomly();
+        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -136,9 +128,17 @@ impl Movement {
     fn tick_accelerating(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_direction_randomly();
+        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
+        return motion;
+    }
+
+    fn tick_crab(mut motion: Motion, bounding_box: Rect) -> Motion {
+        motion.accelerate();
+        motion.change_direction_by_bounding_box(bounding_box);
+        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE * 5.);
+        motion.clamp(bounding_box);
         return motion;
     }
 
@@ -146,7 +146,7 @@ impl Movement {
         motion.accelerate();
         motion.random_idling();
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_direction_randomly();
+        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -236,6 +236,10 @@ impl Fish {
         self.motion = self.motion.move_position(delta, motion);
     }
 
+    fn swims_right(&mut self) -> bool {
+        return self.motion.speed.x >= 0.;
+    }
+
     fn draw(&mut self) {
         draw_texture_ex(
             self.texture,
@@ -249,10 +253,6 @@ impl Fish {
                 ..Default::default()
             },
             );
-    }
-
-    fn swims_right(&mut self) -> bool {
-        return self.motion.speed.x > 0.;
     }
 }
 
