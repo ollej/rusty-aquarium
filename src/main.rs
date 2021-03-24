@@ -11,11 +11,16 @@ pub struct Motion {
     idle: bool,
 }
 impl Motion {
+    const MAX_ROTATION: f32 = 0.3;
+
     fn move_position(&mut self, delta: f32, motion: Motion) -> Motion {
         //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
 
-        let position = if motion.idle { motion.position } else { motion.position + motion.speed * delta };
-        let rotation = if motion.speed.x * motion.speed.y > 0. { 0.3 } else { -0.3 };
+        let position = if motion.idle {
+            motion.position
+        } else {
+            motion.position + motion.speed * delta
+        };
 
         //debug!("rotation: {} new_pos: {} old_pos: {}", rotation, new_position, self.motion.position);
         return Motion {
@@ -23,8 +28,15 @@ impl Motion {
             speed: motion.speed,
             max_speed: motion.max_speed,
             acceleration: motion.acceleration,
-            rotation: rotation,
+            rotation: motion.rotation,
             idle: motion.idle,
+        }
+    }
+
+    fn rotate(&mut self) {
+        self.rotation = (self.speed.y / self.max_speed.y).abs() * Motion::MAX_ROTATION;
+        if self.speed.x * self.speed.y < 0. {
+            self.rotation *= -1.;
         }
     }
 
@@ -107,6 +119,7 @@ impl Movement {
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_direction_randomly();
         motion.clamp(bounding_box);
+        motion.rotate();
         return motion;
     }
 
@@ -115,6 +128,7 @@ impl Movement {
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_direction_randomly();
         motion.clamp(bounding_box);
+        motion.rotate();
         return motion;
     }
 
@@ -124,6 +138,7 @@ impl Movement {
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_direction_randomly();
         motion.clamp(bounding_box);
+        motion.rotate();
         return motion;
     }
 }
