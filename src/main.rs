@@ -96,6 +96,7 @@ impl Motion {
 pub enum Movement {
     SingleSpeed,
     Accelerating,
+    Crab,
     Random,
 }
 impl Movement {
@@ -103,16 +104,25 @@ impl Movement {
     const CHANCE_IDLE_START: f32 = 0.05;
     const CHANCE_IDLE_END: f32 = 0.75;
 
-    fn random() -> Movement {
-        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::Random].choose().unwrap();
-    }
-
     fn tick(&mut self, motion: Motion, bounding_box: Rect) -> Motion {
         return match self {
             Movement::SingleSpeed => Movement::tick_single_speed(motion, bounding_box),
             Movement::Accelerating => Movement::tick_accelerating(motion, bounding_box),
+            Movement::Crab => Movement::tick_crab(motion, bounding_box),
             Movement::Random => Movement::tick_random(motion, bounding_box),
         }
+    }
+
+    fn random() -> Movement {
+        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::Random].choose().unwrap();
+    }
+
+    fn tick_crab(mut motion: Motion, bounding_box: Rect) -> Motion {
+        motion.accelerate();
+        motion.change_direction_by_bounding_box(bounding_box);
+        motion.change_direction_randomly();
+        motion.clamp(bounding_box);
+        return motion;
     }
 
     fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
@@ -161,6 +171,7 @@ impl Fish {
     const SPRITE_BUTTERFLYFISH: &'static str = "assets/butterflyfish.png";
     const SPRITE_LIONFISH: &'static str = "assets/lionfish.png";
     const SPRITE_TURTLE: &'static str = "assets/turtle.png";
+    const SPRITE_CRAB: &'static str = "assets/ferris.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const DEFAULT_SPRITE_WIDTH: f32 = 7.;
@@ -251,6 +262,7 @@ async fn main() {
     const SCR_H: f32 = 62.5;
 
     let background: Texture2D = load_texture("assets/background.png").await;
+    let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
     let fish_textures = vec![
         load_texture(Fish::SPRITE_CLOWNFISH).await,
         load_texture(Fish::SPRITE_ANGELFISH).await,
@@ -272,6 +284,8 @@ async fn main() {
         h: SCR_H - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
     };
 
+    let crab_box = Rect { x: 35., y: 48.5, w: 30., h: 13. };
+    fishies.push(Fish::new(Fish::DEFAULT_SPRITE_WIDTH, vec2(12., 4.), crab_box, Movement::Crab, ferris));
     for _ in 0..20 {
         let texture = fish_textures.choose().unwrap();
         let size = Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4);
