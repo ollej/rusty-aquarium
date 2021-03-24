@@ -114,7 +114,7 @@ impl Movement {
     }
 
     fn random() -> Movement {
-        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::EdgeIdling, Movement::Random].choose().unwrap();
+        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::Random].choose().unwrap();
     }
 
     fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
