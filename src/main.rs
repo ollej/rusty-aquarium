@@ -200,7 +200,7 @@ impl Fish {
     const SPRITE_YELLOWANGELFISH: &'static str = "assets/yellowangelfish.png";
     const SPRITE_ZEBRAFISH: &'static str = "assets/zebrafish.png";
     const SPRITE_CRAB: &'static str = "assets/ferris.png";
-    const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
+    //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const DEFAULT_SPRITE_WIDTH: f32 = 7.;
@@ -337,7 +337,7 @@ async fn main() {
         load_texture(Fish::SPRITE_ZEBRAFISH).await,
     ];
     let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
-    let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
+    //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
 
     let crt_render_target = render_target(screen_width() as u32, screen_height() as u32);
     set_texture_filter(crt_render_target.texture, FilterMode::Linear);
@@ -348,7 +348,8 @@ async fn main() {
     let mut shader_activated = true;
     let mut fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
     let mut chosen_background = backgrounds_cycle.next().unwrap();
-    let mut time_passed = 0.;
+    let mut background_time_passed = 0.;
+    let mut switch_backgrounds = true;
 
     loop {
         if is_key_pressed(KeyCode::Escape) {
@@ -359,6 +360,10 @@ async fn main() {
         }
         if is_key_pressed(KeyCode::Tab) || is_mouse_button_pressed(MouseButton::Right) {
             chosen_background = backgrounds_cycle.next().unwrap();
+        }
+        if is_key_pressed(KeyCode::A) || is_mouse_button_pressed(MouseButton::Middle) {
+            switch_backgrounds = !switch_backgrounds;
+            background_time_passed = 0.;
         }
         if is_key_pressed(KeyCode::Enter) {
             fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
@@ -372,12 +377,13 @@ async fn main() {
         }
 
         // Switch backgrounds
-        time_passed += delta;
-        if time_passed > BACKGROUND_CHANGE_TIME {
-            time_passed = 0.;
-            chosen_background = backgrounds_cycle.next().unwrap();
+        if switch_backgrounds {
+            background_time_passed += delta;
+            if background_time_passed > BACKGROUND_CHANGE_TIME {
+                background_time_passed = 0.;
+                chosen_background = backgrounds_cycle.next().unwrap();
+            }
         }
-
 
         // build camera with following coordinate system:
         // (0., 0)     .... (SCR_W, 0.)
