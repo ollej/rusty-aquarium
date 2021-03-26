@@ -280,7 +280,13 @@ async fn main() {
 
     let render_target = render_target(screen_width() as u32, screen_height() as u32);
     set_texture_filter(render_target.texture, FilterMode::Linear);
-    let mut shader_activated = false;
+    let materials_vec = vec![
+        load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap(),
+        load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap(),
+    ];
+    let mut materials = materials_vec.iter().cycle();
+    let mut shader_activated = true;
+    let mut chosen_material = materials.next().unwrap();
 
     let background: Texture2D = load_texture("assets/background.png").await;
     let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
@@ -295,7 +301,6 @@ async fn main() {
         load_texture(Fish::SPRITE_LIONFISH).await,
         load_texture(Fish::SPRITE_TURTLE).await,
     ];
-    let water_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
 
     let mut fishies = Vec::new();
     let bounding_box = Rect {
@@ -320,6 +325,9 @@ async fn main() {
         }
         if is_key_pressed(KeyCode::Space) {
             shader_activated = !shader_activated;
+        }
+        if is_key_pressed(KeyCode::Tab) && shader_activated {
+            chosen_material = materials.next().unwrap();
         }
 
         // Update fish positions
@@ -362,7 +370,7 @@ async fn main() {
         clear_background(DARKBLUE);
 
         if shader_activated {
-            gl_use_material(water_material);
+            gl_use_material(*chosen_material);
         }
 
         draw_texture_ex(
@@ -442,3 +450,54 @@ void main() {
     uv = texcoord;
 }
 "#;
+
+const WATER_FRAGMENT_SHADER: &'static str = r#"#version 100
+precision lowp float;
+
+varying vec2 uv;
+varying vec2 uv1;
+
+uniform vec4 _Time;
+uniform sampler2D Texture;
+uniform sampler2D _ScreenTexture;
+
+#define amp 0.02
+
+void main() {
+    vec2 p = uv;
+    vec2 h = uv1 * 0.02;
+    float time = _Time.x;
+
+    h.x += sin(h.y * 15. + time * 2.) / 30.;
+    h.y += cos(h.x * 10. + time * 2.) / 30.;
+
+    p.x += sin((h.y + h.x) * 15. + time * 2.) / (400. + (10. * sin(time)));
+    p.y += cos((h.y + h.x) * 15. + time * 2.) / (400. + (10. * sin(time)));
+
+    vec3 res = texture2D(_ScreenTexture, p).rgb * vec3(0.8, 0.8, 0.9) + vec3(0.0, 0.0, 0.04 * sin(h.y * 15. + time * 2.)) * cos(h.x * 10. + time * 2.);
+
+    gl_FragColor = vec4(res, 1.0);
+}
+"#;
+
+const WATER_VERTEX_SHADER: &'static str = r#"#version 100
+attribute vec3 position;
+attribute vec2 texcoord;
+
+varying lowp vec4 color;
+varying lowp vec2 uv;
+varying lowp vec2 uv1;
+
+uniform mat4 Model;
+uniform mat4 Projection;
+
+void main() {
+    vec4 res = Projection * Model * vec4(position, 1);
+
+    uv = res.xy / 2.0 + vec2(0.5, 0.5);
+    uv1 = position.xy;
+
+    gl_Position = res;
+}
+"#;
+
