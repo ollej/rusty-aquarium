@@ -328,14 +328,13 @@ async fn main() {
     let water_material = load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap();
     let crt_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
     let mut shader_activated = true;
-
     let mut fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
 
     loop {
         if is_key_pressed(KeyCode::Escape) {
             return;
         }
-        if is_key_pressed(KeyCode::Space) {
+        if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
             shader_activated = !shader_activated;
         }
         if is_key_pressed(KeyCode::Enter) {
