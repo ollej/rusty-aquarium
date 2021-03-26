@@ -321,15 +321,13 @@ async fn main() {
         load_texture(Fish::SPRITE_TURTLE).await,
     ];
 
-    let render_target = render_target(screen_width() as u32, screen_height() as u32);
-    set_texture_filter(render_target.texture, FilterMode::Linear);
-    let materials_vec = vec![
-        load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap(),
-        load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap(),
-    ];
-    let mut materials = materials_vec.iter().cycle();
+    let crt_render_target = render_target(screen_width() as u32, screen_height() as u32);
+    set_texture_filter(crt_render_target.texture, FilterMode::Linear);
+    let water_render_target = render_target(screen_width() as u32, screen_height() as u32);
+    set_texture_filter(water_render_target.texture, FilterMode::Linear);
+    let water_material = load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap();
+    let crt_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
     let mut shader_activated = true;
-    let mut chosen_material = materials.next().unwrap();
 
     let mut fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
 
@@ -339,9 +337,6 @@ async fn main() {
         }
         if is_key_pressed(KeyCode::Space) {
             shader_activated = !shader_activated;
-        }
-        if is_key_pressed(KeyCode::Tab) && shader_activated {
-            chosen_material = materials.next().unwrap();
         }
         if is_key_pressed(KeyCode::Enter) {
             fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
@@ -360,7 +355,7 @@ async fn main() {
         set_camera(Camera2D {
             zoom: vec2(1. / SCR_W * 2., -1. / SCR_H * 2.),
             target: vec2(SCR_W / 2., SCR_H / 2.),
-            render_target: Some(render_target),
+            render_target: Some(water_render_target),
             ..Default::default()
         });
         clear_background(DARKBLUE);
@@ -382,27 +377,62 @@ async fn main() {
             fish.draw();
         }
 
-        // Draw target texture to screen with a shader
-        set_default_camera();
-        clear_background(DARKBLUE);
-
+        // Draw texture with water shader
         if shader_activated {
-            gl_use_material(*chosen_material);
-        }
-
-        draw_texture_ex(
-            render_target.texture,
-            0.,
-            0.,
-            WHITE,
-            DrawTextureParams {
-                dest_size: Some(vec2(screen_width(), screen_height())),
-                flip_y: true,
+            set_camera(Camera2D {
+                zoom: vec2(1. / SCR_W * 2., -1. / SCR_H * 2.),
+                target: vec2(SCR_W / 2., SCR_H / 2.),
+                render_target: Some(crt_render_target),
                 ..Default::default()
-            },
-        );
-        if shader_activated {
+            });
+            clear_background(DARKBLUE);
+            gl_use_material(water_material);
+
+            draw_texture_ex(
+                water_render_target.texture,
+                0.,
+                0.,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(screen_width(), screen_height())),
+                    flip_y: true,
+                    ..Default::default()
+                },
+            );
+
+            // Draw texture to screen with crt shader
+            set_default_camera();
+            clear_background(DARKBLUE);
+
+            gl_use_material(crt_material);
+
+            draw_texture_ex(
+                crt_render_target.texture,
+                0.,
+                0.,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(screen_width(), screen_height())),
+                    flip_y: true,
+                    ..Default::default()
+                },
+            );
             gl_use_default_material();
+        } else {
+            set_default_camera();
+            clear_background(DARKBLUE);
+
+            draw_texture_ex(
+                water_render_target.texture,
+                0.,
+                0.,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(screen_width(), screen_height())),
+                    flip_y: true,
+                    ..Default::default()
+                },
+            );
         }
 
         next_frame().await
@@ -482,7 +512,7 @@ uniform sampler2D _ScreenTexture;
 
 void main() {
     vec2 p = uv;
-    vec2 h = uv1 * 0.002;
+    vec2 h = uv1 * 0.003; // Size of waves
     float time = _Time.x;
 
     h.x += sin(h.y * 15. + time * 2.) / 30.;
