@@ -64,16 +64,16 @@ impl Motion {
     }
 
     fn change_direction_by_bounding_box(&mut self, bounding_box: Rect) {
-        if self.position.x < bounding_box.x || self.position.x > bounding_box.right() {
+        if self.position.x <= bounding_box.x || self.position.x >= bounding_box.right() {
             self.speed.x *= -1.;
         }
-        if self.position.y < bounding_box.y || self.position.y > bounding_box.bottom() {
+        if self.position.y <= bounding_box.y || self.position.y >= bounding_box.bottom() {
             self.speed.y *= -1.;
         }
     }
 
     fn change_direction_vertically(&mut self, bounding_box: Rect) {
-        if self.position.y < bounding_box.y || self.position.y > bounding_box.bottom() {
+        if self.position.y <= bounding_box.y || self.position.y >= bounding_box.bottom() {
             self.speed.y *= -1.;
         }
     }
