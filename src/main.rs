@@ -491,7 +491,7 @@ void main() {
     p.x += sin((h.y + h.x) * 15. + time * 2.) / (400. + (10. * sin(time)));
     p.y += cos((h.y + h.x) * 15. + time * 2.) / (400. + (10. * sin(time)));
 
-    vec3 res = texture2D(_ScreenTexture, p).rgb * vec3(0.8, 0.8, 0.9) + vec3(0.0, 0.0, 0.04 * sin(h.y * 15. + time * 2.)) * cos(h.x * 10. + time * 2.);
+    vec3 res = texture2D(Texture, p).rgb * vec3(0.8, 0.8, 0.9) + vec3(0.0, 0.0, 0.04 * sin(h.y * 15. + time * 2.)) * cos(h.x * 10. + time * 2.);
 
     gl_FragColor = vec4(res, 1.0);
 }
