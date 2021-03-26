@@ -78,7 +78,7 @@ impl Motion {
         }
     }
 
-    fn change_direction_randomly(&mut self, change_chance: Vec2) {
+    fn change_acceleration_randomly(&mut self, change_chance: Vec2) {
         if Motion::random_percent() < change_chance.x {
             self.acceleration.x *= -1.;
         }
@@ -127,7 +127,7 @@ impl Movement {
 
     fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -136,7 +136,7 @@ impl Movement {
     fn tick_accelerating(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -145,7 +145,7 @@ impl Movement {
     fn tick_accelerating_edge_idling(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.accelerate();
         motion.change_direction_vertically(bounding_box);
-        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -154,7 +154,7 @@ impl Movement {
     fn tick_crab(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE * 5.);
+        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE * 5.);
         motion.clamp(bounding_box);
         return motion;
     }
@@ -163,7 +163,7 @@ impl Movement {
         motion.accelerate();
         motion.random_idling();
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
