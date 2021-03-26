@@ -324,8 +324,8 @@ async fn main() {
     let render_target = render_target(screen_width() as u32, screen_height() as u32);
     set_texture_filter(render_target.texture, FilterMode::Linear);
     let materials_vec = vec![
-        load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap(),
         load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap(),
+        load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap(),
     ];
     let mut materials = materials_vec.iter().cycle();
     let mut shader_activated = true;
@@ -482,7 +482,7 @@ uniform sampler2D _ScreenTexture;
 
 void main() {
     vec2 p = uv;
-    vec2 h = uv1 * 0.02;
+    vec2 h = uv1 * 0.002;
     float time = _Time.x;
 
     h.x += sin(h.y * 15. + time * 2.) / 30.;
