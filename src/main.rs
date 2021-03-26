@@ -196,7 +196,11 @@ impl Fish {
     const SPRITE_BUTTERFLYFISH: &'static str = "assets/butterflyfish.png";
     const SPRITE_LIONFISH: &'static str = "assets/lionfish.png";
     const SPRITE_TURTLE: &'static str = "assets/turtle.png";
+    const SPRITE_NEONTETRA: &'static str = "assets/neontetra.png";
+    const SPRITE_YELLOWANGELFISH: &'static str = "assets/yellowangelfish.png";
+    const SPRITE_ZEBRAFISH: &'static str = "assets/zebrafish.png";
     const SPRITE_CRAB: &'static str = "assets/ferris.png";
+    const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const DEFAULT_SPRITE_WIDTH: f32 = 7.;
@@ -306,9 +310,18 @@ fn generate_fishies(screen_width: f32, screen_height: f32, ferris: Texture2D, fi
 async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
+    const BACKGROUND_CHANGE_TIME: f32 = 60.;
 
-    let background: Texture2D = load_texture("assets/background.png").await;
-    let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
+    let backgrounds = vec![
+        load_texture("assets/background.png").await,
+        load_texture("assets/background2.png").await,
+        load_texture("assets/background3.png").await,
+        load_texture("assets/background4.png").await,
+        load_texture("assets/background5.png").await,
+        load_texture("assets/background6.png").await,
+        load_texture("assets/background7.png").await,
+    ];
+    let mut backgrounds_cycle = backgrounds.iter().cycle();
     let fish_textures = &vec![
         load_texture(Fish::SPRITE_CLOWNFISH).await,
         load_texture(Fish::SPRITE_ANGELFISH).await,
@@ -319,7 +332,12 @@ async fn main() {
         load_texture(Fish::SPRITE_BUTTERFLYFISH).await,
         load_texture(Fish::SPRITE_LIONFISH).await,
         load_texture(Fish::SPRITE_TURTLE).await,
+        load_texture(Fish::SPRITE_NEONTETRA).await,
+        load_texture(Fish::SPRITE_YELLOWANGELFISH).await,
+        load_texture(Fish::SPRITE_ZEBRAFISH).await,
     ];
+    let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
+    let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
 
     let crt_render_target = render_target(screen_width() as u32, screen_height() as u32);
     set_texture_filter(crt_render_target.texture, FilterMode::Linear);
@@ -329,6 +347,8 @@ async fn main() {
     let crt_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
     let mut shader_activated = true;
     let mut fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
+    let mut chosen_background = backgrounds_cycle.next().unwrap();
+    let mut time_passed = 0.;
 
     loop {
         if is_key_pressed(KeyCode::Escape) {
@@ -336,6 +356,9 @@ async fn main() {
         }
         if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
             shader_activated = !shader_activated;
+        }
+        if is_key_pressed(KeyCode::Tab) || is_mouse_button_pressed(MouseButton::Right) {
+            chosen_background = backgrounds_cycle.next().unwrap();
         }
         if is_key_pressed(KeyCode::Enter) {
             fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
@@ -347,6 +370,14 @@ async fn main() {
         for fish in fishies.iter_mut() {
             fish.tick(delta);
         }
+
+        // Switch backgrounds
+        time_passed += delta;
+        if time_passed > BACKGROUND_CHANGE_TIME {
+            time_passed = 0.;
+            chosen_background = backgrounds_cycle.next().unwrap();
+        }
+
 
         // build camera with following coordinate system:
         // (0., 0)     .... (SCR_W, 0.)
@@ -361,7 +392,7 @@ async fn main() {
 
         // Draw background
         draw_texture_ex(
-            background,
+            *chosen_background,
             0.,
             0.,
             WHITE,
