@@ -273,41 +273,13 @@ impl Fish {
     }
 }
 
-#[macroquad::main("RustyAquarium")]
-async fn main() {
-    const SCR_W: f32 = 100.0;
-    const SCR_H: f32 = 62.5;
-
-    let render_target = render_target(screen_width() as u32, screen_height() as u32);
-    set_texture_filter(render_target.texture, FilterMode::Linear);
-    let materials_vec = vec![
-        load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap(),
-        load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap(),
-    ];
-    let mut materials = materials_vec.iter().cycle();
-    let mut shader_activated = true;
-    let mut chosen_material = materials.next().unwrap();
-
-    let background: Texture2D = load_texture("assets/background.png").await;
-    let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
-    let fish_textures = vec![
-        load_texture(Fish::SPRITE_CLOWNFISH).await,
-        load_texture(Fish::SPRITE_ANGELFISH).await,
-        load_texture(Fish::SPRITE_GOLDFISH).await,
-        load_texture(Fish::SPRITE_YELLOWFISH).await,
-        load_texture(Fish::SPRITE_SEAHORSE).await,
-        load_texture(Fish::SPRITE_ROYALGRAMMA).await,
-        load_texture(Fish::SPRITE_BUTTERFLYFISH).await,
-        load_texture(Fish::SPRITE_LIONFISH).await,
-        load_texture(Fish::SPRITE_TURTLE).await,
-    ];
-
+fn generate_fishies(screen_width: f32, screen_height: f32, ferris: Texture2D, fish_textures: &Vec<Texture2D>) -> Vec<Fish> {
     let mut fishies = Vec::new();
     let bounding_box = Rect {
         x: Fish::MIN_POSITION.x,
         y: Fish::MIN_POSITION.y,
-        w: SCR_W - Fish::MAX_POSITION.x - Fish::MIN_POSITION.x,
-        h: SCR_H - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
+        w: screen_width - Fish::MAX_POSITION.x - Fish::MIN_POSITION.x,
+        h: screen_height - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
     };
 
     let crab_box = Rect { x: 35., y: 48.5, w: 30., h: 13. };
@@ -319,6 +291,40 @@ async fn main() {
         fishies.push(Fish::new(size, max_speed, bounding_box, Movement::random(), *texture));
     }
 
+    return fishies;
+}
+
+#[macroquad::main("RustyAquarium")]
+async fn main() {
+    const SCR_W: f32 = 100.0;
+    const SCR_H: f32 = 62.5;
+
+    let background: Texture2D = load_texture("assets/background.png").await;
+    let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
+    let fish_textures = &vec![
+        load_texture(Fish::SPRITE_CLOWNFISH).await,
+        load_texture(Fish::SPRITE_ANGELFISH).await,
+        load_texture(Fish::SPRITE_GOLDFISH).await,
+        load_texture(Fish::SPRITE_YELLOWFISH).await,
+        load_texture(Fish::SPRITE_SEAHORSE).await,
+        load_texture(Fish::SPRITE_ROYALGRAMMA).await,
+        load_texture(Fish::SPRITE_BUTTERFLYFISH).await,
+        load_texture(Fish::SPRITE_LIONFISH).await,
+        load_texture(Fish::SPRITE_TURTLE).await,
+    ];
+
+    let render_target = render_target(screen_width() as u32, screen_height() as u32);
+    set_texture_filter(render_target.texture, FilterMode::Linear);
+    let materials_vec = vec![
+        load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap(),
+        load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap(),
+    ];
+    let mut materials = materials_vec.iter().cycle();
+    let mut shader_activated = true;
+    let mut chosen_material = materials.next().unwrap();
+
+    let mut fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
+
     loop {
         if is_key_pressed(KeyCode::Escape) {
             return;
@@ -328,6 +334,9 @@ async fn main() {
         }
         if is_key_pressed(KeyCode::Tab) && shader_activated {
             chosen_material = materials.next().unwrap();
+        }
+        if is_key_pressed(KeyCode::Enter) {
+            fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
         }
 
         // Update fish positions
