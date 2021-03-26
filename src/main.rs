@@ -278,6 +278,10 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
+    let render_target = render_target(screen_width() as u32, screen_height() as u32);
+    set_texture_filter(render_target.texture, FilterMode::Linear);
+    let mut shader_activated = false;
+
     let background: Texture2D = load_texture("assets/background.png").await;
     let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
     let fish_textures = vec![
@@ -291,8 +295,8 @@ async fn main() {
         load_texture(Fish::SPRITE_LIONFISH).await,
         load_texture(Fish::SPRITE_TURTLE).await,
     ];
+    let water_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
 
-    let mut first_frame = true;
     let mut fishies = Vec::new();
     let bounding_box = Rect {
         x: Fish::MIN_POSITION.x,
@@ -310,30 +314,31 @@ async fn main() {
         fishies.push(Fish::new(size, max_speed, bounding_box, Movement::random(), *texture));
     }
 
-    // build camera with following coordinate system:
-    // (0., 0)     .... (SCR_W, 0.)
-    // (0., SCR_H) .... (SCR_W, SCR_H)
-    set_camera(Camera2D {
-        zoom: vec2(1. / SCR_W * 2., -1. / SCR_H * 2.),
-        target: vec2(SCR_W / 2., SCR_H / 2.),
-        ..Default::default()
-    });
-
     loop {
-        // Skip the first frame as the delta is too high
-        if first_frame {
-            first_frame = false;
-            next_frame().await;
-            continue;
+        if is_key_pressed(KeyCode::Escape) {
+            return;
+        }
+        if is_key_pressed(KeyCode::Space) {
+            shader_activated = !shader_activated;
         }
 
-        clear_background(DARKBLUE);
-
+        // Update fish positions
         let delta = get_frame_time();
 
         for fish in fishies.iter_mut() {
             fish.tick(delta);
         }
+
+        // build camera with following coordinate system:
+        // (0., 0)     .... (SCR_W, 0.)
+        // (0., SCR_H) .... (SCR_W, SCR_H)
+        set_camera(Camera2D {
+            zoom: vec2(1. / SCR_W * 2., -1. / SCR_H * 2.),
+            target: vec2(SCR_W / 2., SCR_H / 2.),
+            render_target: Some(render_target),
+            ..Default::default()
+        });
+        clear_background(DARKBLUE);
 
         // Draw background
         draw_texture_ex(
@@ -346,11 +351,94 @@ async fn main() {
                 ..Default::default()
             },
             );
+
+        // Draw little fishies
         for fish in fishies.iter_mut() {
             fish.draw();
+        }
+
+        // Draw target texture to screen with a shader
+        set_default_camera();
+        clear_background(DARKBLUE);
+
+        if shader_activated {
+            gl_use_material(water_material);
+        }
+
+        draw_texture_ex(
+            render_target.texture,
+            0.,
+            0.,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(screen_width(), screen_height())),
+                flip_y: true,
+                ..Default::default()
+            },
+        );
+        if shader_activated {
+            gl_use_default_material();
         }
 
         next_frame().await
     }
 }
 
+const CRT_FRAGMENT_SHADER: &'static str = r#"#version 100
+precision lowp float;
+varying vec4 color;
+varying vec2 uv;
+
+uniform sampler2D Texture;
+// https://www.shadertoy.com/view/XtlSD7
+vec2 CRTCurveUV(vec2 uv)
+{
+    uv = uv * 2.0 - 1.0;
+    vec2 offset = abs( uv.yx ) / vec2( 6.0, 4.0 );
+    uv = uv + uv * offset * offset;
+    uv = uv * 0.5 + 0.5;
+    return uv;
+}
+void DrawVignette( inout vec3 color, vec2 uv )
+{
+    float vignette = uv.x * uv.y * ( 1.0 - uv.x ) * ( 1.0 - uv.y );
+    vignette = clamp( pow( 16.0 * vignette, 0.3 ), 0.0, 1.0 );
+    color *= vignette;
+}
+void DrawScanline( inout vec3 color, vec2 uv )
+{
+    float iTime = 0.1;
+    float scanline = clamp( 0.95 + 0.05 * cos( 3.14 * ( uv.y + 0.008 * iTime ) * 240.0 * 1.0 ), 0.0, 1.0 );
+    float grille = 0.85 + 0.15 * clamp( 1.5 * cos( 3.14 * uv.x * 640.0 * 1.0 ), 0.0, 1.0 );
+    color *= scanline * grille * 1.2;
+}
+void main() {
+
+    vec2 crtUV = CRTCurveUV(uv);
+
+    vec3 res = texture2D(Texture, uv).rgb * color.rgb;
+
+    if (crtUV.x < 0.0 || crtUV.x > 1.0 || crtUV.y < 0.0 || crtUV.y > 1.0)
+    {
+        res = vec3(0.0, 0.0, 0.0);
+    }
+    DrawVignette(res, crtUV);
+    DrawScanline(res, uv);
+    gl_FragColor = vec4(res, 1.0);
+}
+"#;
+
+const CRT_VERTEX_SHADER: &'static str = r#"#version 100
+attribute vec3 position;
+attribute vec2 texcoord;
+attribute vec4 color0;
+varying lowp vec2 uv;
+varying lowp vec4 color;
+uniform mat4 Model;
+uniform mat4 Projection;
+void main() {
+    gl_Position = Projection * Model * vec4(position, 1);
+    color = color0 / 255.0;
+    uv = texcoord;
+}
+"#;
