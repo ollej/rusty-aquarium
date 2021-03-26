@@ -72,6 +72,12 @@ impl Motion {
         }
     }
 
+    fn change_direction_vertically(&mut self, bounding_box: Rect) {
+        if self.position.y < bounding_box.y || self.position.y > bounding_box.bottom() {
+            self.speed.y *= -1.;
+        }
+    }
+
     fn change_direction_randomly(&mut self, change_chance: Vec2) {
         if Motion::random_percent() < change_chance.x {
             self.acceleration.x *= -1.;
@@ -96,6 +102,7 @@ impl Motion {
 pub enum Movement {
     SingleSpeed,
     Accelerating,
+    AcceleratingEdgeIdling,
     Crab,
     Random,
 }
@@ -108,13 +115,14 @@ impl Movement {
         return match self {
             Movement::SingleSpeed => Movement::tick_single_speed(motion, bounding_box),
             Movement::Accelerating => Movement::tick_accelerating(motion, bounding_box),
+            Movement::AcceleratingEdgeIdling => Movement::tick_accelerating_edge_idling(motion, bounding_box),
             Movement::Crab => Movement::tick_crab(motion, bounding_box),
             Movement::Random => Movement::tick_random(motion, bounding_box),
         }
     }
 
     fn random() -> Movement {
-        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::Random].choose().unwrap();
+        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::AcceleratingEdgeIdling, Movement::Random].choose().unwrap();
     }
 
     fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
@@ -128,6 +136,15 @@ impl Movement {
     fn tick_accelerating(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
+        motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.clamp(bounding_box);
+        motion.rotate();
+        return motion;
+    }
+
+    fn tick_accelerating_edge_idling(mut motion: Motion, bounding_box: Rect) -> Motion {
+        motion.accelerate();
+        motion.change_direction_vertically(bounding_box);
         motion.change_direction_randomly(Movement::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
