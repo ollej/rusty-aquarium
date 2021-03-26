@@ -1,6 +1,14 @@
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
 
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "Rusty Aquarium".to_owned(),
+        fullscreen: true,
+        ..Default::default()
+    }
+}
+
 #[derive(Copy, Clone)]
 pub struct Motion {
     position: Vec2,
@@ -294,7 +302,7 @@ fn generate_fishies(screen_width: f32, screen_height: f32, ferris: Texture2D, fi
     return fishies;
 }
 
-#[macroquad::main("RustyAquarium")]
+#[macroquad::main(window_conf())]
 async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
