@@ -231,27 +231,6 @@ impl Fish {
         }
     }
 
-    fn generate_fishies(screen_width: f32, screen_height: f32, ferris: Texture2D, fish_textures: &Vec<Texture2D>) -> Vec<Fish> {
-        let mut fishies = Vec::new();
-        let bounding_box = Rect {
-            x: Fish::MIN_POSITION.x,
-            y: Fish::MIN_POSITION.y,
-            w: screen_width - Fish::MAX_POSITION.x - Fish::MIN_POSITION.x,
-            h: screen_height - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
-        };
-
-        let crab_box = Rect { x: 35., y: 48.5, w: 30., h: 13. };
-        fishies.push(Fish::new(Fish::DEFAULT_SPRITE_WIDTH, vec2(12., 4.), crab_box, Movement::Crab, ferris));
-        for _ in 0..20 {
-            let texture = fish_textures.choose().unwrap();
-            let size = Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4);
-            let max_speed = vec2(rand::gen_range(8., 14.), rand::gen_range(2.5, 4.5));
-            fishies.push(Fish::new(size, max_speed, bounding_box, Movement::random(), *texture));
-        }
-
-        return fishies;
-    }
-
     fn adjust_bounding_box(bounding_box: Rect, size: Vec2) -> Rect {
         return Rect {
             x: bounding_box.x,
@@ -303,6 +282,80 @@ impl Fish {
                 ..Default::default()
             },
             );
+    }
+}
+
+struct FishTank {
+    fishes: Vec<Fish>,
+    bounding_box: Rect,
+    ferris_texture: Texture2D,
+    fish_textures: Vec<Texture2D>,
+}
+
+impl FishTank {
+    fn new(screen_width: f32, screen_height: f32, ferris: Texture2D, fish_textures: Vec<Texture2D>) -> Self {
+        Self {
+            fishes: Vec::new(),
+            ferris_texture: ferris,
+            fish_textures: fish_textures,
+            bounding_box: FishTank::default_bounding_box(screen_width, screen_height),
+        }
+    }
+
+    fn tick(&mut self, delta: f32) {
+        for fish in self.fishes.iter_mut() {
+            fish.tick(delta);
+        }
+    }
+
+    fn draw(&mut self) {
+        for fish in self.fishes.iter_mut() {
+            fish.draw();
+        }
+    }
+
+    fn default_bounding_box(width: f32, height: f32) -> Rect {
+        Rect {
+            x: Fish::MIN_POSITION.x,
+            y: Fish::MIN_POSITION.y,
+            w: width - Fish::MAX_POSITION.x - Fish::MIN_POSITION.x,
+            h: height - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
+        }
+    }
+
+    fn populate(&mut self, count: usize) {
+        self.fishes.push(self.ferris());
+        for _ in 0..count {
+            self.fishes.push(self.fish());
+        }
+    }
+
+    fn reset(&mut self) {
+        self.fishes = Vec::new();
+    }
+
+    fn repopulate(&mut self) {
+        let count = self.fishes.len();
+        self.reset();
+        self.populate(count);
+    }
+
+    fn ferris(&self) -> Fish {
+        return Fish::new(
+            Fish::DEFAULT_SPRITE_WIDTH,
+            vec2(12., 4.),
+            Rect { x: 35., y: 48.5, w: 30., h: 13. },
+            Movement::Crab,
+            self.ferris_texture);
+    }
+
+    fn fish(&self) -> Fish {
+        return Fish::new(
+            Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4),
+            vec2(rand::gen_range(8., 14.), rand::gen_range(2.5, 4.5)),
+            self.bounding_box,
+            Movement::random(),
+            *self.fish_textures.choose().unwrap());
     }
 }
 
@@ -411,7 +464,7 @@ async fn main() {
         load_texture("assets/background6.png").await,
         load_texture("assets/background7.png").await,
     ];
-    let fish_textures = &vec![
+    let fish_textures = vec![
         load_texture(Fish::SPRITE_CLOWNFISH).await,
         load_texture(Fish::SPRITE_ANGELFISH).await,
         load_texture(Fish::SPRITE_GOLDFISH).await,
@@ -435,9 +488,11 @@ async fn main() {
     let water_material = load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap();
     let crt_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
     let mut shader_activated = false;
-    let mut fishies = Fish::generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
+    let mut fish_tank = FishTank::new(SCR_W, SCR_H, ferris, fish_textures);
     let mut background = ShowBackground::new(backgrounds);
     let mut show_text: ShowText = ShowText::empty();
+
+    fish_tank.populate(20);
 
     loop {
         if is_key_pressed(KeyCode::Escape) {
@@ -464,15 +519,13 @@ async fn main() {
             };
         }
         if is_key_pressed(KeyCode::Enter) {
-            fishies = Fish::generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
+            fish_tank.repopulate();
         }
 
         // Update fish positions
         let delta = get_frame_time();
 
-        for fish in fishies.iter_mut() {
-            fish.tick(delta);
-        }
+        fish_tank.tick(delta);
 
         // build camera with following coordinate system:
         // (0., 0)     .... (SCR_W, 0.)
@@ -488,10 +541,8 @@ async fn main() {
         // Draw background
         background.draw(delta, SCR_W, SCR_H);
 
-        // Draw little fishies
-        for fish in fishies.iter_mut() {
-            fish.draw();
-        }
+        // Draw little fish_tank
+        fish_tank.draw();
 
         // Draw texture with water shader
         if shader_activated {
