@@ -1,11 +1,12 @@
 [package]
 name = "rusty-aquarium"
-version = "0.1.0"
+version = "0.4.0"
 authors = ["Olle Wreede <olle@wreede.se>"]
 edition = "2018"
 
 [dependencies]
-macroquad = "0.3.0-alpha.17"
+#macroquad = "0.3.0-alpha.17"
+macroquad = { path = "../../external/macroquad", version = "0.3.0-alpha.17" }
 macroquad-particles = { path = "../../external/macroquad/particles" }
 
 # Doesn't work with android build
@@ -16,6 +17,7 @@ opt-level = 3
 build-web = "bin/build-web"
 serve-web = "bin/serve-web"
 build-win = "bin/build-win"
+build-mac = "bin/build-mac"
 build-apk = "bin/build-apk"
 build-linux = "bin/build-linux"
 

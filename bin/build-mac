@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+# Build release for mac
+cargo build --release
+
+# Package mac zip
+cp ./target/release/rusty-aquarium ./
+zip -ruq target/rusty-aquarium-mac.zip rusty-aquarium assets/*
+rm rusty-aquarium
