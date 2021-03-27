@@ -324,20 +324,40 @@ impl FishTank {
     }
 
     fn populate(&mut self, count: usize) {
-        self.fishes.push(self.ferris());
+        // Only add Ferris if fishes is empty
+        if self.fishes.len() == 0 {
+            self.fishes.push(self.ferris());
+        }
         for _ in 0..count {
-            self.fishes.push(self.fish());
+            self.add_fish();
         }
     }
 
     fn reset(&mut self) {
-        self.fishes = Vec::new();
+        self.fishes.truncate(1); // Keep Ferris
     }
 
     fn repopulate(&mut self) {
-        let count = self.fishes.len();
-        self.reset();
-        self.populate(count);
+        let count = self.fish_count();
+        if count >= 1 {
+            self.reset();
+            self.populate(count);
+        }
+    }
+
+    fn fish_count(&self) -> usize {
+        return self.fishes.len() - 1; // Skip Ferris
+    }
+
+    fn add_fish(&mut self) {
+        self.fishes.push(self.fish());
+    }
+
+    fn remove_fish(&mut self) {
+        // Don't remove Ferris
+        if self.fishes.len() > 1 {
+            self.fishes.pop();
+        }
     }
 
     fn ferris(&self) -> Fish {
@@ -492,7 +512,7 @@ async fn main() {
     let mut background = ShowBackground::new(backgrounds);
     let mut show_text: ShowText = ShowText::empty();
 
-    fish_tank.populate(20);
+    fish_tank.populate(10);
 
     loop {
         if is_key_pressed(KeyCode::Escape) {
@@ -520,6 +540,12 @@ async fn main() {
         }
         if is_key_pressed(KeyCode::Enter) {
             fish_tank.repopulate();
+        }
+        if is_key_pressed(KeyCode::Up) {
+            fish_tank.add_fish();
+        }
+        if is_key_pressed(KeyCode::Down) {
+            fish_tank.remove_fish();
         }
 
         // Update fish positions
