@@ -346,11 +346,61 @@ impl ShowText {
     }
 }
 
+struct ShowBackground {
+    background: usize,
+    backgrounds: Vec<Texture2D>,
+    time: f32,
+    switching_backgrounds: bool,
+}
+
+impl ShowBackground {
+    const BACKGROUND_CHANGE_TIME: f32 = 60.;
+
+    fn new(backgrounds: Vec<Texture2D>) -> Self {
+        Self {
+            background: 0,
+            backgrounds: backgrounds,
+            time: 0.,
+            switching_backgrounds: true,
+        }
+    }
+
+    fn draw(&mut self, delta: f32, w: f32, h: f32) {
+        if self.time > Self::BACKGROUND_CHANGE_TIME && self.switching_backgrounds {
+            self.next();
+        }
+
+        self.time += delta;
+        draw_texture_ex(
+            self.backgrounds[self.background],
+            0.,
+            0.,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(w, h)),
+                ..Default::default()
+            },
+        );
+    }
+
+    fn next(&mut self) {
+        self.time = 0.;
+        self.background += 1;
+        if self.background == self.backgrounds.len() {
+            self.background = 0;
+        }
+    }
+
+    fn toggle_switching_backgrounds(&mut self) {
+        self.switching_backgrounds = !self.switching_backgrounds;
+        self.time  = 0.;
+    }
+}
+
 #[macroquad::main(window_conf())]
 async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
-    const BACKGROUND_CHANGE_TIME: f32 = 60.;
 
     let backgrounds = vec![
         load_texture("assets/background.png").await,
@@ -361,7 +411,6 @@ async fn main() {
         load_texture("assets/background6.png").await,
         load_texture("assets/background7.png").await,
     ];
-    let mut backgrounds_cycle = backgrounds.iter().cycle();
     let fish_textures = &vec![
         load_texture(Fish::SPRITE_CLOWNFISH).await,
         load_texture(Fish::SPRITE_ANGELFISH).await,
@@ -387,9 +436,7 @@ async fn main() {
     let crt_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
     let mut shader_activated = false;
     let mut fishies = Fish::generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
-    let mut chosen_background = backgrounds_cycle.next().unwrap();
-    let mut background_time_passed = 0.;
-    let mut switch_backgrounds = true;
+    let mut background = ShowBackground::new(backgrounds);
     let mut show_text: ShowText = ShowText::empty();
 
     loop {
@@ -405,14 +452,12 @@ async fn main() {
             };
         }
         if is_key_pressed(KeyCode::Tab) || is_mouse_button_pressed(MouseButton::Left) {
-            chosen_background = backgrounds_cycle.next().unwrap();
-            background_time_passed = 0.;
+            background.next();
             show_text = ShowText::new("Next background");
         }
         if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Right) {
-            switch_backgrounds = !switch_backgrounds;
-            background_time_passed = 0.;
-            show_text = if switch_backgrounds {
+            background.toggle_switching_backgrounds();
+            show_text = if background.switching_backgrounds {
                 ShowText::new("Switching backgrounds")
             } else {
                 ShowText::new("Background locked")
@@ -429,15 +474,6 @@ async fn main() {
             fish.tick(delta);
         }
 
-        // Switch backgrounds
-        background_time_passed += delta;
-        if switch_backgrounds {
-            if background_time_passed > BACKGROUND_CHANGE_TIME {
-                background_time_passed = 0.;
-                chosen_background = backgrounds_cycle.next().unwrap();
-            }
-        }
-
         // build camera with following coordinate system:
         // (0., 0)     .... (SCR_W, 0.)
         // (0., SCR_H) .... (SCR_W, SCR_H)
@@ -450,16 +486,7 @@ async fn main() {
         clear_background(DARKBLUE);
 
         // Draw background
-        draw_texture_ex(
-            *chosen_background,
-            0.,
-            0.,
-            WHITE,
-            DrawTextureParams {
-                dest_size: Some(vec2(SCR_W, SCR_H)),
-                ..Default::default()
-            },
-            );
+        background.draw(delta, SCR_W, SCR_H);
 
         // Draw little fishies
         for fish in fishies.iter_mut() {
