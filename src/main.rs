@@ -518,7 +518,7 @@ async fn main() {
         if is_key_pressed(KeyCode::Escape) {
             return;
         }
-        if is_key_pressed(KeyCode::Backspace) || is_mouse_button_pressed(MouseButton::Middle) {
+        if is_key_pressed(KeyCode::Left) || is_mouse_button_pressed(MouseButton::Middle) {
             shader_activated = !shader_activated;
             show_text = if shader_activated {
                 ShowText::new("Activated shader")
