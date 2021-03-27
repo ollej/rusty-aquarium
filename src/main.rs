@@ -299,7 +299,9 @@ impl Fish {
     }
 
     fn draw(&mut self) {
-        self.emit();
+        if !self.motion.idle {
+            self.emit();
+        }
         draw_texture_ex(
             self.texture,
             self.motion.position.x,
