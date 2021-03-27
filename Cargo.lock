@@ -131,6 +131,19 @@ checksum = "ba4aede83fc3617411dc6993bc8c70919750c1c257c6ca6a502aed6e0e2394ae"
 
 [[package]]
 name = "macroquad"
+version = "0.3.0-alpha.16"
+dependencies = [
+ "bumpalo",
+ "fontdue",
+ "glam",
+ "image",
+ "macroquad_macro 0.1.2",
+ "miniquad",
+ "quad-rand",
+]
+
+[[package]]
+name = "macroquad"
 version = "0.3.0-alpha.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d278eaf76c3fa5eac8c487002ac01646f8be47484a77db040a9a7b767a19fc1"
@@ -139,10 +152,21 @@ dependencies = [
  "fontdue",
  "glam",
  "image",
- "macroquad_macro",
+ "macroquad_macro 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "miniquad",
  "quad-rand",
 ]
+
+[[package]]
+name = "macroquad-particles"
+version = "0.1.0"
+dependencies = [
+ "macroquad 0.3.0-alpha.16",
+]
+
+[[package]]
+name = "macroquad_macro"
+version = "0.1.2"
 
 [[package]]
 name = "macroquad_macro"
@@ -237,7 +261,8 @@ checksum = "658fa1faf7a4cc5f057c9ee5ef560f717ad9d8dc66d975267f709624d6e1ab88"
 name = "rusty-aquarium"
 version = "0.1.0"
 dependencies = [
- "macroquad",
+ "macroquad 0.3.0-alpha.17",
+ "macroquad-particles",
 ]
 
 [[package]]

@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 macroquad = "0.3.0-alpha.17"
+macroquad-particles = { path = "../../external/macroquad/particles" }
 
 # Doesn't work with android build
 [profile.dev.package.'*']

@@ -1,5 +1,6 @@
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
+use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial };
 
 fn window_conf() -> Conf {
     Conf {
@@ -185,6 +186,7 @@ pub struct Fish {
     //bounding_box: Rect,
     bounding_box_adjusted: Rect,
     texture: Texture2D,
+    emitter: Emitter,
 }
 impl Fish {
     const SPRITE_CLOWNFISH: &'static str = "assets/clownfish.png";
@@ -228,6 +230,20 @@ impl Fish {
             bounding_box_adjusted: bbox_adjusted,
             movement: movement,
             texture: texture,
+            emitter: Emitter::new(EmitterConfig {
+                emitting: true,
+                amount: 25,
+                lifetime: 1.6,
+                lifetime_randomness: 1.6,
+                size: 0.20,
+                size_randomness: 0.4,
+                initial_velocity: 6.0,
+                initial_velocity_randomness: 0.8,
+                initial_direction_spread: 0.5,
+                gravity: vec2(0.0, -15.0),
+                material: Some(ParticleMaterial::new(WATER_PARTICLE_VERTEX, WATER_PARTICLE_SHADER)),
+                ..Default::default()
+            }),
         }
     }
 
@@ -265,11 +281,25 @@ impl Fish {
         self.motion = self.motion.move_position(delta, motion);
     }
 
-    fn swims_right(&mut self) -> bool {
+    fn swims_right(&self) -> bool {
         return self.motion.speed.x >= 0.;
     }
 
+    fn emit_position(&self) -> Vec2 {
+        return self.motion.position
+            + if !self.swims_right() { vec2(self.size.x, 0.) } else { vec2(0., 0.) }
+            + vec2(0., self.size.y / 2.);
+    }
+
+    fn emit(&mut self) {
+        match self.movement {
+            Movement::Crab => (),
+            _ => self.emitter.draw(self.emit_position()),
+        }
+    }
+
     fn draw(&mut self) {
+        self.emit();
         draw_texture_ex(
             self.texture,
             self.motion.position.x,
@@ -281,7 +311,7 @@ impl Fish {
                 rotation: self.motion.rotation,
                 ..Default::default()
             },
-            );
+        );
     }
 }
 
@@ -567,8 +597,9 @@ async fn main() {
         // Draw background
         background.draw(delta, SCR_W, SCR_H);
 
-        // Draw little fish_tank
+        // Draw fish_tank
         fish_tank.draw();
+
 
         // Draw texture with water shader
         if shader_activated {
@@ -740,6 +771,41 @@ void main() {
     uv1 = position.xy;
 
     gl_Position = res;
+}
+"#;
+
+const WATER_PARTICLE_VERTEX: &'static str = r#"#version 100
+#define DEF_VERTEX_ATTRIBUTES
+#include "particles.glsl"
+
+varying lowp vec2 texcoord;
+varying lowp vec4 particle_data;
+
+void main() {
+    gl_Position = particle_transform_vertex();
+    texcoord = particle_transform_uv();
+
+    particle_data = in_attr_inst_data;
+}
+"#;
+
+const WATER_PARTICLE_SHADER: &'static str = r#"#version 100
+#include "particles.glsl"
+
+precision lowp float;
+varying lowp vec2 texcoord;
+varying lowp vec4 particle_data;
+
+uniform sampler2D texture;
+
+void main() {
+    // particle_ix is uniquad id of each particle
+    float randomize_initial_color = 0.5 + rand(vec2(particle_ix(particle_data), 0)) * 0.5;
+
+    // particle_lifetime is 0..1 value with 0 at the beginning of particle life and 1 just before particle removal
+    float fade_during_lifetime = 0.5 + (1.0 - particle_lifetime(particle_data));
+
+    gl_FragColor = texture2D(texture, texcoord) * randomize_initial_color * fade_during_lifetime;
 }
 "#;
 
