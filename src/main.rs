@@ -285,6 +285,46 @@ impl Fish {
     }
 }
 
+struct ShowText {
+    text: &'static str,
+    time: f32,
+    x: f32,
+    y: f32,
+}
+
+impl ShowText {
+    fn new(text: &'static str) -> Self {
+        Self {
+            text: text,
+            time: 2.,
+            x: 20.,
+            y: 40.,
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            text: "",
+            time: 0.,
+            x: 0.,
+            y: 0.,
+        }
+    }
+
+    fn draw(&mut self, delta: f32) {
+        if self.time > 0. {
+            self.time -= delta;
+            draw_text(
+                self.text,
+                self.x,
+                self.y,
+                40.,
+                WHITE,
+                );
+        }
+    }
+}
+
 fn generate_fishies(screen_width: f32, screen_height: f32, ferris: Texture2D, fish_textures: &Vec<Texture2D>) -> Vec<Fish> {
     let mut fishies = Vec::new();
     let bounding_box = Rect {
@@ -345,25 +385,38 @@ async fn main() {
     set_texture_filter(water_render_target.texture, FilterMode::Linear);
     let water_material = load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap();
     let crt_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
-    let mut shader_activated = true;
+    let mut shader_activated = false;
     let mut fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
     let mut chosen_background = backgrounds_cycle.next().unwrap();
     let mut background_time_passed = 0.;
     let mut switch_backgrounds = true;
+    let mut show_text: ShowText = ShowText::empty();
 
     loop {
         if is_key_pressed(KeyCode::Escape) {
             return;
         }
-        if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
+        if is_key_pressed(KeyCode::Backspace) || is_mouse_button_pressed(MouseButton::Middle) {
             shader_activated = !shader_activated;
+            show_text = if shader_activated {
+                ShowText::new("Activated shader")
+            } else {
+                ShowText::new("Disabled shader")
+            };
         }
-        if is_key_pressed(KeyCode::Tab) || is_mouse_button_pressed(MouseButton::Right) {
+        if is_key_pressed(KeyCode::Tab) || is_mouse_button_pressed(MouseButton::Left) {
             chosen_background = backgrounds_cycle.next().unwrap();
+            background_time_passed = 0.;
+            show_text = ShowText::new("Next background");
         }
-        if is_key_pressed(KeyCode::A) || is_mouse_button_pressed(MouseButton::Middle) {
+        if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Right) {
             switch_backgrounds = !switch_backgrounds;
             background_time_passed = 0.;
+            show_text = if switch_backgrounds {
+                ShowText::new("Switching backgrounds")
+            } else {
+                ShowText::new("Background locked")
+            };
         }
         if is_key_pressed(KeyCode::Enter) {
             fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
@@ -377,8 +430,8 @@ async fn main() {
         }
 
         // Switch backgrounds
+        background_time_passed += delta;
         if switch_backgrounds {
-            background_time_passed += delta;
             if background_time_passed > BACKGROUND_CHANGE_TIME {
                 background_time_passed = 0.;
                 chosen_background = backgrounds_cycle.next().unwrap();
@@ -470,6 +523,8 @@ async fn main() {
                 },
             );
         }
+
+        show_text.draw(delta);
 
         next_frame().await
     }
