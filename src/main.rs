@@ -231,6 +231,27 @@ impl Fish {
         }
     }
 
+    fn generate_fishies(screen_width: f32, screen_height: f32, ferris: Texture2D, fish_textures: &Vec<Texture2D>) -> Vec<Fish> {
+        let mut fishies = Vec::new();
+        let bounding_box = Rect {
+            x: Fish::MIN_POSITION.x,
+            y: Fish::MIN_POSITION.y,
+            w: screen_width - Fish::MAX_POSITION.x - Fish::MIN_POSITION.x,
+            h: screen_height - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
+        };
+
+        let crab_box = Rect { x: 35., y: 48.5, w: 30., h: 13. };
+        fishies.push(Fish::new(Fish::DEFAULT_SPRITE_WIDTH, vec2(12., 4.), crab_box, Movement::Crab, ferris));
+        for _ in 0..20 {
+            let texture = fish_textures.choose().unwrap();
+            let size = Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4);
+            let max_speed = vec2(rand::gen_range(8., 14.), rand::gen_range(2.5, 4.5));
+            fishies.push(Fish::new(size, max_speed, bounding_box, Movement::random(), *texture));
+        }
+
+        return fishies;
+    }
+
     fn adjust_bounding_box(bounding_box: Rect, size: Vec2) -> Rect {
         return Rect {
             x: bounding_box.x,
@@ -325,27 +346,6 @@ impl ShowText {
     }
 }
 
-fn generate_fishies(screen_width: f32, screen_height: f32, ferris: Texture2D, fish_textures: &Vec<Texture2D>) -> Vec<Fish> {
-    let mut fishies = Vec::new();
-    let bounding_box = Rect {
-        x: Fish::MIN_POSITION.x,
-        y: Fish::MIN_POSITION.y,
-        w: screen_width - Fish::MAX_POSITION.x - Fish::MIN_POSITION.x,
-        h: screen_height - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
-    };
-
-    let crab_box = Rect { x: 35., y: 48.5, w: 30., h: 13. };
-    fishies.push(Fish::new(Fish::DEFAULT_SPRITE_WIDTH, vec2(12., 4.), crab_box, Movement::Crab, ferris));
-    for _ in 0..20 {
-        let texture = fish_textures.choose().unwrap();
-        let size = Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4);
-        let max_speed = vec2(rand::gen_range(8., 14.), rand::gen_range(2.5, 4.5));
-        fishies.push(Fish::new(size, max_speed, bounding_box, Movement::random(), *texture));
-    }
-
-    return fishies;
-}
-
 #[macroquad::main(window_conf())]
 async fn main() {
     const SCR_W: f32 = 100.0;
@@ -386,7 +386,7 @@ async fn main() {
     let water_material = load_material(WATER_VERTEX_SHADER, WATER_FRAGMENT_SHADER, Default::default()).unwrap();
     let crt_material = load_material(CRT_VERTEX_SHADER, CRT_FRAGMENT_SHADER, Default::default()).unwrap();
     let mut shader_activated = false;
-    let mut fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
+    let mut fishies = Fish::generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
     let mut chosen_background = backgrounds_cycle.next().unwrap();
     let mut background_time_passed = 0.;
     let mut switch_backgrounds = true;
@@ -419,7 +419,7 @@ async fn main() {
             };
         }
         if is_key_pressed(KeyCode::Enter) {
-            fishies = generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
+            fishies = Fish::generate_fishies(SCR_W, SCR_H, ferris, fish_textures);
         }
 
         // Update fish positions
