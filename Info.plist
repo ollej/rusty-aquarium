@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleSignature</key>
+  <string>FooB</string>
+  <key>CFBundleExecutable</key>
+  <string>rusty-aquarium</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.ollej.rusty-aquarium</string>
+  <key>CFBundleName</key>
+  <string>Rusty Aquarium</string>
+  <key>CFBundleSupportedPlatforms</key>
+  <array>
+    <string>MacOSX</string>
+  </array>
+  <key>NSHumanReadableCopyright</key>
+  <string>Copyright © 2021 Olle Wreede</string>
+  </dict>
+</plist>
