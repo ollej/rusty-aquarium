@@ -451,7 +451,7 @@ async fn main() {
                 ShowText::new("Disabled shader")
             };
         }
-        if is_key_pressed(KeyCode::Tab) || is_mouse_button_pressed(MouseButton::Left) {
+        if is_key_pressed(KeyCode::Right) || is_mouse_button_pressed(MouseButton::Left) {
             background.next();
             show_text = ShowText::new("Next background");
         }
