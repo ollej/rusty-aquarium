@@ -241,7 +241,7 @@ impl Fish {
                 initial_velocity_randomness: 0.8,
                 initial_direction_spread: 0.5,
                 gravity: vec2(0.0, -15.0),
-                material: Some(ParticleMaterial::new(shaders::WATER_PARTICLE_VERTEX, shaders::WATER_PARTICLE_SHADER)),
+                material: Some(water_particle_shader::material()),
                 ..Default::default()
             }),
         }
@@ -537,8 +537,8 @@ async fn main() {
     set_texture_filter(crt_render_target.texture, FilterMode::Linear);
     let water_render_target = render_target(screen_width() as u32, screen_height() as u32);
     set_texture_filter(water_render_target.texture, FilterMode::Linear);
-    let water_material = load_material(shaders::WATER_VERTEX_SHADER, shaders::WATER_FRAGMENT_SHADER, Default::default()).unwrap();
-    let crt_material = load_material(shaders::CRT_VERTEX_SHADER, shaders::CRT_FRAGMENT_SHADER, Default::default()).unwrap();
+    let water_material = load_material(water_wave_shader::VERTEX, water_wave_shader::FRAGMENT, Default::default()).unwrap();
+    let crt_material = load_material(crt_shader::VERTEX, crt_shader::FRAGMENT, Default::default()).unwrap();
     let mut shader_activated = false;
     let mut fish_tank = FishTank::new(SCR_W, SCR_H, ferris, fish_textures);
     let mut background = ShowBackground::new(backgrounds);
@@ -667,8 +667,8 @@ async fn main() {
     }
 }
 
-mod shaders {
-    pub const CRT_FRAGMENT_SHADER: &'static str = r#"#version 100
+mod crt_shader {
+    pub const FRAGMENT: &'static str = r#"#version 100
         precision lowp float;
         varying vec4 color;
         varying vec2 uv;
@@ -712,7 +712,7 @@ mod shaders {
         }
     "#;
 
-    pub const CRT_VERTEX_SHADER: &'static str = r#"#version 100
+    pub const VERTEX: &'static str = r#"#version 100
         attribute vec3 position;
         attribute vec2 texcoord;
         attribute vec4 color0;
@@ -726,8 +726,10 @@ mod shaders {
             uv = texcoord;
         }
     "#;
+}
 
-    pub const WATER_FRAGMENT_SHADER: &'static str = r#"#version 100
+mod water_wave_shader {
+    pub const FRAGMENT: &'static str = r#"#version 100
         precision lowp float;
 
         varying vec2 uv;
@@ -756,7 +758,7 @@ mod shaders {
         }
     "#;
 
-    pub const WATER_VERTEX_SHADER: &'static str = r#"#version 100
+    pub const VERTEX: &'static str = r#"#version 100
         attribute vec3 position;
         attribute vec2 texcoord;
 
@@ -776,8 +778,16 @@ mod shaders {
             gl_Position = res;
         }
     "#;
+}
 
-    pub const WATER_PARTICLE_VERTEX: &'static str = r#"#version 100
+mod water_particle_shader {
+    use super::*;
+
+    pub fn material() -> ParticleMaterial {
+        return ParticleMaterial::new(water_particle_shader::VERTEX, water_particle_shader::PARTICLE);
+    }
+
+    pub const VERTEX: &'static str = r#"#version 100
         #define DEF_VERTEX_ATTRIBUTES
         #include "particles.glsl"
 
@@ -792,7 +802,7 @@ mod shaders {
         }
     "#;
 
-    pub const WATER_PARTICLE_SHADER: &'static str = r#"#version 100
+    pub const PARTICLE: &'static str = r#"#version 100
         #include "particles.glsl"
 
         precision lowp float;
