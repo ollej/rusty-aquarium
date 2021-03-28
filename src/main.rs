@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
-use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial, BlendMode };
+use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial };
 
 fn window_conf() -> Conf {
     Conf {
