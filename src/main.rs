@@ -1,6 +1,7 @@
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
 use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial };
+use futures::future::join_all;
 
 fn window_conf() -> Conf {
     Conf {
@@ -517,29 +518,32 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
-    let backgrounds = vec![
-        load_texture("assets/background.png").await,
-        load_texture("assets/background2.png").await,
-        load_texture("assets/background3.png").await,
-        load_texture("assets/background4.png").await,
-        load_texture("assets/background5.png").await,
-        load_texture("assets/background6.png").await,
-        load_texture("assets/background7.png").await,
+    let background_futures = vec![
+        load_texture("assets/background.png"),
+        load_texture("assets/background2.png"),
+        load_texture("assets/background3.png"),
+        load_texture("assets/background4.png"),
+        load_texture("assets/background5.png"),
+        load_texture("assets/background6.png"),
+        load_texture("assets/background7.png"),
     ];
-    let fish_textures = vec![
-        load_texture(Fish::SPRITE_CLOWNFISH).await,
-        load_texture(Fish::SPRITE_ANGELFISH).await,
-        load_texture(Fish::SPRITE_GOLDFISH).await,
-        load_texture(Fish::SPRITE_YELLOWFISH).await,
-        load_texture(Fish::SPRITE_SEAHORSE).await,
-        load_texture(Fish::SPRITE_ROYALGRAMMA).await,
-        load_texture(Fish::SPRITE_BUTTERFLYFISH).await,
-        load_texture(Fish::SPRITE_LIONFISH).await,
-        load_texture(Fish::SPRITE_TURTLE).await,
-        load_texture(Fish::SPRITE_NEONTETRA).await,
-        load_texture(Fish::SPRITE_YELLOWANGELFISH).await,
-        load_texture(Fish::SPRITE_ZEBRAFISH).await,
+    let fish_futures = vec![
+        load_texture(Fish::SPRITE_CLOWNFISH),
+        load_texture(Fish::SPRITE_ANGELFISH),
+        load_texture(Fish::SPRITE_GOLDFISH),
+        load_texture(Fish::SPRITE_YELLOWFISH),
+        load_texture(Fish::SPRITE_SEAHORSE),
+        load_texture(Fish::SPRITE_ROYALGRAMMA),
+        load_texture(Fish::SPRITE_BUTTERFLYFISH),
+        load_texture(Fish::SPRITE_LIONFISH),
+        load_texture(Fish::SPRITE_TURTLE),
+        load_texture(Fish::SPRITE_NEONTETRA),
+        load_texture(Fish::SPRITE_YELLOWANGELFISH),
+        load_texture(Fish::SPRITE_ZEBRAFISH),
     ];
+    let background_textures = join_all(background_futures).await;
+    let fish_textures = join_all(fish_futures).await;
+
     let ferris_texture: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
     let bubble_texture: Texture2D = load_texture(Fish::SPRITE_BUBBLE).await;
     //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
@@ -552,7 +556,7 @@ async fn main() {
     let crt_material = load_material(crt_shader::VERTEX, crt_shader::FRAGMENT, Default::default()).unwrap();
     let mut shader_activated = false;
     let mut fish_tank = FishTank::new(SCR_W, SCR_H, ferris_texture, bubble_texture, fish_textures);
-    let mut background = ShowBackground::new(backgrounds);
+    let mut background = ShowBackground::new(background_textures);
     let mut show_text: ShowText = ShowText::empty();
 
     fish_tank.populate(10);
