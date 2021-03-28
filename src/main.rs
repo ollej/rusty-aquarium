@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
-use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial };
+use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial, BlendMode };
 
 fn window_conf() -> Conf {
     Conf {
@@ -202,6 +202,7 @@ impl Fish {
     const SPRITE_YELLOWANGELFISH: &'static str = "assets/yellowangelfish.png";
     const SPRITE_ZEBRAFISH: &'static str = "assets/zebrafish.png";
     const SPRITE_CRAB: &'static str = "assets/ferris.png";
+    const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
     //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
     const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
@@ -212,7 +213,8 @@ impl Fish {
         max_speed: Vec2,
         bounding_box: Rect,
         movement: Movement,
-        texture: Texture2D) -> Fish {
+        texture: Texture2D,
+        bubble_texture: Texture2D) -> Fish {
         let fish_height = fish_size / (texture.width() / texture.height());
         let size = vec2(fish_size, fish_height);
         let bbox_adjusted = Fish::adjust_bounding_box(bounding_box, size);
@@ -234,13 +236,15 @@ impl Fish {
                 emitting: true,
                 amount: 25,
                 lifetime: 1.4,
-                lifetime_randomness: 0.8,
-                size: 0.20,
-                size_randomness: 0.4,
+                lifetime_randomness: 0.9,
+                size: 0.55,
+                size_randomness: 0.9,
+                explosiveness: 0.9,
                 initial_velocity: 5.0,
                 initial_velocity_randomness: 0.8,
                 initial_direction_spread: 0.5,
-                gravity: vec2(0.0, -15.0),
+                gravity: vec2(0.0, -5.0),
+                texture: Some(bubble_texture),
                 material: Some(water_particle_shader::material()),
                 ..Default::default()
             }),
@@ -321,16 +325,18 @@ struct FishTank {
     fishes: Vec<Fish>,
     bounding_box: Rect,
     ferris_texture: Texture2D,
+    bubble_texture: Texture2D,
     fish_textures: Vec<Texture2D>,
 }
 
 impl FishTank {
-    fn new(screen_width: f32, screen_height: f32, ferris: Texture2D, fish_textures: Vec<Texture2D>) -> Self {
+    fn new(screen_width: f32, screen_height: f32, ferris_texture: Texture2D, bubble_texture: Texture2D, fish_textures: Vec<Texture2D>) -> Self {
         Self {
             fishes: Vec::new(),
-            ferris_texture: ferris,
+            ferris_texture: ferris_texture,
+            bubble_texture: bubble_texture,
             fish_textures: fish_textures,
-            bounding_box: FishTank::default_bounding_box(screen_width, screen_height),
+            bounding_box: Self::default_bounding_box(screen_width, screen_height),
         }
     }
 
@@ -398,7 +404,9 @@ impl FishTank {
             vec2(12., 4.),
             Rect { x: 35., y: 48.5, w: 30., h: 13. },
             Movement::Crab,
-            self.ferris_texture);
+            self.ferris_texture,
+            self.bubble_texture,
+            );
     }
 
     fn fish(&self) -> Fish {
@@ -407,7 +415,9 @@ impl FishTank {
             vec2(rand::gen_range(8., 14.), rand::gen_range(2.5, 4.5)),
             self.bounding_box,
             Movement::random(),
-            *self.fish_textures.choose().unwrap());
+            *self.fish_textures.choose().unwrap(),
+            self.bubble_texture,
+            );
     }
 }
 
@@ -530,7 +540,8 @@ async fn main() {
         load_texture(Fish::SPRITE_YELLOWANGELFISH).await,
         load_texture(Fish::SPRITE_ZEBRAFISH).await,
     ];
-    let ferris: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
+    let ferris_texture: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
+    let bubble_texture: Texture2D = load_texture(Fish::SPRITE_BUBBLE).await;
     //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
 
     let crt_render_target = render_target(screen_width() as u32, screen_height() as u32);
@@ -540,7 +551,7 @@ async fn main() {
     let water_material = load_material(water_wave_shader::VERTEX, water_wave_shader::FRAGMENT, Default::default()).unwrap();
     let crt_material = load_material(crt_shader::VERTEX, crt_shader::FRAGMENT, Default::default()).unwrap();
     let mut shader_activated = false;
-    let mut fish_tank = FishTank::new(SCR_W, SCR_H, ferris, fish_textures);
+    let mut fish_tank = FishTank::new(SCR_W, SCR_H, ferris_texture, bubble_texture, fish_textures);
     let mut background = ShowBackground::new(backgrounds);
     let mut show_text: ShowText = ShowText::empty();
 
@@ -797,7 +808,6 @@ mod water_particle_shader {
         void main() {
             gl_Position = particle_transform_vertex();
             texcoord = particle_transform_uv();
-
             particle_data = in_attr_inst_data;
         }
     "#;
@@ -812,13 +822,10 @@ mod water_particle_shader {
         uniform sampler2D texture;
 
         void main() {
-            // particle_ix is uniquad id of each particle
-            float randomize_initial_color = 0.5 + rand(vec2(particle_ix(particle_data), 0)) * 0.5;
-
             // particle_lifetime is 0..1 value with 0 at the beginning of particle life and 1 just before particle removal
             float fade_during_lifetime = 0.5 + (1.0 - particle_lifetime(particle_data));
 
-            gl_FragColor = texture2D(texture, texcoord) * randomize_initial_color * fade_during_lifetime;
+            gl_FragColor = texture2D(texture, texcoord) * vec4(1., 1., 1., 0.2) * fade_during_lifetime;
         }
     "#;
 }

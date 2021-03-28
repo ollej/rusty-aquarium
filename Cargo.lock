@@ -238,7 +238,7 @@ checksum = "658fa1faf7a4cc5f057c9ee5ef560f717ad9d8dc66d975267f709624d6e1ab88"
 
 [[package]]
 name = "rusty-aquarium"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "macroquad",
  "macroquad-particles",
