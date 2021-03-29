@@ -482,11 +482,12 @@ impl ShowBackground {
     }
 
     fn draw(&mut self, delta: f32, w: f32, h: f32) {
+        self.time += delta;
+
         if self.time > Self::BACKGROUND_CHANGE_TIME && self.switching_backgrounds {
             self.next();
         }
 
-        self.time += delta;
         draw_texture_ex(
             self.backgrounds[self.background],
             0.,
