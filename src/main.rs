@@ -3,14 +3,6 @@ use macroquad::rand::ChooseRandom;
 use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial };
 use futures::future::join_all;
 
-fn window_conf() -> Conf {
-    Conf {
-        window_title: "Rusty Aquarium".to_owned(),
-        fullscreen: true,
-        ..Default::default()
-    }
-}
-
 #[derive(Copy, Clone)]
 pub struct Motion {
     position: Vec2,
@@ -511,6 +503,14 @@ impl ShowBackground {
     fn toggle_switching_backgrounds(&mut self) {
         self.switching_backgrounds = !self.switching_backgrounds;
         self.time  = 0.;
+    }
+}
+
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "Rusty Aquarium".to_owned(),
+        fullscreen: true,
+        ..Default::default()
     }
 }
 
