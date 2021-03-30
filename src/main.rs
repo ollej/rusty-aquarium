@@ -183,6 +183,7 @@ pub struct Fish {
     bounding_box_adjusted: Rect,
     texture: Texture2D,
     emitter: Emitter,
+    bubbles: bool,
 }
 impl Fish {
     const SPRITE_CRAB: &'static str = "assets/ferris.png";
@@ -196,7 +197,8 @@ impl Fish {
         bounding_box: Rect,
         movement: Movement,
         texture: Texture2D,
-        bubble_texture: Texture2D) -> Fish {
+        bubble_texture: Texture2D,
+        bubbles: bool) -> Fish {
         let fish_height = fish_size / (texture.width() / texture.height());
         let size = vec2(fish_size, fish_height);
         let bbox_adjusted = Self::adjust_bounding_box(bounding_box, size);
@@ -230,6 +232,7 @@ impl Fish {
                 material: Some(water_particle_shader::material()),
                 ..Default::default()
             }),
+            bubbles: bubbles,
         }
     }
 
@@ -280,7 +283,9 @@ impl Fish {
     fn emit(&mut self) {
         match self.movement {
             Movement::Crab => (),
-            _ => self.emitter.draw(self.emit_position()),
+            _ => if self.bubbles {
+                self.emitter.draw(self.emit_position())
+            },
         }
     }
 
@@ -379,6 +384,7 @@ impl FishTank {
             Movement::Crab,
             self.ferris_texture,
             self.bubble_texture,
+            false,
             );
     }
 
@@ -392,6 +398,7 @@ impl FishTank {
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
             self.bubble_texture,
+            fish_config.bubbles,
             );
     }
 }
