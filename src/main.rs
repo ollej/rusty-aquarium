@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
 use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial };
 use futures::future::join_all;
+use nanoserde::{DeJson};
 
 #[derive(Copy, Clone)]
 pub struct Motion {
@@ -182,18 +183,6 @@ pub struct Fish {
     emitter: Emitter,
 }
 impl Fish {
-    const SPRITE_CLOWNFISH: &'static str = "assets/clownfish.png";
-    const SPRITE_ANGELFISH: &'static str = "assets/angelfish.png";
-    const SPRITE_GOLDFISH: &'static str = "assets/goldfish.png";
-    const SPRITE_YELLOWFISH: &'static str = "assets/yellowfish.png";
-    const SPRITE_SEAHORSE: &'static str = "assets/seahorse.png";
-    const SPRITE_ROYALGRAMMA: &'static str = "assets/royalgramma.png";
-    const SPRITE_BUTTERFLYFISH: &'static str = "assets/butterflyfish.png";
-    const SPRITE_LIONFISH: &'static str = "assets/lionfish.png";
-    const SPRITE_TURTLE: &'static str = "assets/turtle.png";
-    const SPRITE_NEONTETRA: &'static str = "assets/neontetra.png";
-    const SPRITE_YELLOWANGELFISH: &'static str = "assets/yellowangelfish.png";
-    const SPRITE_ZEBRAFISH: &'static str = "assets/zebrafish.png";
     const SPRITE_CRAB: &'static str = "assets/ferris.png";
     const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
     //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
@@ -506,6 +495,19 @@ impl ShowBackground {
     }
 }
 
+#[derive(DeJson)]
+pub struct Config {
+    pub backgrounds: Vec<String>,
+    pub fish_textures: Vec<String>,
+}
+
+impl Config {
+    async fn load() -> Self {
+        let json = load_string("assets/config.json").await.unwrap();
+        return DeJson::deserialize_json(&json).unwrap();
+    }
+}
+
 fn window_conf() -> Conf {
     Conf {
         window_title: "Rusty Aquarium".to_owned(),
@@ -519,29 +521,10 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
-    let background_futures = vec![
-        load_texture("assets/background.png"),
-        load_texture("assets/background2.png"),
-        load_texture("assets/background3.png"),
-        load_texture("assets/background4.png"),
-        load_texture("assets/background5.png"),
-        load_texture("assets/background6.png"),
-        load_texture("assets/background7.png"),
-    ];
-    let fish_futures = vec![
-        load_texture(Fish::SPRITE_CLOWNFISH),
-        load_texture(Fish::SPRITE_ANGELFISH),
-        load_texture(Fish::SPRITE_GOLDFISH),
-        load_texture(Fish::SPRITE_YELLOWFISH),
-        load_texture(Fish::SPRITE_SEAHORSE),
-        load_texture(Fish::SPRITE_ROYALGRAMMA),
-        load_texture(Fish::SPRITE_BUTTERFLYFISH),
-        load_texture(Fish::SPRITE_LIONFISH),
-        load_texture(Fish::SPRITE_TURTLE),
-        load_texture(Fish::SPRITE_NEONTETRA),
-        load_texture(Fish::SPRITE_YELLOWANGELFISH),
-        load_texture(Fish::SPRITE_ZEBRAFISH),
-    ];
+    let config = Config::load().await;
+
+    let background_futures = config.backgrounds.iter().map( |background| { load_texture(background) });
+    let fish_futures = config.fish_textures.iter().map( |texture| { load_texture(texture) });
     let background_textures = join_all(background_futures).await;
     let fish_textures = join_all(fish_futures).await;
 

@@ -9,6 +9,7 @@ edition = "2018"
 macroquad = { path = "../../external/macroquad", version = "0.3.0-alpha.17" }
 macroquad-particles = { path = "../../external/macroquad/particles" }
 futures = "0.3.*"
+nanoserde = "0.1.*"
 
 # Doesn't work with android build
 [profile.dev.package.'*']

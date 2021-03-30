@@ -1,0 +1,25 @@
+{
+    "backgrounds": [
+        "assets/background.png",
+        "assets/background2.png",
+        "assets/background3.png",
+        "assets/background4.png",
+        "assets/background5.png",
+        "assets/background6.png",
+        "assets/background7.png"
+    ],
+    "fish_textures": [
+        "assets/clownfish.png",
+        "assets/angelfish.png",
+        "assets/goldfish.png",
+        "assets/yellowfish.png",
+        "assets/seahorse.png",
+        "assets/royalgramma.png",
+        "assets/butterflyfish.png",
+        "assets/lionfish.png",
+        "assets/turtle.png",
+        "assets/neontetra.png",
+        "assets/yellowangelfish.png",
+        "assets/zebrafish.png"
+    ]
+}
