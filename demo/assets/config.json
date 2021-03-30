@@ -139,9 +139,9 @@
         },
         {
             "texture": "assets/turtle.png",
-            "size": 7.0,
+            "size": 9.0,
             "movement": { "SingleSpeed": [] },
-            "bubbles": true,
+            "bubbles": false,
             "speed": {
                 "x": 10.0,
                 "y": 4.0
