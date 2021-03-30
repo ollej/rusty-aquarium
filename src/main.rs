@@ -506,6 +506,16 @@ impl Config {
         let json = load_string("assets/config.json").await.unwrap();
         return DeJson::deserialize_json(&json).unwrap();
     }
+
+    async fn background_textures(&self) -> Vec<Texture2D> {
+        let background_futures = self.backgrounds.iter().map( |background| { load_texture(background) });
+        return join_all(background_futures).await;
+    }
+
+    async fn fish_textures(&self) -> Vec<Texture2D> {
+        let fish_futures = self.fish_textures.iter().map( |texture| { load_texture(texture) });
+        return join_all(fish_futures).await;
+    }
 }
 
 fn window_conf() -> Conf {
@@ -523,11 +533,6 @@ async fn main() {
 
     let config = Config::load().await;
 
-    let background_futures = config.backgrounds.iter().map( |background| { load_texture(background) });
-    let fish_futures = config.fish_textures.iter().map( |texture| { load_texture(texture) });
-    let background_textures = join_all(background_futures).await;
-    let fish_textures = join_all(fish_futures).await;
-
     let ferris_texture: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
     let bubble_texture: Texture2D = load_texture(Fish::SPRITE_BUBBLE).await;
     //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
@@ -539,8 +544,8 @@ async fn main() {
     let water_material = load_material(water_wave_shader::VERTEX, water_wave_shader::FRAGMENT, Default::default()).unwrap();
     let crt_material = load_material(crt_shader::VERTEX, crt_shader::FRAGMENT, Default::default()).unwrap();
     let mut shader_activated = false;
-    let mut fish_tank = FishTank::new(SCR_W, SCR_H, ferris_texture, bubble_texture, fish_textures);
-    let mut background = ShowBackground::new(background_textures);
+    let mut fish_tank = FishTank::new(SCR_W, SCR_H, ferris_texture, bubble_texture, config.fish_textures().await);
+    let mut background = ShowBackground::new(config.background_textures().await);
     let mut show_text: ShowText = ShowText::empty();
 
     fish_tank.populate(10);
