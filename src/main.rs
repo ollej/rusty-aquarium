@@ -3,6 +3,7 @@ use macroquad::rand::ChooseRandom;
 use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial };
 use futures::future::join_all;
 use nanoserde::{DeJson};
+use std::collections::HashMap;
 
 #[derive(Copy, Clone)]
 pub struct Motion {
@@ -37,7 +38,7 @@ impl Motion {
     }
 
     fn rotate(&mut self) {
-        self.rotation = (self.speed.y / self.max_speed.y).abs() * Motion::MAX_ROTATION;
+        self.rotation = (self.speed.y / self.max_speed.y).abs() * Self::MAX_ROTATION;
         if self.speed.x * self.speed.y < 0. {
             self.rotation *= -1.;
         }
@@ -60,9 +61,9 @@ impl Motion {
 
     fn random_idling(&mut self) {
         if self.idle {
-            self.idle = self.idle ^ (Motion::random_percent() < Movement::CHANCE_IDLE_END);
+            self.idle = self.idle ^ (Self::random_percent() < Movement::CHANCE_IDLE_END);
         } else {
-            self.idle = self.idle ^ (Motion::random_percent() < Movement::CHANCE_IDLE_START);
+            self.idle = self.idle ^ (Self::random_percent() < Movement::CHANCE_IDLE_START);
         }
     }
 
@@ -82,10 +83,10 @@ impl Motion {
     }
 
     fn change_acceleration_randomly(&mut self, change_chance: Vec2) {
-        if Motion::random_percent() < change_chance.x {
+        if Self::random_percent() < change_chance.x {
             self.acceleration.x *= -1.;
         }
-        if Motion::random_percent() < change_chance.y {
+        if Self::random_percent() < change_chance.y {
             self.acceleration.y *= -1.;
         }
     }
@@ -101,7 +102,7 @@ impl Motion {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, DeJson)]
 pub enum Movement {
     SingleSpeed,
     Accelerating,
@@ -109,6 +110,7 @@ pub enum Movement {
     Crab,
     Random,
 }
+
 impl Movement {
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
     const CHANCE_IDLE_START: f32 = 0.05;
@@ -116,21 +118,21 @@ impl Movement {
 
     fn tick(&mut self, motion: Motion, bounding_box: Rect) -> Motion {
         return match self {
-            Movement::SingleSpeed => Movement::tick_single_speed(motion, bounding_box),
-            Movement::Accelerating => Movement::tick_accelerating(motion, bounding_box),
-            Movement::AcceleratingEdgeIdling => Movement::tick_accelerating_edge_idling(motion, bounding_box),
-            Movement::Crab => Movement::tick_crab(motion, bounding_box),
-            Movement::Random => Movement::tick_random(motion, bounding_box),
+            Self::SingleSpeed => Self::tick_single_speed(motion, bounding_box),
+            Self::Accelerating => Self::tick_accelerating(motion, bounding_box),
+            Self::AcceleratingEdgeIdling => Self::tick_accelerating_edge_idling(motion, bounding_box),
+            Self::Crab => Self::tick_crab(motion, bounding_box),
+            Self::Random => Self::tick_random(motion, bounding_box),
         }
     }
 
-    fn random() -> Movement {
-        return *vec![Movement::SingleSpeed, Movement::Accelerating, Movement::AcceleratingEdgeIdling, Movement::Random].choose().unwrap();
+    fn random() -> Self {
+        return *vec![Self::SingleSpeed, Self::Accelerating, Self::AcceleratingEdgeIdling, Self::Random].choose().unwrap();
     }
 
     fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -139,7 +141,7 @@ impl Movement {
     fn tick_accelerating(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -148,7 +150,7 @@ impl Movement {
     fn tick_accelerating_edge_idling(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.accelerate();
         motion.change_direction_vertically(bounding_box);
-        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -157,7 +159,7 @@ impl Movement {
     fn tick_crab(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE * 5.);
+        motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE * 5.);
         motion.clamp(bounding_box);
         return motion;
     }
@@ -166,7 +168,7 @@ impl Movement {
         motion.accelerate();
         motion.random_idling();
         motion.change_direction_by_bounding_box(bounding_box);
-        motion.change_acceleration_randomly(Movement::DIRECTION_CHANGE_CHANCE);
+        motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
         return motion;
@@ -186,8 +188,6 @@ impl Fish {
     const SPRITE_CRAB: &'static str = "assets/ferris.png";
     const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
     //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
-    const MAX_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
-    const MIN_POSITION: Vec2 = Vec2 { x: 5., y: 5. };
     const DEFAULT_SPRITE_WIDTH: f32 = 7.;
 
     fn new(
@@ -199,13 +199,13 @@ impl Fish {
         bubble_texture: Texture2D) -> Fish {
         let fish_height = fish_size / (texture.width() / texture.height());
         let size = vec2(fish_size, fish_height);
-        let bbox_adjusted = Fish::adjust_bounding_box(bounding_box, size);
+        let bbox_adjusted = Self::adjust_bounding_box(bounding_box, size);
         Fish {
             motion: Motion {
-                position: Fish::random_start_position(bbox_adjusted),
-                speed: Fish::random_start_speed(max_speed),
+                position: Self::random_start_position(bbox_adjusted),
+                speed: Self::random_start_speed(max_speed),
                 max_speed: max_speed,
-                acceleration: Fish::random_acceleration(),
+                acceleration: Self::random_acceleration(),
                 rotation: 0.,
                 idle: false,
             },
@@ -305,20 +305,20 @@ impl Fish {
 
 struct FishTank {
     fishes: Vec<Fish>,
-    bounding_box: Rect,
     ferris_texture: Texture2D,
     bubble_texture: Texture2D,
-    fish_textures: Vec<Texture2D>,
+    config: Config,
+    fish_textures: HashMap<String, Texture2D>,
 }
 
 impl FishTank {
-    fn new(screen_width: f32, screen_height: f32, ferris_texture: Texture2D, bubble_texture: Texture2D, fish_textures: Vec<Texture2D>) -> Self {
+    fn new(ferris_texture: Texture2D, bubble_texture: Texture2D, fish_textures: HashMap<String, Texture2D>, config: Config) -> Self {
         Self {
             fishes: Vec::new(),
             ferris_texture: ferris_texture,
             bubble_texture: bubble_texture,
+            config: config,
             fish_textures: fish_textures,
-            bounding_box: Self::default_bounding_box(screen_width, screen_height),
         }
     }
 
@@ -331,15 +331,6 @@ impl FishTank {
     fn draw(&mut self) {
         for fish in self.fishes.iter_mut() {
             fish.draw();
-        }
-    }
-
-    fn default_bounding_box(width: f32, height: f32) -> Rect {
-        Rect {
-            x: Fish::MIN_POSITION.x,
-            y: Fish::MIN_POSITION.y,
-            w: width - Fish::MAX_POSITION.x - Fish::MIN_POSITION.x,
-            h: height - Fish::MAX_POSITION.y - Fish::MIN_POSITION.y,
         }
     }
 
@@ -392,12 +383,14 @@ impl FishTank {
     }
 
     fn fish(&self) -> Fish {
+        let fish_config = self.config.fishes.choose().unwrap();
+
         return Fish::new(
-            Fish::DEFAULT_SPRITE_WIDTH * rand::gen_range(0.6, 1.4),
-            vec2(rand::gen_range(8., 14.), rand::gen_range(2.5, 4.5)),
-            self.bounding_box,
-            Movement::random(),
-            *self.fish_textures.choose().unwrap(),
+            fish_config.randomized_size(),
+            fish_config.randomized_speed(),
+            fish_config.area,
+            fish_config.movement,
+            *self.fish_textures.get(&fish_config.texture).unwrap(),
             self.bubble_texture,
             );
     }
@@ -496,9 +489,65 @@ impl ShowBackground {
 }
 
 #[derive(DeJson)]
+pub struct FishSpeed {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl From<&FishSpeed> for Vec2 {
+    fn from(serializable: &FishSpeed) -> Vec2 {
+        Vec2 {
+            x: serializable.x,
+            y: serializable.y,
+        }
+    }
+}
+
+#[derive(DeJson)]
+pub struct FishArea {
+    pub x: f32,
+    pub y: f32,
+    pub w: f32,
+    pub h: f32,
+}
+
+impl From<&FishArea> for Rect {
+    fn from(serializable: &FishArea) -> Rect {
+        Rect {
+            x: serializable.x,
+            y: serializable.y,
+            w: serializable.w,
+            h: serializable.h,
+        }
+    }
+}
+
+#[derive(DeJson)]
+pub struct FishConfig {
+    pub texture: String,
+    pub size: f32,
+    pub movement: Movement,
+    pub bubbles: bool,
+    #[nserde(proxy = "FishSpeed")]
+    pub speed: Vec2,
+    #[nserde(proxy = "FishArea")]
+    pub area: Rect,
+}
+
+impl FishConfig {
+    fn randomized_size(&self) -> f32 {
+        return self.size - self.size * rand::gen_range(0.0, 0.6);
+    }
+
+    fn randomized_speed(&self) -> Vec2 {
+        return self.speed - self.speed * rand::gen_range(0.0, 0.6);
+    }
+}
+
+#[derive(DeJson)]
 pub struct Config {
     pub backgrounds: Vec<String>,
-    pub fish_textures: Vec<String>,
+    pub fishes: Vec<FishConfig>,
 }
 
 impl Config {
@@ -510,11 +559,6 @@ impl Config {
     async fn background_textures(&self) -> Vec<Texture2D> {
         let background_futures = self.backgrounds.iter().map( |background| { load_texture(background) });
         return join_all(background_futures).await;
-    }
-
-    async fn fish_textures(&self) -> Vec<Texture2D> {
-        let fish_futures = self.fish_textures.iter().map( |texture| { load_texture(texture) });
-        return join_all(fish_futures).await;
     }
 }
 
@@ -544,8 +588,12 @@ async fn main() {
     let water_material = load_material(water_wave_shader::VERTEX, water_wave_shader::FRAGMENT, Default::default()).unwrap();
     let crt_material = load_material(crt_shader::VERTEX, crt_shader::FRAGMENT, Default::default()).unwrap();
     let mut shader_activated = false;
-    let mut fish_tank = FishTank::new(SCR_W, SCR_H, ferris_texture, bubble_texture, config.fish_textures().await);
     let mut background = ShowBackground::new(config.background_textures().await);
+    let mut fish_textures = HashMap::new();
+    for fish in config.fishes.iter() {
+        fish_textures.insert(fish.texture.clone(), load_texture(&fish.texture).await);
+    }
+    let mut fish_tank = FishTank::new(ferris_texture, bubble_texture, fish_textures, config);
     let mut show_text: ShowText = ShowText::empty();
 
     fish_tank.populate(10);
