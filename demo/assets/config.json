@@ -12,11 +12,16 @@
         {
             "texture": "assets/clownfish.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "AcceleratingEdgeIdling": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -28,11 +33,16 @@
         {
             "texture": "assets/angelfish.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "SingleSpeed": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -44,11 +54,16 @@
         {
             "texture": "assets/goldfish.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "Accelerating": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -60,11 +75,16 @@
         {
             "texture": "assets/yellowfish.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "Random": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -76,11 +96,16 @@
         {
             "texture": "assets/seahorse.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "Accelerating": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -92,11 +117,16 @@
         {
             "texture": "assets/royalgramma.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "AcceleratingEdgeIdling": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -108,11 +138,16 @@
         {
             "texture": "assets/butterflyfish.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "Random": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -124,11 +159,16 @@
         {
             "texture": "assets/lionfish.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "Accelerating": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -139,12 +179,17 @@
         },
         {
             "texture": "assets/turtle.png",
-            "size": 9.0,
+            "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "SingleSpeed": [] },
             "bubbles": false,
             "speed": {
                 "x": 10.0,
                 "y": 4.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -156,11 +201,16 @@
         {
             "texture": "assets/neontetra.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "Accelerating": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -172,11 +222,16 @@
         {
             "texture": "assets/yellowangelfish.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "Random": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
@@ -188,11 +243,16 @@
         {
             "texture": "assets/zebrafish.png",
             "size": 7.0,
+            "size_randomness": 0.5,
             "movement": { "AcceleratingEdgeIdling": [] },
             "bubbles": true,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
+            },
+            "speed_randomness": {
+                "x": 0.5,
+                "y": 0.5
             },
             "area": {
                 "x": 5.0,
