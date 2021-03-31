@@ -8,8 +8,8 @@
         "assets/background6.png",
         "assets/background7.png"
     ],
-    "fishes": [
-        {
+    "fishes": {
+        "clownfish": {
             "texture": "assets/clownfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -30,7 +30,7 @@
                 "h": 52.5
             }
         },
-        {
+        "angelfish": {
             "texture": "assets/angelfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -51,7 +51,7 @@
                 "h": 52.5
             }
         },
-        {
+        "goldfish": {
             "texture": "assets/goldfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -72,7 +72,7 @@
                 "h": 52.5
             }
         },
-        {
+        "yellowfish": {
             "texture": "assets/yellowfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -93,7 +93,7 @@
                 "h": 52.5
             }
         },
-        {
+        "seahorse": {
             "texture": "assets/seahorse.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -114,7 +114,7 @@
                 "h": 52.5
             }
         },
-        {
+        "royalgramma": {
             "texture": "assets/royalgramma.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -135,7 +135,7 @@
                 "h": 52.5
             }
         },
-        {
+        "butterflyfish": {
             "texture": "assets/butterflyfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -156,7 +156,7 @@
                 "h": 52.5
             }
         },
-        {
+        "lionfish": {
             "texture": "assets/lionfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -177,7 +177,7 @@
                 "h": 52.5
             }
         },
-        {
+        "turtle": {
             "texture": "assets/turtle.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -198,7 +198,7 @@
                 "h": 52.5
             }
         },
-        {
+        "neontetra": {
             "texture": "assets/neontetra.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -219,7 +219,7 @@
                 "h": 52.5
             }
         },
-        {
+        "yellowangelfish": {
             "texture": "assets/yellowangelfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -240,7 +240,7 @@
                 "h": 52.5
             }
         },
-        {
+        "zebrafish": {
             "texture": "assets/zebrafish.png",
             "size": 7.0,
             "size_randomness": 0.5,
@@ -261,5 +261,5 @@
                 "h": 52.5
             }
         }
-    ]
+    }
 }

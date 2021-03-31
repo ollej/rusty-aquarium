@@ -4,6 +4,7 @@ use macroquad_particles::{ Emitter, EmitterConfig, ParticleMaterial };
 use futures::future::join_all;
 use nanoserde::{DeJson};
 use std::collections::HashMap;
+use std::iter::FromIterator;
 
 #[derive(Copy, Clone)]
 pub struct Motion {
@@ -316,6 +317,7 @@ struct FishTank {
     fishes: Vec<Fish>,
     ferris_texture: Texture2D,
     bubble_texture: Texture2D,
+    fish_keys: Vec<String>,
     config: Config,
     fish_textures: HashMap<String, Texture2D>,
 }
@@ -326,6 +328,7 @@ impl FishTank {
             fishes: Vec::new(),
             ferris_texture: ferris_texture,
             bubble_texture: bubble_texture,
+            fish_keys: Vec::from_iter(config.fishes.keys().cloned()),
             config: config,
             fish_textures: fish_textures,
         }
@@ -397,9 +400,13 @@ impl FishTank {
             );
     }
 
-    fn fish(&self) -> Fish {
-        let fish_config = self.config.fishes.choose().unwrap();
+    fn random_fish_config(&self) -> &FishConfig {
+        let fish_key = self.fish_keys.choose().unwrap();
+        return self.config.fishes.get(fish_key).unwrap();
+    }
 
+    fn fish(&self) -> Fish {
+        let fish_config = self.random_fish_config();
         return Fish::new(
             fish_config.randomized_size(),
             fish_config.randomized_speed(),
@@ -538,7 +545,7 @@ impl From<&FishArea> for Rect {
     }
 }
 
-#[derive(DeJson)]
+#[derive(Clone, DeJson)]
 #[nserde(default)]
 pub struct FishConfig {
     pub texture: String,
@@ -590,7 +597,7 @@ impl FishConfig {
 #[derive(DeJson)]
 pub struct Config {
     pub backgrounds: Vec<String>,
-    pub fishes: Vec<FishConfig>,
+    pub fishes: HashMap<String, FishConfig>,
 }
 
 impl Config {
@@ -633,7 +640,7 @@ async fn main() {
     let mut shader_activated = false;
     let mut background = ShowBackground::new(config.background_textures().await);
     let mut fish_textures = HashMap::new();
-    for fish in config.fishes.iter() {
+    for (key, fish) in config.fishes.iter() {
         fish_textures.insert(fish.texture.clone(), load_texture(&fish.texture).await);
     }
     let mut fish_tank = FishTank::new(ferris_texture, bubble_texture, fish_textures, config);
