@@ -111,6 +111,10 @@ pub enum Movement {
     Random,
 }
 
+impl Default for Movement {
+    fn default() -> Self { Movement::Accelerating }
+}
+
 impl Movement {
     const DIRECTION_CHANGE_CHANCE: Vec2 = Vec2 { x: 2.5, y: 5. };
     const CHANCE_IDLE_START: f32 = 0.05;
@@ -366,7 +370,12 @@ impl FishTank {
     }
 
     fn add_fish(&mut self) {
-        self.fishes.push(self.fish());
+        let fish = self.fish();
+        //debug!("size: {:?}", fish.size);
+        //debug!("speed: {:?}", fish.motion.speed);
+        //debug!("bubbles: {:?}", fish.bubbles);
+        //debug!("---");
+        self.fishes.push(fish);
     }
 
     fn remove_fish(&mut self) {
@@ -530,24 +539,51 @@ impl From<&FishArea> for Rect {
 }
 
 #[derive(DeJson)]
+#[nserde(default)]
 pub struct FishConfig {
     pub texture: String,
     pub size: f32,
+    pub size_randomness: f32,
     pub movement: Movement,
     pub bubbles: bool,
     #[nserde(proxy = "FishSpeed")]
     pub speed: Vec2,
+    #[nserde(proxy = "FishSpeed")]
+    pub speed_randomness: Vec2,
     #[nserde(proxy = "FishArea")]
     pub area: Rect,
 }
 
+impl Default for FishConfig {
+    fn default() -> FishConfig {
+        FishConfig {
+            texture: "assets/ferris.png".to_string(),
+            size: 7.,
+            size_randomness: 0.5,
+            movement: Movement::Accelerating,
+            bubbles: true,
+            speed: vec2(15., 7.),
+            speed_randomness: vec2(0.5, 0.5),
+            area: Rect {
+                x: 5.,
+                y: 5.,
+                w: 90.,
+                h: 52.5,
+            },
+        }
+    }
+}
+
 impl FishConfig {
     fn randomized_size(&self) -> f32 {
-        return self.size - self.size * rand::gen_range(0.0, 0.6);
+        return self.size - self.size * rand::gen_range(0.0, self.size_randomness);
     }
 
     fn randomized_speed(&self) -> Vec2 {
-        return self.speed - self.speed * rand::gen_range(0.0, 0.6);
+        let random_speed = vec2(
+            rand::gen_range(0., self.speed_randomness.x),
+            rand::gen_range(0., self.speed_randomness.y));
+        return self.speed - self.speed * random_speed;
     }
 }
 
