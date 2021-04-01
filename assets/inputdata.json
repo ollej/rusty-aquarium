@@ -1,0 +1,16 @@
+{
+    "school": [
+        { "fish": "clownfish", "size": 0.5, "speed": 1.0 },
+        { "fish": "angelfish", "size": 1.0, "speed": 1.0 },
+        { "fish": "goldfish", "size": 0.75, "speed": 0.5 },
+        { "fish": "yellowfish", "size": 1.2, "speed": 0.5 },
+        { "fish": "seahorse", "size": 0.5, "speed": 1.0 },
+        { "fish": "royalgramma", "size": 1.0, "speed": 1.0 },
+        { "fish": "butterflyfish", "size": 0.75, "speed": 0.5 },
+        { "fish": "lionfish", "size": 0.5, "speed": 1.0 },
+        { "fish": "turtle", "size": 1.2, "speed": 0.5 },
+        { "fish": "neontetra", "size": 1.0, "speed": 1.0 },
+        { "fish": "yellowangelfish", "size": 0.75, "speed": 0.5 },
+        { "fish": "zebrafish", "size": 1.2, "speed": 0.5 },
+    ]
+}

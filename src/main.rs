@@ -320,10 +320,12 @@ struct FishTank {
     fish_keys: Vec<String>,
     config: Config,
     fish_textures: HashMap<String, Texture2D>,
+    //input_data: InputData,
+    school: Vec<FishSpecimen>,
 }
 
 impl FishTank {
-    fn new(ferris_texture: Texture2D, bubble_texture: Texture2D, fish_textures: HashMap<String, Texture2D>, config: Config) -> Self {
+    fn new(ferris_texture: Texture2D, bubble_texture: Texture2D, fish_textures: HashMap<String, Texture2D>, config: Config, input_data: InputData) -> Self {
         Self {
             fishes: Vec::new(),
             ferris_texture: ferris_texture,
@@ -331,6 +333,7 @@ impl FishTank {
             fish_keys: Vec::from_iter(config.fishes.keys().cloned()),
             config: config,
             fish_textures: fish_textures,
+            school: input_data.school,
         }
     }
 
@@ -346,13 +349,14 @@ impl FishTank {
         }
     }
 
-    fn populate(&mut self, count: usize) {
+    fn populate(&mut self) {
         // Only add Ferris if fishes is empty
         if self.fishes.len() == 0 {
             self.fishes.push(self.ferris());
         }
-        for _ in 0..count {
-            self.add_fish();
+        for fish_specimen in self.school.iter() {
+            let fish = self.create_fish(fish_specimen);
+            self.fishes.push(fish);
         }
     }
 
@@ -364,7 +368,7 @@ impl FishTank {
         let count = self.fish_count();
         if count >= 1 {
             self.reset();
-            self.populate(count);
+            self.populate();
         }
     }
 
@@ -373,7 +377,7 @@ impl FishTank {
     }
 
     fn add_fish(&mut self) {
-        let fish = self.fish();
+        let fish = self.random_fish();
         //debug!("size: {:?}", fish.size);
         //debug!("speed: {:?}", fish.motion.speed);
         //debug!("bubbles: {:?}", fish.bubbles);
@@ -405,11 +409,24 @@ impl FishTank {
         return self.config.fishes.get(fish_key).unwrap();
     }
 
-    fn fish(&self) -> Fish {
+    fn random_fish(&self) -> Fish {
         let fish_config = self.random_fish_config();
         return Fish::new(
             fish_config.randomized_size(),
             fish_config.randomized_speed(),
+            fish_config.area,
+            fish_config.movement,
+            *self.fish_textures.get(&fish_config.texture).unwrap(),
+            self.bubble_texture,
+            fish_config.bubbles,
+            );
+    }
+
+    fn create_fish(&self, fish_specimen: &FishSpecimen) -> Fish {
+        let fish_config = self.config.fishes.get(&fish_specimen.fish).unwrap();
+        return Fish::new(
+            fish_config.size * fish_specimen.size,
+            fish_config.speed * fish_specimen.speed,
             fish_config.area,
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
@@ -612,6 +629,25 @@ impl Config {
     }
 }
 
+#[derive(Clone, DeJson)]
+pub struct FishSpecimen {
+    pub fish: String,
+    pub size: f32,
+    pub speed: f32,
+}
+
+#[derive(Clone, DeJson)]
+pub struct InputData {
+    pub school: Vec<FishSpecimen>,
+}
+
+impl InputData {
+    async fn load() -> Self {
+        let json = load_string("assets/inputdata.json").await.unwrap();
+        return DeJson::deserialize_json(&json).unwrap();
+    }
+}
+
 fn window_conf() -> Conf {
     Conf {
         window_title: "Rusty Aquarium".to_owned(),
@@ -626,6 +662,7 @@ async fn main() {
     const SCR_H: f32 = 62.5;
 
     let config = Config::load().await;
+    let input_data = InputData::load().await;
 
     let ferris_texture: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
     let bubble_texture: Texture2D = load_texture(Fish::SPRITE_BUBBLE).await;
@@ -640,13 +677,13 @@ async fn main() {
     let mut shader_activated = false;
     let mut background = ShowBackground::new(config.background_textures().await);
     let mut fish_textures = HashMap::new();
-    for (key, fish) in config.fishes.iter() {
+    for (_key, fish) in config.fishes.iter() {
         fish_textures.insert(fish.texture.clone(), load_texture(&fish.texture).await);
     }
-    let mut fish_tank = FishTank::new(ferris_texture, bubble_texture, fish_textures, config);
+    let mut fish_tank = FishTank::new(ferris_texture, bubble_texture, fish_textures, config, input_data);
     let mut show_text: ShowText = ShowText::empty();
 
-    fish_tank.populate(10);
+    fish_tank.populate();
 
     loop {
         if is_key_pressed(KeyCode::Escape) {
