@@ -9,6 +9,27 @@
         "assets/background7.png"
     ],
     "fishes": {
+        "crab": {
+            "texture": "assets/ferris.png",
+            "size": 7.0,
+            "size_randomness": 1.0,
+            "movement": { "Crab": [] },
+            "bubbles": false,
+            "speed": {
+                "x": 12.0,
+                "y": 4.0
+            },
+            "speed_randomness": {
+                "x": 1.0,
+                "y": 1.0
+            },
+            "area": {
+                "x": 35.0,
+                "y": 48.5,
+                "w": 30.0,
+                "h": 13.0
+            }
+        },
         "clownfish": {
             "texture": "assets/clownfish.png",
             "size": 7.0,

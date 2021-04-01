@@ -191,10 +191,8 @@ pub struct Fish {
     bubbles: bool,
 }
 impl Fish {
-    const SPRITE_CRAB: &'static str = "assets/ferris.png";
     const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
     //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
-    const DEFAULT_SPRITE_WIDTH: f32 = 7.;
 
     fn new(
         fish_size: f32,
@@ -315,25 +313,23 @@ impl Fish {
 
 struct FishTank {
     fishes: Vec<Fish>,
-    ferris_texture: Texture2D,
-    bubble_texture: Texture2D,
     fish_keys: Vec<String>,
     config: Config,
+    school: Vec<FishSpecimen>,
+    bubble_texture: Texture2D,
     fish_textures: HashMap<String, Texture2D>,
     //input_data: InputData,
-    school: Vec<FishSpecimen>,
 }
 
 impl FishTank {
-    fn new(ferris_texture: Texture2D, bubble_texture: Texture2D, fish_textures: HashMap<String, Texture2D>, config: Config, input_data: InputData) -> Self {
+    fn new(bubble_texture: Texture2D, fish_textures: HashMap<String, Texture2D>, config: Config, input_data: InputData) -> Self {
         Self {
             fishes: Vec::new(),
-            ferris_texture: ferris_texture,
-            bubble_texture: bubble_texture,
             fish_keys: Vec::from_iter(config.fishes.keys().cloned()),
             config: config,
-            fish_textures: fish_textures,
             school: input_data.school,
+            bubble_texture: bubble_texture,
+            fish_textures: fish_textures,
         }
     }
 
@@ -350,10 +346,6 @@ impl FishTank {
     }
 
     fn populate(&mut self) {
-        // Only add Ferris if fishes is empty
-        if self.fishes.len() == 0 {
-            self.fishes.push(self.ferris());
-        }
         for fish_specimen in self.school.iter() {
             let fish = self.create_fish(fish_specimen);
             self.fishes.push(fish);
@@ -361,19 +353,14 @@ impl FishTank {
     }
 
     fn reset(&mut self) {
-        self.fishes.truncate(1); // Keep Ferris
+        self.fishes.clear();
     }
 
     fn repopulate(&mut self) {
-        let count = self.fish_count();
-        if count >= 1 {
+        if self.fishes.len() >= 1 {
             self.reset();
             self.populate();
         }
-    }
-
-    fn fish_count(&self) -> usize {
-        return self.fishes.len() - 1; // Skip Ferris
     }
 
     fn add_fish(&mut self) {
@@ -387,21 +374,9 @@ impl FishTank {
 
     fn remove_fish(&mut self) {
         // Don't remove Ferris
-        if self.fishes.len() > 1 {
+        if self.fishes.len() > 0 {
             self.fishes.pop();
         }
-    }
-
-    fn ferris(&self) -> Fish {
-        return Fish::new(
-            Fish::DEFAULT_SPRITE_WIDTH,
-            vec2(12., 4.),
-            Rect { x: 35., y: 48.5, w: 30., h: 13. },
-            Movement::Crab,
-            self.ferris_texture,
-            self.bubble_texture,
-            false,
-            );
     }
 
     fn random_fish_config(&self) -> &FishConfig {
@@ -664,7 +639,6 @@ async fn main() {
     let config = Config::load().await;
     let input_data = InputData::load().await;
 
-    let ferris_texture: Texture2D = load_texture(Fish::SPRITE_CRAB).await;
     let bubble_texture: Texture2D = load_texture(Fish::SPRITE_BUBBLE).await;
     //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
 
@@ -680,7 +654,7 @@ async fn main() {
     for (_key, fish) in config.fishes.iter() {
         fish_textures.insert(fish.texture.clone(), load_texture(&fish.texture).await);
     }
-    let mut fish_tank = FishTank::new(ferris_texture, bubble_texture, fish_textures, config, input_data);
+    let mut fish_tank = FishTank::new(bubble_texture, fish_textures, config, input_data);
     let mut show_text: ShowText = ShowText::empty();
 
     fish_tank.populate();
