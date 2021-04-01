@@ -28,7 +28,7 @@ impl Motion {
         };
 
         //debug!("rotation: {} new_pos: {} old_pos: {}", rotation, new_position, self.motion.position);
-        return Motion {
+        Motion {
             position: position,
             speed: motion.speed,
             max_speed: motion.max_speed,
@@ -99,7 +99,7 @@ impl Motion {
     }
 
     fn random_percent() -> f32 {
-        return rand::gen_range(0., 100.);
+        rand::gen_range(0., 100.)
     }
 }
 
@@ -122,7 +122,7 @@ impl Movement {
     const CHANCE_IDLE_END: f32 = 0.75;
 
     fn tick(&mut self, motion: Motion, bounding_box: Rect) -> Motion {
-        return match self {
+        match self {
             Self::SingleSpeed => Self::tick_single_speed(motion, bounding_box),
             Self::Accelerating => Self::tick_accelerating(motion, bounding_box),
             Self::AcceleratingEdgeIdling => Self::tick_accelerating_edge_idling(motion, bounding_box),
@@ -132,7 +132,7 @@ impl Movement {
     }
 
     fn random() -> Self {
-        return *vec![Self::SingleSpeed, Self::Accelerating, Self::AcceleratingEdgeIdling, Self::Random].choose().unwrap();
+        *vec![Self::SingleSpeed, Self::Accelerating, Self::AcceleratingEdgeIdling, Self::Random].choose().unwrap()
     }
 
     fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
@@ -140,7 +140,7 @@ impl Movement {
         motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
-        return motion;
+        motion
     }
 
     fn tick_accelerating(mut motion: Motion, bounding_box: Rect) -> Motion {
@@ -149,7 +149,7 @@ impl Movement {
         motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
-        return motion;
+        motion
     }
 
     fn tick_accelerating_edge_idling(mut motion: Motion, bounding_box: Rect) -> Motion {
@@ -158,7 +158,7 @@ impl Movement {
         motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
-        return motion;
+        motion
     }
 
     fn tick_crab(mut motion: Motion, bounding_box: Rect) -> Motion {
@@ -166,7 +166,7 @@ impl Movement {
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE * 5.);
         motion.clamp(bounding_box);
-        return motion;
+        motion
     }
 
     fn tick_random(mut motion: Motion, bounding_box: Rect) -> Motion {
@@ -176,7 +176,7 @@ impl Movement {
         motion.change_acceleration_randomly(Self::DIRECTION_CHANGE_CHANCE);
         motion.clamp(bounding_box);
         motion.rotate();
-        return motion;
+        motion
     }
 }
 
@@ -240,32 +240,33 @@ impl Fish {
     }
 
     fn adjust_bounding_box(bounding_box: Rect, size: Vec2) -> Rect {
-        return Rect {
+        Rect {
             x: bounding_box.x,
             y: bounding_box.y,
             w: bounding_box.w - size.x,
             h: bounding_box.h - size.y,
-        };
+        }
     }
 
     fn random_start_position(bounding_box: Rect) -> Vec2 {
-        return vec2(
+        vec2(
             rand::gen_range(bounding_box.x, bounding_box.right()),
-            rand::gen_range(bounding_box.y, bounding_box.bottom()));
+            rand::gen_range(bounding_box.y, bounding_box.bottom()),
+        )
     }
 
     fn random_start_speed(max_speed: Vec2) -> Vec2 {
-        return vec2(
+        vec2(
             rand::gen_range(-max_speed.x, max_speed.x),
             rand::gen_range(-max_speed.y, max_speed.y),
-        );
+        )
     }
 
     fn random_acceleration() -> Vec2 {
-        return vec2(
+        vec2(
             rand::gen_range(0.1, 0.2),
             rand::gen_range(0.1, 0.2),
-        );
+        )
     }
 
     fn tick(&mut self, delta: f32) {
@@ -386,7 +387,7 @@ impl FishTank {
 
     fn random_fish(&self) -> Fish {
         let fish_config = self.random_fish_config();
-        return Fish::new(
+        Fish::new(
             fish_config.randomized_size(),
             fish_config.randomized_speed(),
             fish_config.area,
@@ -394,12 +395,12 @@ impl FishTank {
             *self.fish_textures.get(&fish_config.texture).unwrap(),
             self.bubble_texture,
             fish_config.bubbles,
-            );
+        )
     }
 
     fn create_fish(&self, fish_specimen: &FishSpecimen) -> Fish {
         let fish_config = self.config.fishes.get(&fish_specimen.fish).unwrap();
-        return Fish::new(
+        Fish::new(
             fish_config.size * fish_specimen.size,
             fish_config.speed * fish_specimen.speed,
             fish_config.area,
@@ -407,7 +408,7 @@ impl FishTank {
             *self.fish_textures.get(&fish_config.texture).unwrap(),
             self.bubble_texture,
             fish_config.bubbles,
-            );
+        )
     }
 }
 
