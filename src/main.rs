@@ -316,7 +316,7 @@ struct FishTank {
     fishes: Vec<Fish>,
     fish_keys: Vec<String>,
     config: Config,
-    school: Vec<FishSpecimen>,
+    school: Vec<FishData>,
     bubble_texture: Texture2D,
     fish_textures: HashMap<String, Texture2D>,
     //input_data: InputData,
@@ -347,8 +347,8 @@ impl FishTank {
     }
 
     fn populate(&mut self) {
-        for fish_specimen in self.school.iter() {
-            let fish = self.create_fish(fish_specimen);
+        for fish_data in self.school.iter() {
+            let fish = self.create_fish(fish_data);
             self.fishes.push(fish);
         }
     }
@@ -398,11 +398,11 @@ impl FishTank {
         )
     }
 
-    fn create_fish(&self, fish_specimen: &FishSpecimen) -> Fish {
-        let fish_config = self.config.fishes.get(&fish_specimen.fish).unwrap();
+    fn create_fish(&self, fish_data: &FishData) -> Fish {
+        let fish_config = self.config.fishes.get(&fish_data.fish).unwrap();
         Fish::new(
-            fish_config.size * fish_specimen.size,
-            fish_config.speed * fish_specimen.speed,
+            fish_config.size * fish_data.size,
+            fish_config.speed * fish_data.speed,
             fish_config.area,
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
@@ -606,7 +606,7 @@ impl Config {
 }
 
 #[derive(Clone, DeJson)]
-pub struct FishSpecimen {
+pub struct FishData {
     pub fish: String,
     pub size: f32,
     pub speed: f32,
@@ -614,7 +614,7 @@ pub struct FishSpecimen {
 
 #[derive(Clone, DeJson)]
 pub struct InputData {
-    pub school: Vec<FishSpecimen>,
+    pub school: Vec<FishData>,
 }
 
 impl InputData {
