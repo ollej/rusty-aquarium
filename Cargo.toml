@@ -3,6 +3,7 @@ name = "rusty-aquarium"
 version = "0.5.0"
 authors = ["Olle Wreede <olle@wreede.se>"]
 edition = "2018"
+default-run = "rusty-aquarium"
 
 [dependencies]
 #macroquad = "0.3.0-alpha.17"
@@ -10,6 +11,7 @@ macroquad = { path = "../../external/macroquad", version = "0.3.0-alpha.17" }
 macroquad-particles = { path = "../../external/macroquad/particles" }
 futures = "0.3.*"
 nanoserde = "0.1.*"
+sysinfo = "0.16.*"
 
 # Doesn't work with android build
 [profile.dev.package.'*']

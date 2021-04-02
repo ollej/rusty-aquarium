@@ -224,7 +224,7 @@
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": { "Accelerating": [] },
-            "bubbles": true,
+            "bubbles": false,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
