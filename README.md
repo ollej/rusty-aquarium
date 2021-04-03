@@ -17,7 +17,11 @@ Download a Windows exe or an Android APK:
 License
 =======
 
-Rusty Aquarium is released under The MIT License. See LICENSE file for more details.
+The code for Rusty Aquarium is released under the MIT License.
+See LICENSE file for more details.
+
+The images are not covered by the license, and are to the best of my knowledge
+public domain.
 
 Build scripts
 -------------
