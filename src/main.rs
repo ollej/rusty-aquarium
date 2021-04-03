@@ -475,17 +475,17 @@ struct ShowBackground {
     background: usize,
     backgrounds: Vec<Texture2D>,
     time: f32,
+    background_switch_time: f32,
     switching_backgrounds: bool,
 }
 
 impl ShowBackground {
-    const BACKGROUND_CHANGE_TIME: f32 = 60.;
-
-    fn new(backgrounds: Vec<Texture2D>) -> Self {
+    fn new(background_switch_time: u32, backgrounds: Vec<Texture2D>) -> Self {
         Self {
             background: 0,
             backgrounds: backgrounds,
             time: 0.,
+            background_switch_time: background_switch_time as f32,
             switching_backgrounds: true,
         }
     }
@@ -493,7 +493,7 @@ impl ShowBackground {
     fn draw(&mut self, delta: f32, w: f32, h: f32) {
         self.time += delta;
 
-        if self.time > Self::BACKGROUND_CHANGE_TIME && self.switching_backgrounds {
+        if self.time > self.background_switch_time && self.switching_backgrounds {
             self.next();
         }
 
@@ -610,6 +610,7 @@ impl FishConfig {
 #[nserde(default)]
 pub struct Config {
     pub data_reload_time: u32,
+    pub background_switch_time: u32,
     pub backgrounds: Vec<String>,
     pub fishes: HashMap<String, FishConfig>,
 }
@@ -618,6 +619,7 @@ impl Default for Config {
     fn default() -> Config {
         Config {
             data_reload_time: 0,
+            background_switch_time: 0,
             backgrounds: vec![],
             fishes: HashMap::new(),
         }
@@ -681,7 +683,7 @@ async fn main() {
     let water_material = load_material(water_wave_shader::VERTEX, water_wave_shader::FRAGMENT, Default::default()).unwrap();
     let crt_material = load_material(crt_shader::VERTEX, crt_shader::FRAGMENT, Default::default()).unwrap();
     let mut shader_activated = false;
-    let mut background = ShowBackground::new(config.background_textures().await);
+    let mut background = ShowBackground::new(config.background_switch_time, config.background_textures().await);
     let mut fish_textures = HashMap::new();
     for (_key, fish) in config.fishes.iter() {
         fish_textures.insert(fish.texture.clone(), load_texture(&fish.texture).await);
