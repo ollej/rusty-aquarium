@@ -1,4 +1,6 @@
 {
+    "data_reload_time": 0,
+    "background_switch_time": 60,
     "backgrounds": [
         "assets/background.png",
         "assets/background2.png",
@@ -224,7 +226,7 @@
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": { "Accelerating": [] },
-            "bubbles": true,
+            "bubbles": false,
             "speed": {
                 "x": 15.0,
                 "y": 6.0
