@@ -48,3 +48,26 @@ cargo run-script build-win
 cargo run-script build-apk
 ```
 
+Generate input data
+-------------------
+
+The file `assets/inputdata.json` is read to define what fish to display.
+
+### File format
+
+```json
+{
+    "school": [
+        { "fish": "crab", "size": 1.0, "speed": 1.0 },
+    ]
+}
+```
+
+### System monitoring
+
+The `systemdata` binary generates an inputdata.json file based on CPU,
+processes and disks.
+
+```bash
+cd src/lib/systemdata; cargo run > ../../../assets/inputdata.json
+```
