@@ -320,6 +320,7 @@ struct FishTank {
     bubble_texture: Texture2D,
     fish_textures: HashMap<String, Texture2D>,
     //input_data: InputData,
+    time_since_reload: f32,
 }
 
 impl FishTank {
@@ -331,7 +332,25 @@ impl FishTank {
             school: input_data.school,
             bubble_texture: bubble_texture,
             fish_textures: fish_textures,
+            time_since_reload: 0.,
         }
+    }
+
+    async fn reload_config(&mut self, delta: f32) {
+        if self.config.data_reload_time == 0 {
+            return;
+        }
+        self.time_since_reload += delta;
+        if self.time_since_reload > self.config.data_reload_time as f32 {
+            let data = InputData::load().await;
+            self.update_data(data);
+            self.time_since_reload = 0.;
+        }
+    }
+
+    fn update_data(&mut self, input_data: InputData) {
+        self.school = input_data.school;
+        self.repopulate();
     }
 
     fn tick(&mut self, delta: f32) {
@@ -588,9 +607,21 @@ impl FishConfig {
 }
 
 #[derive(DeJson)]
+#[nserde(default)]
 pub struct Config {
+    pub data_reload_time: u32,
     pub backgrounds: Vec<String>,
     pub fishes: HashMap<String, FishConfig>,
+}
+
+impl Default for Config {
+    fn default() -> Config {
+        Config {
+            data_reload_time: 0,
+            backgrounds: vec![],
+            fishes: HashMap::new(),
+        }
+    }
 }
 
 impl Config {
@@ -696,6 +727,8 @@ async fn main() {
 
         // Update fish positions
         let delta = get_frame_time();
+
+        fish_tank.reload_config(delta).await;
 
         fish_tank.tick(delta);
 
