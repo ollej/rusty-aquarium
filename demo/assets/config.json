@@ -76,7 +76,7 @@
         },
         "goldfish": {
             "texture": "assets/goldfish.png",
-            "size": 7.0,
+            "size": 10.0,
             "size_randomness": 0.5,
             "movement": { "Accelerating": [] },
             "bubbles": true,
@@ -139,7 +139,7 @@
         },
         "royalgramma": {
             "texture": "assets/royalgramma.png",
-            "size": 7.0,
+            "size": 5.0,
             "size_randomness": 0.5,
             "movement": { "AcceleratingEdgeIdling": [] },
             "bubbles": true,
