@@ -8,7 +8,7 @@
 
 "use strict";
 
-const version = "0.1.22";
+const version = "0.1.23";
 
 const canvas = document.querySelector("#glcanvas");
 const gl = canvas.getContext("webgl");
@@ -1186,8 +1186,8 @@ var importObject = {
             window.addEventListener("paste", function(e) {
                 e.stopPropagation();
                 e.preventDefault();
-                clipboardData = e.clipboardData || window.clipboardData;
-                pastedData = clipboardData.getData('Text');
+                var clipboardData = e.clipboardData || window.clipboardData;
+                var pastedData = clipboardData.getData('Text');
 
                 if (pastedData != undefined && pastedData != null && pastedData.length != 0) {
                     var len = pastedData.length;
@@ -1251,6 +1251,23 @@ var importObject = {
         },
         sapp_set_cursor: function(ptr, len) {
             canvas.style.cursor = UTF8ToString(ptr, len);
+        },
+        sapp_is_fullscreen: function() {
+            let fullscreenElement = document.fullscreenElement;
+
+            return fullscreenElement != null && fullscreenElement.id == canvas.id;
+        },
+        sapp_set_fullscreen: function(fullscreen) {
+            if (!fullscreen) {
+                document.exitFullscreen();
+            } else {
+                canvas.requestFullscreen();
+            }
+        },
+        sapp_set_window_size: function(new_width, new_height) {
+            canvas.width = new_width;
+            canvas.height = new_height;
+            resize(canvas, wasm_exports.resize);
         }
     }
 };
