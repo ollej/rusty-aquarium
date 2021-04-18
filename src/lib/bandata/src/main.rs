@@ -16,9 +16,9 @@ pub struct InputData {
 }
 
 #[derive(Clone, DeJson)]
-pub struct BandataItem {
-    pub boardings: Option<u16>,
-    pub alightings: Option<u16>,
+pub struct Bandata {
+    pub boardings: Option<u32>,
+    pub alightings: Option<u32>,
     #[nserde(proxy = "DateTimeProxy")]
     pub arrTimeObsPubTrans: Option<NaiveDateTime>,
     #[nserde(proxy = "DateTimeProxy")]
@@ -28,6 +28,15 @@ pub struct BandataItem {
     #[nserde(proxy = "DateProxy")]
     pub operatingDayDate: NaiveDate,
     pub passengersOnboard: Option<i16>,
+}
+
+impl Bandata {
+    fn boardings(&self) -> u32 {
+        match self.boardings {
+            Some(b) => b,
+            None => 0,
+        }
+    }
 }
 
 #[derive(DeJson, SerJson)]
@@ -78,6 +87,73 @@ impl From<&DateProxy> for NaiveDate {
     }
 }
 
+struct Journeys {
+    pub journeys: HashMap<u16, Journey>,
+    pub max_boardings: u32,
+    pub earliest_departure_time: Option<NaiveDateTime>,
+    pub latest_departure_time: Option<NaiveDateTime>,
+}
+
+#[derive(Clone, Debug)]
+struct Journey {
+    pub boardings: u32,
+    pub departure_time: Option<NaiveDateTime>,
+}
+
+impl Journey {
+    fn from_bandata(bandata: &Bandata) -> Self {
+        Journey {
+            boardings: bandata.boardings(),
+            departure_time: bandata.depTimeTarPubTrans,
+        }
+    }
+
+    fn update(&mut self, bandata: &Bandata) -> &mut Self {
+        self.boardings += bandata.boardings();
+        self.departure_time = min_date(self.departure_time, bandata.depTimeTarPubTrans);
+        self
+    }
+}
+
+impl Journeys {
+    fn new() -> Self {
+        Self {
+            journeys: HashMap::new(),
+            max_boardings: 0,
+            earliest_departure_time: None,
+            latest_departure_time: None,
+        }
+    }
+
+    fn add(&mut self, item: &Bandata) {
+        let journey = match self.journeys.get_mut(&item.journeyNumber) {
+            Some(journey) => journey.update(item).to_owned(),
+            None => self.insert(item.journeyNumber, Journey::from_bandata(item)),
+        };
+        self.max_boardings = self.max_boardings.max(journey.boardings);
+        self.earliest_departure_time =
+            min_date(self.earliest_departure_time, journey.departure_time);
+        self.latest_departure_time = self.latest_departure_time.max(item.depTimeTarPubTrans);
+    }
+
+    fn insert(&mut self, number: u16, journey: Journey) -> Journey {
+        self.journeys.insert(number, journey.to_owned());
+        journey
+    }
+
+    fn duration_in_seconds(&self) -> f32 {
+        (self.latest_departure_time.unwrap() - self.earliest_departure_time.unwrap()).num_seconds()
+            as f32
+    }
+
+    fn journey_age_in_seconds(&self, journey: &Journey) -> f32 {
+        match journey.departure_time {
+            Some(dep_time) => (self.latest_departure_time.unwrap() - dep_time).num_seconds() as f32,
+            None => 0.,
+        }
+    }
+}
+
 fn clamp(value: f32) -> f32 {
     if value < 0.1 {
         0.1
@@ -88,51 +164,25 @@ fn clamp(value: f32) -> f32 {
     }
 }
 
-#[derive(Debug)]
-struct Journeys {
-    pub journeys: HashMap<u16, u32>,
-    pub max_boardings: u32,
-}
-
-impl Journeys {
-    fn new() -> Self {
-        Self {
-            journeys: HashMap::new(),
-            max_boardings: 0,
-        }
+fn min_date(left: Option<NaiveDateTime>, right: Option<NaiveDateTime>) -> Option<NaiveDateTime> {
+    if left.is_none() && right.is_none() {
+        return None;
     }
-
-    fn add(&mut self, journey: u16, boardings: u32) {
-        if !self.journeys.contains_key(&journey) {
-            self.journeys.insert(journey, boardings);
-            self.max_boardings = self.max_boardings.max(boardings);
-        } else {
-            if let Some(b) = self.journeys.get_mut(&journey) {
-                *b = *b + boardings;
-                self.max_boardings = self.max_boardings.max(*b);
-            }
-        }
+    if left.is_none() {
+        return right;
     }
+    if right.is_none() {
+        return left;
+    }
+    left.min(right)
 }
 
 fn main() {
     let mut fishes = Vec::new();
     let path = "bandata.json".to_string();
 
-    let bandata: Vec<BandataItem> = match fs::read_to_string(&path) {
-        Ok(json) => match DeJson::deserialize_json(&json) {
-            Ok(data) => data,
-            Err(e) => {
-                eprintln!("Couldn't parse file: {}", path);
-                eprintln!("{}", e);
-                std::process::exit(2);
-            }
-        },
-        Err(_) => {
-            eprintln!("Couldn't read file: {}", path);
-            std::process::exit(1);
-        }
-    };
+    let json = fs::read_to_string(&path).expect("Couldn't read file");
+    let bandata: Vec<Bandata> = DeJson::deserialize_json(&json).expect("Couldn't parse file");
 
     // {
     //   "boardings": 1,
@@ -150,18 +200,17 @@ fn main() {
         //    "line: {:?}, journey: {:?}, boarding: {:?}",
         //    item.lineNumber, item.journeyNumber, item.boardings
         //);
-        match item.boardings {
-            Some(b) => journeys.add(item.journeyNumber, b.into()),
-            None => (),
-        }
+        journeys.add(item);
     }
     //println!("{:?}", journeys);
 
-    for (_journey, boardings) in journeys.journeys.iter() {
+    for (_, journey) in journeys.journeys.iter() {
+        //println!("{:?}", journey);
+        let duration = journeys.journey_age_in_seconds(journey) / journeys.duration_in_seconds();
         fishes.push(FishData {
             fish: "goldfish".to_string(),
-            size: *boardings as f32 / journeys.max_boardings as f32,
-            speed: 1.0,
+            size: clamp(journey.boardings as f32 / journeys.max_boardings as f32),
+            speed: duration,
         });
     }
 
