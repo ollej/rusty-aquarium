@@ -1,5 +1,6 @@
 use chrono::naive::{NaiveDate, NaiveDateTime};
 use nanoserde::{DeJson, SerJson};
+use std::collections::HashMap;
 use std::fs;
 
 #[derive(Clone, SerJson)]
@@ -87,8 +88,35 @@ fn clamp(value: f32) -> f32 {
     }
 }
 
+#[derive(Debug)]
+struct Journeys {
+    pub journeys: HashMap<u16, u32>,
+    pub max_boardings: u32,
+}
+
+impl Journeys {
+    fn new() -> Self {
+        Self {
+            journeys: HashMap::new(),
+            max_boardings: 0,
+        }
+    }
+
+    fn add(&mut self, journey: u16, boardings: u32) {
+        if !self.journeys.contains_key(&journey) {
+            self.journeys.insert(journey, boardings);
+            self.max_boardings = self.max_boardings.max(boardings);
+        } else {
+            if let Some(b) = self.journeys.get_mut(&journey) {
+                *b = *b + boardings;
+                self.max_boardings = self.max_boardings.max(*b);
+            }
+        }
+    }
+}
+
 fn main() {
-    //let mut fishes = Vec::new();
+    let mut fishes = Vec::new();
     let path = "bandata.json".to_string();
 
     let bandata: Vec<BandataItem> = match fs::read_to_string(&path) {
@@ -116,11 +144,25 @@ fn main() {
     //   "operatingDayDate": "2021-03-26",
     //   "passengersOnboard": 1
     // }
+    let mut journeys = Journeys::new();
     for item in bandata.iter() {
-        println!(
-            "line: {:?}, journey: {:?}, boarding: {:?}",
-            item.lineNumber, item.journeyNumber, item.boardings
-        );
+        //println!(
+        //    "line: {:?}, journey: {:?}, boarding: {:?}",
+        //    item.lineNumber, item.journeyNumber, item.boardings
+        //);
+        match item.boardings {
+            Some(b) => journeys.add(item.journeyNumber, b.into()),
+            None => (),
+        }
+    }
+    //println!("{:?}", journeys);
+
+    for (_journey, boardings) in journeys.journeys.iter() {
+        fishes.push(FishData {
+            fish: "goldfish".to_string(),
+            size: *boardings as f32 / journeys.max_boardings as f32,
+            speed: 1.0,
+        });
     }
 
     //let mut items = Vec::new();
@@ -137,7 +179,7 @@ fn main() {
     //let json = SerJson::serialize_json(&items);
     //println!("{}", json);
 
-    //let data = InputData { school: fishes };
-    //let json = SerJson::serialize_json(&data);
-    //println!("{}", json);
+    let data = InputData { school: fishes };
+    let json = SerJson::serialize_json(&data);
+    println!("{}", json);
 }
