@@ -1,7 +1,10 @@
 Rusty Aquarium
 ==============
+[![Cross-compile](https://github.com/ollej/rusty-aquarium/actions/workflows/crosscompile.yml/badge.svg)](https://github.com/ollej/rusty-aquarium/actions/workflows/crosscompile.yml)
 
 A monitoring visualization as an aquarium written in Rust.
+
+![Screenshot](https://ollej.github.io/rusty-aquarium/assets/screenshot.png)
 
 Demo
 ----
