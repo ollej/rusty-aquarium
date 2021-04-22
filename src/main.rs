@@ -2,7 +2,7 @@ pub mod shaders;
 use futures::future::join_all;
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
-use macroquad_particles::{Emitter, EmitterConfig};
+use macroquad_particles::{AtlasConfig, BlendMode, Emitter, EmitterConfig};
 use nanoserde::DeJson;
 use std::collections::HashMap;
 use std::iter::FromIterator;
@@ -204,7 +204,8 @@ pub struct Fish {
 }
 
 impl Fish {
-    const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
+    //const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
+    const SPRITE_WATER: &'static str = "assets/water.png";
     //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
 
     fn new(
@@ -239,15 +240,17 @@ impl Fish {
                 amount: bubble_amount,
                 lifetime: 1.4,
                 lifetime_randomness: 0.9,
-                size: 0.55,
+                size: 1.5,
                 size_randomness: 0.9,
                 explosiveness: 0.9,
                 initial_velocity: 5.0,
                 initial_velocity_randomness: 0.8,
                 initial_direction_spread: 0.5,
                 gravity: vec2(0.0, -5.0),
+                atlas: Some(AtlasConfig::new(4, 2, 0..8)),
                 texture: Some(bubble_texture),
                 material: Some(shaders::water_particle::material()),
+                blend_mode: BlendMode::Additive,
                 ..Default::default()
             }),
         }
@@ -714,7 +717,7 @@ async fn main() {
     let config = Config::load().await;
     let input_data = InputData::load().await;
 
-    let bubble_texture: Texture2D = load_texture(Fish::SPRITE_BUBBLE)
+    let bubble_texture: Texture2D = load_texture(Fish::SPRITE_WATER)
         .await
         .expect("Couldn't load bubble sprite.");
     //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
