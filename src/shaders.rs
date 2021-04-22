@@ -1,7 +1,7 @@
 use macroquad_particles::ParticleMaterial;
 
 pub mod crt {
-    pub const FRAGMENT: &'static str = r#"#version 100
+    pub const FRAGMENT: &str = r#"#version 100
         precision lowp float;
         varying vec4 color;
         varying vec2 uv;
@@ -45,7 +45,7 @@ pub mod crt {
         }
     "#;
 
-    pub const VERTEX: &'static str = r#"#version 100
+    pub const VERTEX: &str = r#"#version 100
         attribute vec3 position;
         attribute vec2 texcoord;
         attribute vec4 color0;
@@ -62,7 +62,7 @@ pub mod crt {
 }
 
 pub mod water_wave {
-    pub const FRAGMENT: &'static str = r#"#version 100
+    pub const FRAGMENT: &str = r#"#version 100
         precision lowp float;
 
         varying vec2 uv;
@@ -91,7 +91,7 @@ pub mod water_wave {
         }
     "#;
 
-    pub const VERTEX: &'static str = r#"#version 100
+    pub const VERTEX: &str = r#"#version 100
         attribute vec3 position;
         attribute vec2 texcoord;
 
@@ -120,7 +120,7 @@ pub mod water_particle {
         return ParticleMaterial::new(water_particle::VERTEX, water_particle::PARTICLE);
     }
 
-    pub const VERTEX: &'static str = r#"#version 100
+    pub const VERTEX: &str = r#"#version 100
         #define DEF_VERTEX_ATTRIBUTES
         #include "particles.glsl"
 
@@ -134,7 +134,7 @@ pub mod water_particle {
         }
     "#;
 
-    pub const PARTICLE: &'static str = r#"#version 100
+    pub const PARTICLE: &str = r#"#version 100
         #include "particles.glsl"
 
         precision lowp float;
@@ -151,4 +151,3 @@ pub mod water_particle {
         }
     "#;
 }
-

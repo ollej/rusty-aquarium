@@ -35,7 +35,7 @@ impl Motion {
 
         //debug!("rotation: {} new_pos: {} old_pos: {}", rotation, new_position, self.motion.position);
         Motion {
-            position: position,
+            position,
             speed: motion.speed,
             max_speed: motion.max_speed,
             acceleration: motion.acceleration,
@@ -224,7 +224,7 @@ impl Fish {
             motion: Motion {
                 position: Self::random_start_position(bbox_adjusted),
                 speed: Self::random_start_direction(max_speed),
-                max_speed: max_speed,
+                max_speed,
                 acceleration: Self::random_acceleration(),
                 rotation: 0.,
                 idle: false,
@@ -292,17 +292,17 @@ impl Fish {
     }
 
     fn swims_right(&self) -> bool {
-        return self.motion.speed.x >= 0.;
+        self.motion.speed.x >= 0.
     }
 
     fn emit_position(&self) -> Vec2 {
-        return self.motion.position
+        self.motion.position
             + if !self.swims_right() {
                 vec2(self.size.x, 0.)
             } else {
                 vec2(0., 0.)
             }
-            + vec2(0., self.size.y / 2.);
+            + vec2(0., self.size.y / 2.)
     }
 
     fn emit(&mut self) {
@@ -356,10 +356,10 @@ impl FishTank {
         Self {
             fishes: Vec::new(),
             fish_keys: Vec::from_iter(config.fishes.keys().cloned()),
-            config: config,
+            config,
             school: input_data.school,
-            bubble_texture: bubble_texture,
-            fish_textures: fish_textures,
+            bubble_texture,
+            fish_textures,
             time_since_reload: 0.,
         }
     }
@@ -469,7 +469,7 @@ struct ShowText {
 impl ShowText {
     fn new(text: &'static str) -> Self {
         Self {
-            text: text,
+            text,
             time: 2.,
             x: 20.,
             y: 40.,
@@ -505,7 +505,7 @@ impl ShowBackground {
     fn new(background_switch_time: u32, backgrounds: Vec<Texture2D>) -> Self {
         Self {
             background: 0,
-            backgrounds: backgrounds,
+            backgrounds,
             time: 0.,
             background_switch_time: background_switch_time as f32,
             switching_backgrounds: true,
