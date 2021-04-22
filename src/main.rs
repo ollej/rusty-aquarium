@@ -196,12 +196,13 @@ pub struct Fish {
     motion: Motion,
     movement: Movement,
     size: Vec2,
+    bubble_amount: u32,
     //bounding_box: Rect,
     bounding_box_adjusted: Rect,
     texture: Texture2D,
     emitter: Emitter,
-    bubbles: bool,
 }
+
 impl Fish {
     const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
     //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
@@ -213,12 +214,12 @@ impl Fish {
         movement: Movement,
         texture: Texture2D,
         bubble_texture: Texture2D,
-        bubbles: bool,
-    ) -> Fish {
+        bubble_amount: u32,
+    ) -> Self {
         let fish_height = fish_size / (texture.width() / texture.height());
         let size = vec2(fish_size, fish_height);
         let bbox_adjusted = Self::adjust_bounding_box(bounding_box, size);
-        Fish {
+        Self {
             motion: Motion {
                 position: Self::random_start_position(bbox_adjusted),
                 speed: Self::random_start_direction(max_speed),
@@ -227,14 +228,15 @@ impl Fish {
                 rotation: 0.,
                 idle: false,
             },
-            size: size,
+            size,
+            bubble_amount,
             //bounding_box: bounding_box,
             bounding_box_adjusted: bbox_adjusted,
-            movement: movement,
-            texture: texture,
+            movement,
+            texture,
             emitter: Emitter::new(EmitterConfig {
                 emitting: true,
-                amount: 25,
+                amount: bubble_amount,
                 lifetime: 1.4,
                 lifetime_randomness: 0.9,
                 size: 0.55,
@@ -248,7 +250,6 @@ impl Fish {
                 material: Some(shaders::water_particle::material()),
                 ..Default::default()
             }),
-            bubbles: bubbles,
         }
     }
 
@@ -305,7 +306,7 @@ impl Fish {
         match self.movement {
             Movement::Crab => (),
             _ => {
-                if self.bubbles {
+                if self.bubble_amount > 0 {
                     self.emitter.draw(self.emit_position())
                 }
             }
@@ -437,7 +438,7 @@ impl FishTank {
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
             self.bubble_texture,
-            fish_config.bubbles,
+            fish_config.randomized_bubble_amount(),
         )
     }
 
@@ -579,7 +580,7 @@ pub struct FishConfig {
     pub size: f32,
     pub size_randomness: f32,
     pub movement: Movement,
-    pub bubbles: bool,
+    pub bubbles: u32,
     #[nserde(proxy = "FishSpeed")]
     pub speed: Vec2,
     #[nserde(proxy = "FishSpeed")]
@@ -595,7 +596,7 @@ impl Default for FishConfig {
             size: 7.,
             size_randomness: 0.5,
             movement: Movement::Accelerating,
-            bubbles: true,
+            bubbles: 25,
             speed: vec2(15., 7.),
             speed_randomness: vec2(0.5, 0.5),
             area: Rect {
@@ -619,6 +620,10 @@ impl FishConfig {
             rand::gen_range(0., self.speed_randomness.y),
         );
         return self.speed - self.speed * random_speed;
+    }
+
+    fn randomized_bubble_amount(&self) -> u32 {
+        rand::gen_range(0, 25)
     }
 }
 
