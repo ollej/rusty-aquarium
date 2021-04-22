@@ -26,10 +26,10 @@
                 "y": 1.0
             },
             "area": {
-                "x": 35.0,
-                "y": 48.5,
-                "w": 30.0,
-                "h": 13.0
+                "x": 5.0,
+                "y": 56.0,
+                "w": 90.0,
+                "h": 6.0
             }
         },
         "clownfish": {
@@ -123,8 +123,8 @@
             "movement": { "Accelerating": [] },
             "bubbles": true,
             "speed": {
-                "x": 15.0,
-                "y": 6.0
+                "x": 6.0,
+                "y": 3.0
             },
             "speed_randomness": {
                 "x": 0.5,
@@ -223,13 +223,13 @@
         },
         "neontetra": {
             "texture": "assets/neontetra.png",
-            "size": 7.0,
+            "size": 4.0,
             "size_randomness": 0.5,
             "movement": { "Accelerating": [] },
             "bubbles": false,
             "speed": {
-                "x": 15.0,
-                "y": 6.0
+                "x": 8.0,
+                "y": 4.0
             },
             "speed_randomness": {
                 "x": 0.5,
@@ -270,8 +270,8 @@
             "movement": { "AcceleratingEdgeIdling": [] },
             "bubbles": true,
             "speed": {
-                "x": 15.0,
-                "y": 6.0
+                "x": 6.0,
+                "y": 3.0
             },
             "speed_randomness": {
                 "x": 0.5,
