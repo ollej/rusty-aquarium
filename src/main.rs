@@ -451,7 +451,7 @@ impl FishTank {
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
             self.bubble_texture,
-            fish_config.bubbles,
+            fish_config.bubbles * fish_data.bubbles as u32,
         )
     }
 }
@@ -667,10 +667,23 @@ impl Config {
 }
 
 #[derive(Clone, DeJson)]
+#[nserde(default)]
 pub struct FishData {
     pub fish: String,
     pub size: f32,
     pub speed: f32,
+    pub bubbles: f32,
+}
+
+impl Default for FishData {
+    fn default() -> FishData {
+        FishData {
+            fish: "clownfish".to_string(),
+            size: 1.0,
+            speed: 1.0,
+            bubbles: 1.0,
+        }
+    }
 }
 
 #[derive(Clone, DeJson)]

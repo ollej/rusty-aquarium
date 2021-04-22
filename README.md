@@ -60,12 +60,15 @@ Generate input data
 
 The file `assets/inputdata.json` is read to define what fish to display.
 
+The fields `size`, `speed`, and `bubbles` is a multiplier that will be applied
+to the corresponding value from the fish configuration.
+
 ### File format
 
 ```json
 {
     "school": [
-        { "fish": "crab", "size": 1.0, "speed": 1.0 },
+        { "fish": "crab", "size": 1.0, "speed": 1.0, "bubbles": 1.0 },
     ]
 }
 ```
