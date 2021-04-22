@@ -21,14 +21,17 @@ impl Motion {
     const DIRECTION_CHANGE_CHANCE_X: f32 = 2.5;
     const DIRECTION_CHANGE_CHANCE_Y: f32 = 5.;
 
-    fn move_position(&mut self, delta: f32, motion: Motion) -> Motion {
+    fn move_position(&mut self, delta: f32, motion: Motion, bounding_box: Rect) -> Motion {
         //debug!("x: {} y: {} d: {}", self.position.x, self.position.y, delta);
 
-        let position = if motion.idle {
-            motion.position
-        } else {
-            motion.position + motion.speed * delta
-        };
+        let position = self.clamp(
+            if motion.idle {
+                motion.position
+            } else {
+                motion.position + motion.speed * delta
+            },
+            bounding_box,
+        );
 
         //debug!("rotation: {} new_pos: {} old_pos: {}", rotation, new_position, self.motion.position);
         Motion {
@@ -95,11 +98,10 @@ impl Motion {
         }
     }
 
-    fn clamp(&mut self, bounding_box: Rect) {
-        self.position = self
-            .position
+    fn clamp(&self, position: Vec2, bounding_box: Rect) -> Vec2 {
+        position
             .max(bounding_box.point())
-            .min(vec2(bounding_box.right(), bounding_box.bottom()));
+            .min(vec2(bounding_box.right(), bounding_box.bottom()))
     }
 
     fn random_percent() -> f32 {
@@ -153,7 +155,6 @@ impl Movement {
     fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_acceleration_randomly(1.);
-        motion.clamp(bounding_box);
         motion.rotate();
         motion
     }
@@ -162,7 +163,6 @@ impl Movement {
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_acceleration_randomly(1.);
-        motion.clamp(bounding_box);
         motion.rotate();
         motion
     }
@@ -171,7 +171,6 @@ impl Movement {
         motion.accelerate();
         motion.change_direction_vertically(bounding_box);
         motion.change_acceleration_randomly(1.);
-        motion.clamp(bounding_box);
         motion.rotate();
         motion
     }
@@ -180,7 +179,6 @@ impl Movement {
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_acceleration_randomly(5.);
-        motion.clamp(bounding_box);
         motion
     }
 
@@ -189,7 +187,6 @@ impl Movement {
         motion.random_idling();
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_acceleration_randomly(1.);
-        motion.clamp(bounding_box);
         motion.rotate();
         motion
     }
@@ -284,7 +281,9 @@ impl Fish {
 
     fn tick(&mut self, delta: f32) {
         let motion = self.movement.tick(self.motion, self.bounding_box_adjusted);
-        self.motion = self.motion.move_position(delta, motion);
+        self.motion = self
+            .motion
+            .move_position(delta, motion, self.bounding_box_adjusted);
     }
 
     fn swims_right(&self) -> bool {
