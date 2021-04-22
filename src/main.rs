@@ -7,6 +7,12 @@ use nanoserde::DeJson;
 use std::collections::HashMap;
 use std::iter::FromIterator;
 
+pub enum Collision {
+    Left,
+    Right,
+    No,
+}
+
 #[derive(Copy, Clone)]
 pub struct Motion {
     position: Vec2,
@@ -16,6 +22,7 @@ pub struct Motion {
     rotation: f32,
     idle: bool,
 }
+
 impl Motion {
     const MAX_ROTATION: f32 = 0.3;
     const DIRECTION_CHANGE_CHANCE_X: f32 = 2.5;
@@ -98,6 +105,22 @@ impl Motion {
         }
     }
 
+    fn collision(&mut self, collision: Collision) {
+        match collision {
+            Collision::Left => {
+                if self.speed.x < 0. {
+                    self.speed.x *= -1.
+                }
+            }
+            Collision::Right => {
+                if self.speed.x > 0. {
+                    self.speed.x *= -1.
+                }
+            }
+            Collision::No => (),
+        }
+    }
+
     fn clamp(&self, position: Vec2, bounding_box: Rect) -> Vec2 {
         position
             .max(bounding_box.point())
@@ -128,15 +151,15 @@ impl Movement {
     const CHANCE_IDLE_START: f32 = 0.05;
     const CHANCE_IDLE_END: f32 = 0.75;
 
-    fn tick(&mut self, motion: Motion, bounding_box: Rect) -> Motion {
+    fn tick(&mut self, motion: Motion, bounding_box: Rect, collision: Collision) -> Motion {
         match self {
-            Self::SingleSpeed => Self::tick_single_speed(motion, bounding_box),
-            Self::Accelerating => Self::tick_accelerating(motion, bounding_box),
+            Self::SingleSpeed => Self::tick_single_speed(motion, bounding_box, collision),
+            Self::Accelerating => Self::tick_accelerating(motion, bounding_box, collision),
             Self::AcceleratingEdgeIdling => {
-                Self::tick_accelerating_edge_idling(motion, bounding_box)
+                Self::tick_accelerating_edge_idling(motion, bounding_box, collision)
             }
-            Self::Crab => Self::tick_crab(motion, bounding_box),
-            Self::Random => Self::tick_random(motion, bounding_box),
+            Self::Crab => Self::tick_crab(motion, bounding_box, collision),
+            Self::Random => Self::tick_random(motion, bounding_box, collision),
         }
     }
 
@@ -152,14 +175,16 @@ impl Movement {
         .unwrap()
     }
 
-    fn tick_single_speed(mut motion: Motion, bounding_box: Rect) -> Motion {
+    fn tick_single_speed(mut motion: Motion, bounding_box: Rect, collision: Collision) -> Motion {
+        motion.collision(collision);
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_acceleration_randomly(1.);
         motion.rotate();
         motion
     }
 
-    fn tick_accelerating(mut motion: Motion, bounding_box: Rect) -> Motion {
+    fn tick_accelerating(mut motion: Motion, bounding_box: Rect, collision: Collision) -> Motion {
+        motion.collision(collision);
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_acceleration_randomly(1.);
@@ -167,7 +192,12 @@ impl Movement {
         motion
     }
 
-    fn tick_accelerating_edge_idling(mut motion: Motion, bounding_box: Rect) -> Motion {
+    fn tick_accelerating_edge_idling(
+        mut motion: Motion,
+        bounding_box: Rect,
+        collision: Collision,
+    ) -> Motion {
+        motion.collision(collision);
         motion.accelerate();
         motion.change_direction_vertically(bounding_box);
         motion.change_acceleration_randomly(1.);
@@ -175,14 +205,16 @@ impl Movement {
         motion
     }
 
-    fn tick_crab(mut motion: Motion, bounding_box: Rect) -> Motion {
+    fn tick_crab(mut motion: Motion, bounding_box: Rect, collision: Collision) -> Motion {
+        motion.collision(collision);
         motion.accelerate();
         motion.change_direction_by_bounding_box(bounding_box);
         motion.change_acceleration_randomly(5.);
         motion
     }
 
-    fn tick_random(mut motion: Motion, bounding_box: Rect) -> Motion {
+    fn tick_random(mut motion: Motion, bounding_box: Rect, collision: Collision) -> Motion {
+        motion.collision(collision);
         motion.accelerate();
         motion.random_idling();
         motion.change_direction_by_bounding_box(bounding_box);
@@ -284,11 +316,40 @@ impl Fish {
         vec2(rand::gen_range(0.1, 0.2), rand::gen_range(0.1, 0.2))
     }
 
-    fn tick(&mut self, delta: f32) {
-        let motion = self.movement.tick(self.motion, self.bounding_box_adjusted);
+    fn tick(&mut self, delta: f32, collision_boxes: &Vec<Rect>) {
+        let collision = self.collided(collision_boxes);
+        let motion = self
+            .movement
+            .tick(self.motion, self.bounding_box_adjusted, collision);
         self.motion = self
             .motion
             .move_position(delta, motion, self.bounding_box_adjusted);
+    }
+
+    fn collided(&self, collision_boxes: &Vec<Rect>) -> Collision {
+        let collision_box = self.collision_box();
+        for cbox in collision_boxes.iter() {
+            if cbox.x != self.motion.position.x
+                && cbox.y != self.motion.position.y
+                && collision_box.overlaps(cbox)
+            {
+                return if cbox.x < self.motion.position.x {
+                    Collision::Left
+                } else {
+                    Collision::Right
+                };
+            }
+        }
+        Collision::No
+    }
+
+    fn collision_box(&self) -> Rect {
+        Rect {
+            x: self.motion.position.x,
+            y: self.motion.position.y,
+            w: self.size.x,
+            h: self.size.y,
+        }
     }
 
     fn swims_right(&self) -> bool {
@@ -382,8 +443,13 @@ impl FishTank {
     }
 
     fn tick(&mut self, delta: f32) {
+        let collision_boxes = self
+            .fishes
+            .iter()
+            .map(|fish| fish.collision_box())
+            .collect();
         for fish in self.fishes.iter_mut() {
-            fish.tick(delta);
+            fish.tick(delta, &collision_boxes);
         }
     }
 
