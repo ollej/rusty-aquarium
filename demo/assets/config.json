@@ -76,7 +76,7 @@
         },
         "goldfish": {
             "texture": "assets/goldfish.png",
-            "size": 8.0,
+            "size": 6.0,
             "size_randomness": 1.0,
             "movement": { "SingleSpeed": [] },
             "bubbles": 25,
