@@ -206,11 +206,15 @@ fn main() {
 
     for (_, journey) in journeys.journeys.iter() {
         //println!("{:?}", journey);
-        let duration = journeys.journey_age_in_seconds(journey) / journeys.duration_in_seconds();
+        let speed = journeys.journey_age_in_seconds(journey) / journeys.duration_in_seconds();
+        let size = clamp(journey.boardings as f32 / journeys.max_boardings as f32);
+        if size < 0.2 {
+            continue;
+        }
         fishes.push(FishData {
             fish: "goldfish".to_string(),
-            size: clamp(journey.boardings as f32 / journeys.max_boardings as f32),
-            speed: duration,
+            size,
+            speed,
         });
     }
 
