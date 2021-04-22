@@ -221,7 +221,7 @@ impl Fish {
         Fish {
             motion: Motion {
                 position: Self::random_start_position(bbox_adjusted),
-                speed: Self::random_start_speed(max_speed),
+                speed: Self::random_start_direction(max_speed),
                 max_speed: max_speed,
                 acceleration: Self::random_acceleration(),
                 rotation: 0.,
@@ -268,11 +268,12 @@ impl Fish {
         )
     }
 
-    fn random_start_speed(max_speed: Vec2) -> Vec2 {
-        vec2(
-            rand::gen_range(-max_speed.x, max_speed.x),
-            rand::gen_range(-max_speed.y, max_speed.y),
-        )
+    fn random_start_direction(max_speed: Vec2) -> Vec2 {
+        max_speed
+            * vec2(
+                *vec![-1., 1.].choose().unwrap(),
+                *vec![-1., 1.].choose().unwrap(),
+            )
     }
 
     fn random_acceleration() -> Vec2 {
