@@ -403,6 +403,7 @@ struct FishTank {
     school: Vec<FishData>,
     bubble_texture: Texture2D,
     fish_textures: HashMap<String, Texture2D>,
+    backgrounds: ShowBackground,
     //input_data: InputData,
     time_since_reload: f32,
 }
@@ -413,6 +414,7 @@ impl FishTank {
         fish_textures: HashMap<String, Texture2D>,
         config: Config,
         input_data: InputData,
+        backgrounds: ShowBackground,
     ) -> Self {
         Self {
             fishes: Vec::new(),
@@ -422,7 +424,28 @@ impl FishTank {
             bubble_texture,
             fish_textures,
             time_since_reload: 0.,
+            backgrounds,
         }
+    }
+
+    async fn load() -> Self {
+        let config = Config::load().await;
+        let input_data = InputData::load().await;
+        let water_sprite: Texture2D = load_texture(Fish::SPRITE_WATER)
+            .await
+            .expect("Couldn't load water sprite.");
+        let backgrounds = ShowBackground::new(
+            config.background_switch_time,
+            config.background_textures().await,
+        );
+        let mut fish_textures = HashMap::new();
+        for (_key, fish) in config.fishes.iter() {
+            fish_textures.insert(
+                fish.texture.clone(),
+                load_texture(&fish.texture).await.unwrap(),
+            );
+        }
+        Self::new(water_sprite, fish_textures, config, input_data, backgrounds)
     }
 
     async fn reload_data(&mut self, delta: f32) {
@@ -447,7 +470,16 @@ impl FishTank {
         self.repopulate();
     }
 
+    fn next_background(&mut self) {
+        self.backgrounds.next();
+    }
+
+    fn toggle_switching_backgrounds(&mut self) -> bool {
+        self.backgrounds.toggle_switching()
+    }
+
     fn tick(&mut self, delta: f32) {
+        self.backgrounds.tick(delta);
         let collision_boxes = self
             .fishes
             .iter()
@@ -458,7 +490,8 @@ impl FishTank {
         }
     }
 
-    fn draw(&mut self) {
+    fn draw(&mut self, rect: Vec2) {
+        self.backgrounds.draw(rect);
         for fish in self.fishes.iter_mut() {
             fish.draw();
         }
@@ -482,15 +515,10 @@ impl FishTank {
 
     fn add_fish(&mut self) {
         let fish = self.random_fish();
-        //debug!("size: {:?}", fish.size);
-        //debug!("speed: {:?}", fish.motion.speed);
-        //debug!("bubbles: {:?}", fish.bubbles);
-        //debug!("---");
         self.fishes.push(fish);
     }
 
     fn remove_fish(&mut self) {
-        // Don't remove Ferris
         if self.fishes.len() > 0 {
             self.fishes.pop();
         }
@@ -566,35 +594,37 @@ struct ShowBackground {
     background: usize,
     backgrounds: Vec<Texture2D>,
     time: f32,
-    background_switch_time: f32,
-    switching_backgrounds: bool,
+    switch_time: f32,
+    switching: bool,
 }
 
 impl ShowBackground {
-    fn new(background_switch_time: u32, backgrounds: Vec<Texture2D>) -> Self {
+    fn new(switch_time: u32, backgrounds: Vec<Texture2D>) -> Self {
         Self {
             background: 0,
             backgrounds,
             time: 0.,
-            background_switch_time: background_switch_time as f32,
-            switching_backgrounds: true,
+            switch_time: switch_time as f32,
+            switching: switch_time > 0,
         }
     }
 
-    fn draw(&mut self, delta: f32, w: f32, h: f32) {
+    fn tick(&mut self, delta: f32) {
         self.time += delta;
 
-        if self.time > self.background_switch_time && self.switching_backgrounds {
+        if self.time > self.switch_time && self.switching {
             self.next();
         }
+    }
 
+    fn draw(&self, rect: Vec2) {
         draw_texture_ex(
             self.backgrounds[self.background],
             0.,
             0.,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(vec2(w, h)),
+                dest_size: Some(rect),
                 ..Default::default()
             },
         );
@@ -608,9 +638,10 @@ impl ShowBackground {
         }
     }
 
-    fn toggle_switching_backgrounds(&mut self) {
-        self.switching_backgrounds = !self.switching_backgrounds;
+    fn toggle_switching(&mut self) -> bool {
         self.time = 0.;
+        self.switching = !self.switching;
+        self.switching
     }
 }
 
@@ -760,6 +791,7 @@ impl Default for FishData {
 
 #[derive(Clone, DeJson)]
 pub struct InputData {
+    pub background: Option<String>,
     pub school: Vec<FishData>,
 }
 
@@ -783,12 +815,6 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
-    let config = Config::load().await;
-    let input_data = InputData::load().await;
-
-    let bubble_texture: Texture2D = load_texture(Fish::SPRITE_WATER)
-        .await
-        .expect("Couldn't load bubble sprite.");
     //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
 
     let crt_render_target = render_target(screen_width() as u32, screen_height() as u32);
@@ -808,18 +834,8 @@ async fn main() {
     )
     .unwrap();
     let mut shader_activated = false;
-    let mut background = ShowBackground::new(
-        config.background_switch_time,
-        config.background_textures().await,
-    );
-    let mut fish_textures = HashMap::new();
-    for (_key, fish) in config.fishes.iter() {
-        fish_textures.insert(
-            fish.texture.clone(),
-            load_texture(&fish.texture).await.unwrap(),
-        );
-    }
-    let mut fish_tank = FishTank::new(bubble_texture, fish_textures, config, input_data);
+
+    let mut fish_tank = FishTank::load().await;
     let mut show_text: ShowText = ShowText::empty();
 
     fish_tank.populate();
@@ -837,12 +853,11 @@ async fn main() {
             };
         }
         if is_key_pressed(KeyCode::Right) || is_mouse_button_pressed(MouseButton::Left) {
-            background.next();
+            fish_tank.next_background();
             show_text = ShowText::new("Next background");
         }
         if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Right) {
-            background.toggle_switching_backgrounds();
-            show_text = if background.switching_backgrounds {
+            show_text = if fish_tank.toggle_switching_backgrounds() {
                 ShowText::new("Switching backgrounds")
             } else {
                 ShowText::new("Background locked")
@@ -884,11 +899,8 @@ async fn main() {
         });
         clear_background(DARKBLUE);
 
-        // Draw background
-        background.draw(delta, SCR_W, SCR_H);
-
         // Draw fish_tank
-        fish_tank.draw();
+        fish_tank.draw(vec2(SCR_W, SCR_H));
 
         // Draw texture with water shader
         if shader_activated {
