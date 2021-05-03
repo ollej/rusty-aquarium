@@ -1,4 +1,5 @@
 {
+    "background": 0,
     "school": [
         { "fish": "crab", "size": 1.0, "speed": 1.0, "bubbles": 0.0 },
         { "fish": "clownfish", "size": 0.5, "speed": 1.0, "bubbles": 0.0 },
