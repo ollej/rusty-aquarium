@@ -9,13 +9,28 @@ A monitoring visualization as an aquarium written in Rust.
 Demo
 ----
 
-Run the Rusty Aquarium in your browser:
+Run Rusty Aquarium in your browser:
 
  * [Web demo](https://ollej.github.io/rusty-aquarium/demo/)
 
 Download executables for different platforms:
 
  * [Latest Release](https://github.com/ollej/rusty-aquarium/releases/latest)
+
+Usage
+-----
+
+Use these keys to control the fish tank.
+
+* **Escape** - Exit the program.
+* **Left** - Toggle shader.
+* **Right** - Switch to next background.
+* **Space** - Lock/Unlock automatic background switching.
+* **Enter** - Refreshes the list of fishes.
+* **Up** - Add a random fish to the tank.
+* **Down** - Remove the latest added fish from the tank.
+* **C** - Reload `config.json` file. Does not currently reload images.
+* **D** - Force reload of `inputdata.json`.
 
 Generate input data
 -------------------
@@ -98,15 +113,15 @@ with default values for them.
 }
 ```
 
- * **data_reload_time** - Reload `input_data.json` after this number of
+ * **data_reload_time** - Reload `inputdata.json` after this number of
  seconds. Set to `0` to never reload data.
  * **background_switch_time** - Number of seconds each background image is
  shown. Set to `0` to never change the background automatically. It can still
- be updated by `input_data.json`.
+ be updated by `inputdata.json`.
  * **backgrounds** - An array of strings with paths to PNG images to use as
  background images.
  * **fishes** - A list of fish type definitions, the key is used to select the
- fish type in `input_data.json`
+ fish type in `inputdata.json`
     * **texture** - Path to the PNG file to use for this fish.
     * **size** - Max size to scale the image to.
     * **size_randomness** - A multiplier used when randomizing fishes. Should
