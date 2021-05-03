@@ -471,10 +471,8 @@ impl FishTank {
     }
 
     fn repopulate(&mut self) {
-        if self.fishes.len() >= 1 {
-            self.reset();
-            self.populate();
-        }
+        self.reset();
+        self.populate();
     }
 
     fn add_fish(&mut self) {
