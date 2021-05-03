@@ -13,9 +13,112 @@ Run the Rusty Aquarium in your browser:
 
  * [Web demo](https://ollej.github.io/rusty-aquarium/demo/)
 
-Download a Windows exe or an Android APK:
+Download executables for different platforms:
 
  * [Latest Release](https://github.com/ollej/rusty-aquarium/releases/latest)
+
+Generate input data
+-------------------
+
+The file `assets/inputdata.json` is read to define what fish to display.
+
+The field `background` is optional, and can be used to select which
+background to show. The number should match the index of the wanted
+background from the `backgrounds` field in `config.json`.
+
+The field `school` should be an array of objects, one for each fish to
+display.
+
+The `fish` field should match a name in the map of fishes in the
+`config.json` file.
+
+The fields `size`, `speed`, and `bubbles` is a multiplier that will be applied
+to the corresponding value from the fish configuration.
+
+### File format
+
+```json
+{
+    "background": 1,
+    "school": [
+        { "fish": "crab", "size": 1.0, "speed": 1.0, "bubbles": 1.0 },
+    ]
+}
+```
+
+### System monitoring
+
+The `systemdata` binary generates an inputdata.json file based on CPU,
+processes and disks.
+
+```bash
+cd src/lib/systemdata; cargo run > ../../../assets/inputdata.json
+```
+
+Configuration
+-------------
+
+The file `assets/config.json` can be used to configure the fish tank. It has
+some general configuration values, paths to PNG files to load for background
+images and fish sprites. It also defines which fish types are available,
+with default values for them.
+
+### File format
+
+```json
+{
+    "data_reload_time": 10,
+    "background_switch_time": 0,
+    "backgrounds": [
+        "assets/background.png",
+    ],
+    "fishes": {
+        "crab": {
+            "texture": "assets/ferris.png",
+            "size": 7.0,
+            "size_randomness": 1.0,
+            "movement": { "Crab": [] },
+            "bubbles": 0,
+            "speed": {
+                "x": 12.0,
+                "y": 4.0
+            },
+            "speed_randomness": {
+                "x": 1.0,
+                "y": 1.0
+            },
+            "area": {
+                "x": 5.0,
+                "y": 56.0,
+                "w": 90.0,
+                "h": 6.0
+            }
+        },
+    }
+}
+```
+
+ * **data_reload_time** - Reload `input_data.json` after this number of
+ seconds. Set to `0` to never reload data.
+ * **background_switch_time** - Number of seconds each background image is
+ shown. Set to `0` to never change the background automatically. It can still
+ be updated by `input_data.json`.
+ * **backgrounds** - An array of strings with paths to PNG images to use as
+ background images.
+ * **fishes** - A list of fish type definitions, the key is used to select the
+ fish type in `input_data.json`
+    * **texture** - Path to the PNG file to use for this fish.
+    * **size** - Max size to scale the image to.
+    * **size_randomness** - A multiplier used when randomizing fishes. Should
+    be between 0.0 and 1.0.
+    * **movement** - Name of the type of movement for this fish. Available
+    movements: SingleSpeed, Accelerating, AcceleratingEdgeIdling, Crab, Random,
+    * **bubbles** - Number of movement bubbles to show after this fish. Set to
+    `0` to not display any bubbles.
+    * **speed** - The speed of the fish in X and Y direction.
+    * **speed_randomness** - A multiplier used when randomizing fish speed.
+    Should be between 0.0 and 1.0.
+    * **area** - The area this fish can move in. Max X is 100, max Y is 62.5.
 
 License
 =======
@@ -55,29 +158,3 @@ cargo run-script build-win
 cargo run-script build-apk
 ```
 
-Generate input data
--------------------
-
-The file `assets/inputdata.json` is read to define what fish to display.
-
-The fields `size`, `speed`, and `bubbles` is a multiplier that will be applied
-to the corresponding value from the fish configuration.
-
-### File format
-
-```json
-{
-    "school": [
-        { "fish": "crab", "size": 1.0, "speed": 1.0, "bubbles": 1.0 },
-    ]
-}
-```
-
-### System monitoring
-
-The `systemdata` binary generates an inputdata.json file based on CPU,
-processes and disks.
-
-```bash
-cd src/lib/systemdata; cargo run > ../../../assets/inputdata.json
-```

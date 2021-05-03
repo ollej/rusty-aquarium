@@ -435,6 +435,7 @@ impl FishTank {
             .await
             .expect("Couldn't load water sprite.");
         let backgrounds = ShowBackground::new(
+            input_data.background,
             config.background_switch_time,
             config.background_textures().await,
         );
@@ -462,6 +463,9 @@ impl FishTank {
 
     fn update_data(&mut self, input_data: InputData) {
         self.school = input_data.school;
+        if let Some(background) = input_data.background {
+            self.backgrounds.set(background);
+        }
         self.repopulate();
     }
 
@@ -599,9 +603,13 @@ struct ShowBackground {
 }
 
 impl ShowBackground {
-    fn new(switch_time: u32, backgrounds: Vec<Texture2D>) -> Self {
+    fn new(
+        selected_background: Option<usize>,
+        switch_time: u32,
+        backgrounds: Vec<Texture2D>,
+    ) -> Self {
         Self {
-            background: 0,
+            background: selected_background.unwrap_or(0),
             backgrounds,
             time: 0.,
             switch_time: switch_time as f32,
@@ -628,6 +636,14 @@ impl ShowBackground {
                 ..Default::default()
             },
         );
+    }
+
+    fn set(&mut self, background: usize) {
+        if background < self.backgrounds.len() {
+            self.background = background;
+            self.time = 0.0;
+            self.switching = false;
+        }
     }
 
     fn next(&mut self) {
@@ -791,7 +807,7 @@ impl Default for FishData {
 
 #[derive(Clone, DeJson)]
 pub struct InputData {
-    pub background: Option<String>,
+    pub background: Option<usize>,
     pub school: Vec<FishData>,
 }
 
