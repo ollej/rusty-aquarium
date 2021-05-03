@@ -425,7 +425,7 @@ impl FishTank {
         }
     }
 
-    async fn reload_config(&mut self, delta: f32) {
+    async fn reload_data(&mut self, delta: f32) {
         if self.config.data_reload_time == 0 {
             return;
         }
@@ -439,6 +439,11 @@ impl FishTank {
 
     fn update_data(&mut self, input_data: InputData) {
         self.school = input_data.school;
+        self.repopulate();
+    }
+
+    fn update_config(&mut self, config: Config) {
+        self.config = config;
         self.repopulate();
     }
 
@@ -852,11 +857,19 @@ async fn main() {
         if is_key_pressed(KeyCode::Down) {
             fish_tank.remove_fish();
         }
+        if is_key_pressed(KeyCode::C) {
+            let config = Config::load().await;
+            fish_tank.update_config(config);
+        }
+        if is_key_pressed(KeyCode::D) {
+            let data = InputData::load().await;
+            fish_tank.update_data(data);
+        }
 
         // Update fish positions
         let delta = get_frame_time();
 
-        fish_tank.reload_config(delta).await;
+        fish_tank.reload_data(delta).await;
 
         fish_tank.tick(delta);
 
