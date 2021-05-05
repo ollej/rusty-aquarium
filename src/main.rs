@@ -927,10 +927,12 @@ async fn main() {
             fish_tank.remove_fish();
         }
         if is_key_pressed(KeyCode::C) {
+            show_text = ShowText::new("Updating config...");
             let config = Config::load().await;
             fish_tank.update_config(config);
         }
         if is_key_pressed(KeyCode::D) {
+            show_text = ShowText::new("Reloading data...");
             fish_tank.reload_data();
         }
 
