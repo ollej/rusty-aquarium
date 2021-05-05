@@ -1,5 +1,7 @@
 pub mod shaders;
 use futures::future::join_all;
+use macroquad::experimental::collections::storage;
+use macroquad::experimental::coroutines::{start_coroutine, Coroutine};
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
 use macroquad_particles::{AtlasConfig, BlendMode, Emitter, EmitterConfig};
@@ -406,6 +408,7 @@ struct FishTank {
     backgrounds: ShowBackground,
     //input_data: InputData,
     time_since_reload: f32,
+    reloader: Option<Coroutine>,
 }
 
 impl FishTank {
@@ -425,6 +428,7 @@ impl FishTank {
             fish_textures,
             time_since_reload: 0.,
             backgrounds,
+            reloader: None,
         }
     }
 
@@ -449,20 +453,35 @@ impl FishTank {
         Self::new(water_sprite, fish_textures, config, input_data, backgrounds)
     }
 
-    async fn reload_data(&mut self, delta: f32) {
+    fn tick_data_reloading(&mut self, delta: f32) {
+        if let Some(reloader) = self.reloader {
+            if reloader.is_done() {
+                self.update_data();
+                self.reloader = None;
+                self.time_since_reload = 0.;
+            } else {
+                return;
+            }
+        }
         if self.config.data_reload_time == 0 {
             return;
         }
         self.time_since_reload += delta;
         if self.time_since_reload > self.config.data_reload_time as f32 {
-            let data = InputData::load().await;
-            self.update_data(data);
-            self.time_since_reload = 0.;
+            self.reload_data();
         }
     }
 
-    fn update_data(&mut self, input_data: InputData) {
-        self.school = input_data.school;
+    fn reload_data(&mut self) {
+        self.reloader = Some(start_coroutine(async move {
+            let data = InputData::load().await;
+            storage::store(data);
+        }));
+    }
+
+    fn update_data(&mut self) {
+        let input_data = storage::get_mut::<InputData>();
+        self.school = (*input_data.school).to_vec();
         if let Some(background) = input_data.background {
             self.backgrounds.set(background);
         }
@@ -483,6 +502,7 @@ impl FishTank {
     }
 
     fn tick(&mut self, delta: f32) {
+        self.tick_data_reloading(delta);
         self.backgrounds.tick(delta);
         let collision_boxes = self
             .fishes
@@ -911,14 +931,11 @@ async fn main() {
             fish_tank.update_config(config);
         }
         if is_key_pressed(KeyCode::D) {
-            let data = InputData::load().await;
-            fish_tank.update_data(data);
+            fish_tank.reload_data();
         }
 
         // Update fish positions
         let delta = get_frame_time();
-
-        fish_tank.reload_data(delta).await;
 
         fish_tank.tick(delta);
 
