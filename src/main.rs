@@ -811,10 +811,21 @@ pub struct InputData {
     pub school: Vec<FishData>,
 }
 
+impl Default for InputData {
+    fn default() -> InputData {
+        InputData {
+            background: None,
+            school: vec![],
+        }
+    }
+}
+
 impl InputData {
     async fn load() -> Self {
-        let json = load_string("assets/inputdata.json").await.unwrap();
-        return DeJson::deserialize_json(&json).unwrap();
+        let json = load_string("assets/inputdata.json")
+            .await
+            .unwrap_or("{}".to_string());
+        DeJson::deserialize_json(&json).unwrap_or(InputData::default())
     }
 }
 
