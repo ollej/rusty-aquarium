@@ -503,8 +503,9 @@ impl FishTank {
 
     fn populate(&mut self) {
         for fish_data in self.school.iter() {
-            let fish = self.create_fish(fish_data);
-            self.fishes.push(fish);
+            if let Ok(fish) = self.create_fish(fish_data) {
+                self.fishes.push(fish);
+            }
         }
     }
 
@@ -546,9 +547,13 @@ impl FishTank {
         )
     }
 
-    fn create_fish(&self, fish_data: &FishData) -> Fish {
-        let fish_config = self.config.fishes.get(&fish_data.fish).unwrap();
-        Fish::new(
+    fn create_fish(&self, fish_data: &FishData) -> Result<Fish, &'static str> {
+        let fish_config = self
+            .config
+            .fishes
+            .get(&fish_data.fish)
+            .ok_or("FishConfig missing")?;
+        Ok(Fish::new(
             fish_config.size * fish_data.size,
             fish_config.speed * fish_data.speed,
             fish_config.area,
@@ -556,7 +561,7 @@ impl FishTank {
             *self.fish_textures.get(&fish_config.texture).unwrap(),
             self.bubble_texture,
             fish_config.bubbles * fish_data.bubbles as u32,
-        )
+        ))
     }
 }
 
@@ -768,8 +773,10 @@ impl Default for Config {
 
 impl Config {
     async fn load() -> Self {
-        let json = load_string("assets/config.json").await.unwrap();
-        return DeJson::deserialize_json(&json).unwrap();
+        let json = load_string("assets/config.json")
+            .await
+            .unwrap_or("{}".to_string());
+        DeJson::deserialize_json(&json).unwrap_or(Config::default())
     }
 
     async fn background_textures(&self) -> Vec<Texture2D> {
