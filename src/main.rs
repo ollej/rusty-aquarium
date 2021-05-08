@@ -400,57 +400,51 @@ impl Fish {
 
 struct FishTank {
     fishes: Vec<Fish>,
+    fish_configs: HashMap<String, FishConfig>,
     fish_keys: Vec<String>,
-    config: Config,
     school: Vec<FishData>,
-    bubble_texture: Texture2D,
+    bubble_texture: Option<Texture2D>,
     fish_textures: HashMap<String, Texture2D>,
     backgrounds: ShowBackground,
     //input_data: InputData,
     time_since_reload: f32,
+    data_reload_time: u32,
     reloader: Option<Coroutine>,
+    loaded: bool,
 }
 
 impl FishTank {
-    fn new(
-        bubble_texture: Texture2D,
-        fish_textures: HashMap<String, Texture2D>,
-        config: Config,
-        input_data: InputData,
-        backgrounds: ShowBackground,
-    ) -> Self {
+    fn new() -> Self {
         Self {
             fishes: Vec::new(),
-            fish_keys: Vec::from_iter(config.fishes.keys().cloned()),
-            config,
-            school: input_data.school,
-            bubble_texture,
-            fish_textures,
+            fish_keys: Vec::new(),
+            fish_configs: HashMap::new(),
+            school: Vec::new(),
+            bubble_texture: None,
+            fish_textures: HashMap::new(),
+            backgrounds: ShowBackground::empty(),
             time_since_reload: 0.,
-            backgrounds,
+            data_reload_time: 0,
             reloader: None,
+            loaded: false,
         }
     }
 
-    async fn load() -> Self {
-        let config = Config::load().await;
-        let input_data = InputData::load().await;
-        let water_sprite: Texture2D = load_texture(Fish::SPRITE_WATER)
-            .await
-            .expect("Couldn't load water sprite.");
-        let backgrounds = ShowBackground::new(
-            input_data.background,
-            config.background_switch_time,
-            config.background_textures().await,
+    fn add_resources(&mut self) {
+        let resources = storage::get::<Resources>();
+        self.bubble_texture = Some(resources.bubble_texture);
+        self.fish_keys = Vec::from_iter(resources.config.fishes.keys().cloned());
+        self.data_reload_time = resources.config.data_reload_time;
+        self.fish_configs = resources.config.fishes.clone();
+        self.school = (*resources.input_data.school).to_vec();
+        self.fish_textures = resources.fish_textures.clone();
+        self.backgrounds = ShowBackground::new(
+            resources.input_data.background,
+            resources.config.background_switch_time,
+            (*resources.backgrounds).to_vec(),
         );
-        let mut fish_textures = HashMap::new();
-        for (_key, fish) in config.fishes.iter() {
-            fish_textures.insert(
-                fish.texture.clone(),
-                load_texture(&fish.texture).await.unwrap(),
-            );
-        }
-        Self::new(water_sprite, fish_textures, config, input_data, backgrounds)
+        self.populate();
+        self.loaded = true;
     }
 
     fn tick_data_reloading(&mut self, delta: f32) {
@@ -463,11 +457,11 @@ impl FishTank {
                 return;
             }
         }
-        if self.config.data_reload_time == 0 {
+        if self.data_reload_time == 0 {
             return;
         }
         self.time_since_reload += delta;
-        if self.time_since_reload > self.config.data_reload_time as f32 {
+        if self.time_since_reload > self.data_reload_time as f32 {
             self.reload_data();
         }
     }
@@ -489,7 +483,8 @@ impl FishTank {
     }
 
     fn update_config(&mut self, config: Config) {
-        self.config = config;
+        self.fish_configs = config.fishes;
+        self.data_reload_time = config.data_reload_time;
         self.repopulate();
     }
 
@@ -551,7 +546,7 @@ impl FishTank {
 
     fn random_fish_config(&self) -> &FishConfig {
         let fish_key = self.fish_keys.choose().unwrap();
-        return self.config.fishes.get(fish_key).unwrap();
+        return self.fish_configs.get(fish_key).unwrap();
     }
 
     fn random_fish(&self) -> Fish {
@@ -562,15 +557,14 @@ impl FishTank {
             fish_config.area,
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
-            self.bubble_texture,
+            self.bubble_texture.unwrap(),
             fish_config.randomized_bubble_amount(),
         )
     }
 
     fn create_fish(&self, fish_data: &FishData) -> Result<Fish, &'static str> {
         let fish_config = self
-            .config
-            .fishes
+            .fish_configs
             .get(&fish_data.fish)
             .ok_or("FishConfig missing")?;
         Ok(Fish::new(
@@ -579,7 +573,7 @@ impl FishTank {
             fish_config.area,
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
-            self.bubble_texture,
+            self.bubble_texture.unwrap(),
             fish_config.bubbles * fish_data.bubbles as u32,
         ))
     }
@@ -639,6 +633,16 @@ impl ShowBackground {
             time: 0.,
             switch_time: switch_time as f32,
             switching: switch_time > 0,
+        }
+    }
+
+    fn empty() -> Self {
+        ShowBackground {
+            background: 0,
+            backgrounds: vec![],
+            time: 0.,
+            switch_time: 0.,
+            switching: false,
         }
     }
 
@@ -713,6 +717,59 @@ impl From<&FishArea> for Rect {
             y: serializable.y,
             w: serializable.w,
             h: serializable.h,
+        }
+    }
+}
+
+struct Resources {
+    config: Config,
+    input_data: InputData,
+    backgrounds: Vec<Texture2D>,
+    bubble_texture: Texture2D,
+    fish_textures: HashMap<String, Texture2D>,
+}
+
+impl Resources {
+    async fn new() -> Result<Resources, macroquad::prelude::FileError> {
+        let config = Config::load().await;
+        let input_data = InputData::load().await;
+        let bubble_texture: Texture2D = load_texture(Fish::SPRITE_WATER).await?;
+        let backgrounds = config.background_textures().await;
+        let mut fish_textures = HashMap::new();
+        for (_key, fish) in config.fishes.iter() {
+            fish_textures.insert(fish.texture.clone(), load_texture(&fish.texture).await?);
+        }
+
+        Ok(Resources {
+            config,
+            input_data,
+            backgrounds,
+            bubble_texture,
+            fish_textures,
+        })
+    }
+
+    async fn load() {
+        let resources_loading = start_coroutine(async move {
+            let resources = Resources::new().await.unwrap();
+            storage::store(resources);
+        });
+
+        let text_dim = measure_text("Filling up fish tank ...", None, 40, 1.0);
+        while resources_loading.is_done() == false {
+            clear_background(BLACK);
+            draw_text(
+                &format!(
+                    "Filling up fish tank {}",
+                    ".".repeat(((get_time() * 2.0) as usize) % 4)
+                ),
+                screen_width() / 2.0 - text_dim.width / 2.,
+                screen_height() / 2.0,
+                40.,
+                WHITE,
+            );
+
+            next_frame().await;
         }
     }
 }
@@ -889,12 +946,15 @@ async fn main() {
     .unwrap();
     let mut shader_activated = false;
 
-    let mut fish_tank = FishTank::load().await;
+    let mut fish_tank = FishTank::new();
     let mut show_text: ShowText = ShowText::empty();
 
-    fish_tank.populate();
-
     loop {
+        if !fish_tank.loaded {
+            Resources::load().await;
+            fish_tank.add_resources();
+        }
+
         if is_key_pressed(KeyCode::Escape) {
             return;
         }
