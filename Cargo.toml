@@ -1,13 +1,12 @@
 [package]
 name = "rusty-aquarium"
-version = "0.9.0"
+version = "0.10.0"
 authors = ["Olle Wreede <olle@wreede.se>"]
 edition = "2018"
 
 [dependencies]
-#macroquad = "0.3.0-alpha.17"
-macroquad = { version = "0.3.2", git = "https://github.com/not-fl3/macroquad" }
-macroquad-particles = { git = "https://github.com/not-fl3/macroquad" }
+macroquad = "0.3.3"
+macroquad-particles = "0.1.1"
 futures = "0.3.*"
 nanoserde = "0.1.*"
 

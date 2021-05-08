@@ -533,8 +533,9 @@ dependencies = [
 
 [[package]]
 name = "macroquad"
-version = "0.3.2"
-source = "git+https://github.com/not-fl3/macroquad#3e434465cba9a30647f91297aeb2633c4d863587"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1342e65e33e558518594cba52e3e702de16d65ec3cd3b89c86ab4eea32a474c"
 dependencies = [
  "bumpalo",
  "fontdue",
@@ -549,7 +550,8 @@ dependencies = [
 [[package]]
 name = "macroquad-particles"
 version = "0.1.1"
-source = "git+https://github.com/not-fl3/macroquad#3e434465cba9a30647f91297aeb2633c4d863587"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8505dc035e4d68799a53a459afef0bc345410039325b5928af2e0d83eb15de40"
 dependencies = [
  "macroquad",
 ]
@@ -557,7 +559,8 @@ dependencies = [
 [[package]]
 name = "macroquad_macro"
 version = "0.1.2"
-source = "git+https://github.com/not-fl3/macroquad#3e434465cba9a30647f91297aeb2633c4d863587"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88dc77cec2b364f6e0cba5701b20482ef5c7c87f5587ee9e9296240936eaaf8a"
 
 [[package]]
 name = "memchr"
@@ -926,7 +929,7 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rusty-aquarium"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "futures",
  "macroquad",
