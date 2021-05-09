@@ -41,13 +41,13 @@ The field `background` is optional, and can be used to select which
 background to show. The number should match the index of the wanted
 background from the `backgrounds` field in `config.json`.
 
-The field `school` should be an array of objects, one for each fish to
+The field `school` must be an array of objects, one for each fish to
 display.
 
-The `fish` field should match a name in the map of fishes in the
+The `fish` field must match a name in the map of fishes in the
 `config.json` file.
 
-The fields `size`, `speed`, and `bubbles` is a multiplier that will be applied
+The fields `size`, `speed`, and `bubbles` are multipliers that will be applied
 to the corresponding value from the fish configuration.
 
 ### File format
