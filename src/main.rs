@@ -238,6 +238,7 @@ pub struct Fish {
 }
 
 impl Fish {
+    const COLLISION_SIZE_DIFFERENCE: f32 = 2.0;
     //const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
     const SPRITE_WATER: &'static str = "assets/water.png";
     //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
@@ -333,6 +334,7 @@ impl Fish {
         for cbox in collision_boxes.iter() {
             if cbox.x != self.motion.position.x
                 && cbox.y != self.motion.position.y
+                && (cbox.w - collision_box.w).abs() < Fish::COLLISION_SIZE_DIFFERENCE
                 && collision_box.overlaps(cbox)
             {
                 return if cbox.x < self.motion.position.x {
@@ -406,7 +408,6 @@ struct FishTank {
     bubble_texture: Option<Texture2D>,
     fish_textures: HashMap<String, Texture2D>,
     backgrounds: ShowBackground,
-    //input_data: InputData,
     time_since_reload: f32,
     data_reload_time: u32,
     reloader: Option<Coroutine>,
