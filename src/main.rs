@@ -231,8 +231,9 @@ pub struct Fish {
     movement: Movement,
     size: Vec2,
     bubble_amount: u32,
-    //bounding_box: Rect,
     bounding_box_adjusted: Rect,
+    collision_aversion: f32,
+    already_collided: bool,
     texture: Texture2D,
     emitter: Emitter,
 }
@@ -246,6 +247,7 @@ impl Fish {
     fn new(
         fish_size: f32,
         max_speed: Vec2,
+        collision_aversion: f32,
         bounding_box: Rect,
         movement: Movement,
         texture: Texture2D,
@@ -266,8 +268,9 @@ impl Fish {
             },
             size,
             bubble_amount,
-            //bounding_box: bounding_box,
             bounding_box_adjusted: bbox_adjusted,
+            collision_aversion,
+            already_collided: false,
             movement,
             texture,
             emitter: Emitter::new(EmitterConfig {
@@ -321,6 +324,10 @@ impl Fish {
 
     fn tick(&mut self, delta: f32, collision_boxes: &Vec<Rect>) {
         let collision = self.collided(collision_boxes);
+        let collision_box = self.collision_box();
+        self.already_collided = collision_boxes
+            .iter()
+            .any(|cb| cb != &collision_box && cb.overlaps(&collision_box));
         let motion = self
             .movement
             .tick(self.motion, self.bounding_box_adjusted, collision);
@@ -330,12 +337,16 @@ impl Fish {
     }
 
     fn collided(&self, collision_boxes: &Vec<Rect>) -> Collision {
+        if self.already_collided {
+            return Collision::No;
+        }
         let collision_box = self.collision_box();
         for cbox in collision_boxes.iter() {
             if cbox.x != self.motion.position.x
                 && cbox.y != self.motion.position.y
                 && (cbox.w - collision_box.w).abs() < Fish::COLLISION_SIZE_DIFFERENCE
                 && collision_box.overlaps(cbox)
+                && rand::gen_range(0., 1.) > self.collision_aversion
             {
                 return if cbox.x < self.motion.position.x {
                     Collision::Left
@@ -555,6 +566,7 @@ impl FishTank {
         Fish::new(
             fish_config.randomized_size(),
             fish_config.randomized_speed(),
+            fish_config.collision_aversion,
             fish_config.area,
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
@@ -571,6 +583,7 @@ impl FishTank {
         Ok(Fish::new(
             fish_config.size * fish_data.size,
             fish_config.speed * fish_data.speed,
+            fish_config.collision_aversion,
             fish_config.area,
             fish_config.movement,
             *self.fish_textures.get(&fish_config.texture).unwrap(),
@@ -787,6 +800,7 @@ pub struct FishConfig {
     pub speed: Vec2,
     #[nserde(proxy = "FishSpeed")]
     pub speed_randomness: Vec2,
+    pub collision_aversion: f32,
     #[nserde(proxy = "FishArea")]
     pub area: Rect,
 }
@@ -801,6 +815,7 @@ impl Default for FishConfig {
             bubbles: 25,
             speed: vec2(15., 7.),
             speed_randomness: vec2(0.5, 0.5),
+            collision_aversion: 0.90,
             area: Rect {
                 x: 5.,
                 y: 5.,

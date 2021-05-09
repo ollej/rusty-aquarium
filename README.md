@@ -94,6 +94,7 @@ with default values for them.
             "size_randomness": 1.0,
             "movement": { "Crab": [] },
             "bubbles": 0,
+            "collision_aversion": 0.3,
             "speed": {
                 "x": 12.0,
                 "y": 4.0
@@ -130,6 +131,8 @@ with default values for them.
     movements: SingleSpeed, Accelerating, AcceleratingEdgeIdling, Crab, Random,
     * **bubbles** - Number of movement bubbles to show after this fish. Set to
     `0` to not display any bubbles.
+    * **collision_aversion** - A number between 0 and 1. The higher the
+    number, the less chance that the fish changes direction when colliding.
     * **speed** - The speed of the fish in X and Y direction.
     * **speed_randomness** - A multiplier used when randomizing fish speed.
     Should be between 0.0 and 1.0.
