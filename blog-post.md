@@ -73,7 +73,7 @@ Rusty Aquarium is developed with the Rust programming language using the
 Macroquad game engine. It can be compiled to run natively on Windows, Mac and
 Linux, as well as web assembly that can run in the browser.
 
-https://macroquad.rs
+[Macroquad](https://macroquad.rs)
 
 ## Input data
 
@@ -117,5 +117,5 @@ Make your analytics fun with the Rusty Aquarium!
 Download an executable for Windows, Mac or Linux, or a web assembly version to
 run in the browser:
 
-https://github.com/ollej/rusty-aquarium
+[Rusty Aquarium on GitHub](https://github.com/ollej/rusty-aquarium)
 
