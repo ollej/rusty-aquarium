@@ -33,7 +33,7 @@ on a wall, and a fish tank screensaver would be more calming.
 
 There has been multiple false starts trying to implement this. Once I
 downloaded the source code for a fish tank screensaver in C to modify it. But
-it didn't even compile. Another time I tried doing it with Unity, but the
+I couldn't even get it to compile. Another time I tried doing it with Unity, but the
 click heavy interface and video based tutorials weren't my thing.
 
 When we received screens for showing analytics data at work, I decided it was
@@ -64,9 +64,9 @@ art piece, for an extra nice touch.
 
 The file `assets/inputdata.json` is read to define what fish to display.
 
-The field background is optional, and can be used to select which background
+The field `background` is optional, and can be used to select which background
 to show. The number should match the index of the wanted background from the
-backgrounds field in config.json.
+`backgrounds` field in config.json.
 
 The field `school` must be an array of objects, one for each fish to display.
 
@@ -84,7 +84,7 @@ to the corresponding value from the fish configuration.
 
 An example included with the application will show system monitoring data.
 Each CPU is represented by a fish, and the usage will determine its size.
-Every process is represented by a small fish, as well as usage each disk.
+Every process is represented by a small fish, as well as usage of each disk.
 
 ### Web request tracking
 
