@@ -638,6 +638,7 @@ impl ShowLegend {
     const MARGIN: f32 = 50.;
     const FONT_SIZE: f32 = 40.;
     const LINE_OFFSET: f32 = 10.;
+    const FISH_SIZE: f32 = 50.;
 
     fn new() -> Self {
         Self { showing: false }
@@ -659,24 +660,57 @@ impl ShowLegend {
 
             let mut offset_y = Self::MARGIN * 2.;
             for line in legend.description.split("\n") {
-                offset_y = self.draw_line(offset_y, &line);
+                offset_y = self.draw_line(Self::MARGIN * 2., offset_y, &line);
             }
 
-            for fish_legend in legend.fish_legends.iter() {
-                offset_y = self.draw_line(offset_y, &fish_legend.description);
-            }
+            self.draw_fishes(offset_y, &legend.fish_legends);
         }
     }
 
-    fn draw_line(&self, offset_y: f32, text: &str) -> f32 {
-        draw_text(
-            text,
-            Self::MARGIN * 2.,
-            offset_y,
-            Self::FONT_SIZE,
-            Self::FONT_COLOR,
-        );
+    fn draw_line(&self, offset_x: f32, offset_y: f32, text: &str) -> f32 {
+        draw_text(text, offset_x, offset_y, Self::FONT_SIZE, Self::FONT_COLOR);
         offset_y + Self::FONT_SIZE + Self::LINE_OFFSET
+    }
+
+    fn draw_fishes(&self, start_y: f32, fish_legends: &Vec<FishLegend>) {
+        let resources = storage::get::<Resources>();
+        let fish_textures = &resources.fish_textures;
+        let fish_configs = &resources.config.fishes;
+        let mut offset_y = start_y;
+        let mut max_fish_height = 0.;
+        for (_key, texture) in fish_textures.into_iter() {
+            let height = Self::FISH_SIZE / (texture.width() / texture.height());
+            if height > max_fish_height {
+                max_fish_height = height;
+            }
+        }
+        for fish_legend in fish_legends.iter() {
+            if let Some(fish_config) = fish_configs.get(&fish_legend.fish) {
+                if let Some(texture) = fish_textures.get(&fish_config.texture) {
+                    let fish_height = Self::FISH_SIZE / (texture.width() / texture.height());
+                    draw_texture_ex(
+                        *texture,
+                        Self::MARGIN * 2.,
+                        offset_y,
+                        WHITE,
+                        DrawTextureParams {
+                            dest_size: Some(vec2(Self::FISH_SIZE, fish_height)),
+                            ..Default::default()
+                        },
+                    );
+
+                    let text_dim =
+                        measure_text(&fish_legend.description, None, Self::FONT_SIZE as u16, 1.0);
+                    self.draw_line(
+                        Self::MARGIN * 2. + Self::FISH_SIZE * 1.5,
+                        offset_y + text_dim.offset_y,
+                        &fish_legend.description,
+                    );
+
+                    offset_y = offset_y + max_fish_height + Self::LINE_OFFSET;
+                }
+            }
+        }
     }
 
     fn toggle_show(&mut self) {
