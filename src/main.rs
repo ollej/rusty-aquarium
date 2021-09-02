@@ -634,8 +634,10 @@ struct ShowLegend {
 
 impl ShowLegend {
     const BACKGROUND_COLOR: Color = Color::new(0.1, 0.1, 0.1, 0.5);
+    const FONT_COLOR: Color = WHITE;
     const MARGIN: f32 = 50.;
-    const LEGEND_FONT_SIZE: f32 = 40.;
+    const FONT_SIZE: f32 = 40.;
+    const LINE_OFFSET: f32 = 10.;
 
     fn new() -> Self {
         Self { showing: false }
@@ -654,14 +656,27 @@ impl ShowLegend {
                 screen_height() - Self::MARGIN * 2.,
                 Self::BACKGROUND_COLOR,
             );
-            draw_text(
-                &legend.description,
-                Self::MARGIN * 2.,
-                Self::MARGIN * 2.,
-                Self::LEGEND_FONT_SIZE,
-                WHITE,
-            );
+
+            let mut offset_y = Self::MARGIN * 2.;
+            for line in legend.description.split("\n") {
+                offset_y = self.draw_line(offset_y, &line);
+            }
+
+            for fish_legend in legend.fish_legends.iter() {
+                offset_y = self.draw_line(offset_y, &fish_legend.description);
+            }
         }
+    }
+
+    fn draw_line(&self, offset_y: f32, text: &str) -> f32 {
+        draw_text(
+            text,
+            Self::MARGIN * 2.,
+            offset_y,
+            Self::FONT_SIZE,
+            Self::FONT_COLOR,
+        );
+        offset_y + Self::FONT_SIZE + Self::LINE_OFFSET
     }
 
     fn toggle_show(&mut self) {
