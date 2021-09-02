@@ -54,7 +54,16 @@ to the corresponding value from the fish configuration.
 
 ```json
 {
-    "background": 1,
+    "background": 0,
+    "legend": {
+        "description": "A description to be shown when showing legend.",
+        "fish_legends": [
+            {
+                "fish": "crab",
+                "description": "A description of this fish type."
+            }
+        ]
+    },
     "school": [
         { "fish": "crab", "size": 1.0, "speed": 1.0, "bubbles": 1.0 },
     ]

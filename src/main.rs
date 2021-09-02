@@ -906,8 +906,21 @@ impl Default for FishData {
 }
 
 #[derive(Clone, DeJson)]
+pub struct FishLegend {
+    pub fish: String,
+    pub description: String,
+}
+
+#[derive(Clone, DeJson)]
+pub struct Legend {
+    pub description: String,
+    pub fish_legends: Vec<FishLegend>,
+}
+
+#[derive(Clone, DeJson)]
 pub struct InputData {
     pub background: Option<usize>,
+    pub legend: Option<Legend>,
     pub school: Vec<FishData>,
 }
 
@@ -915,6 +928,7 @@ impl Default for InputData {
     fn default() -> InputData {
         InputData {
             background: None,
+            legend: None,
             school: vec![],
         }
     }
