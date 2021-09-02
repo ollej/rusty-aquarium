@@ -444,6 +444,7 @@ impl FishTank {
 
     fn add_resources(&mut self) {
         let resources = storage::get::<Resources>();
+        storage::store(resources.input_data.clone());
         self.bubble_texture = Some(resources.bubble_texture);
         self.fish_keys = Vec::from_iter(resources.config.fishes.keys().cloned());
         self.data_reload_time = resources.config.data_reload_time;
@@ -624,6 +625,47 @@ impl ShowText {
             self.time -= delta;
             draw_text(self.text, self.x, self.y, 40., WHITE);
         }
+    }
+}
+
+struct ShowLegend {
+    pub showing: bool,
+}
+
+impl ShowLegend {
+    const BACKGROUND_COLOR: Color = Color::new(0.1, 0.1, 0.1, 0.5);
+    const MARGIN: f32 = 50.;
+    const LEGEND_FONT_SIZE: f32 = 40.;
+
+    fn new() -> Self {
+        Self { showing: false }
+    }
+
+    fn draw(&self) {
+        if !self.showing {
+            return;
+        }
+        let input_data = storage::get_mut::<InputData>();
+        if let Some(legend) = &input_data.legend {
+            draw_rectangle(
+                Self::MARGIN,
+                Self::MARGIN,
+                screen_width() - Self::MARGIN * 2.,
+                screen_height() - Self::MARGIN * 2.,
+                Self::BACKGROUND_COLOR,
+            );
+            draw_text(
+                &legend.description,
+                Self::MARGIN * 2.,
+                Self::MARGIN * 2.,
+                Self::LEGEND_FONT_SIZE,
+                WHITE,
+            );
+        }
+    }
+
+    fn toggle_show(&mut self) {
+        self.showing = !self.showing
     }
 }
 
@@ -978,6 +1020,7 @@ async fn main() {
 
     let mut fish_tank = FishTank::new();
     let mut show_text: ShowText = ShowText::empty();
+    let mut show_legend: ShowLegend = ShowLegend::new();
 
     loop {
         if !fish_tank.loaded {
@@ -1024,6 +1067,9 @@ async fn main() {
         if is_key_pressed(KeyCode::D) {
             show_text = ShowText::new("Reloading data...");
             fish_tank.reload_data();
+        }
+        if is_key_pressed(KeyCode::L) || is_key_pressed(KeyCode::I) {
+            show_legend.toggle_show();
         }
 
         // Update fish positions
@@ -1104,6 +1150,7 @@ async fn main() {
         }
 
         show_text.draw(delta);
+        show_legend.draw();
 
         next_frame().await
     }
