@@ -663,7 +663,7 @@ impl ShowBackground {
     fn tick(&mut self, delta: f32) {
         self.time += delta;
 
-        if self.time > self.switch_time && self.switching {
+        if self.time > self.switch_time && self.switching && self.switch_time > 0. {
             self.next();
         }
     }
