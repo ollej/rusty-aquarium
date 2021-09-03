@@ -31,6 +31,8 @@ Use these keys to control the fish tank.
 * **Down** - Remove the latest added fish from the tank.
 * **C** - Reload `config.json` file. Does not currently reload images.
 * **D** - Force reload of `inputdata.json`.
+* **L** / **I** - Show screen with description of fishes.
+* **H** - Display help screen with shortcuts.
 
 Generate input data
 -------------------
@@ -49,6 +51,10 @@ The `fish` field must match a name in the map of fishes in the
 
 The fields `size`, `speed`, and `bubbles` are multipliers that will be applied
 to the corresponding value from the fish configuration.
+
+The `legend` field is optional, and can be used to send information to show
+when opening the legend screen. The `description` will be shown at the top,
+and each fish_legend will be shown in a list below it.
 
 ### File format
 
