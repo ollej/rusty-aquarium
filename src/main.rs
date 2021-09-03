@@ -638,7 +638,7 @@ impl ShowLegend {
     const MARGIN: f32 = 50.;
     const FONT_SIZE: f32 = 40.;
     const LINE_OFFSET: f32 = 10.;
-    const FISH_SIZE: f32 = 50.;
+    const FISH_SIZE: f32 = 75.;
 
     fn new() -> Self {
         Self { showing: false }
@@ -691,7 +691,7 @@ impl ShowLegend {
                     draw_texture_ex(
                         *texture,
                         Self::MARGIN * 2.,
-                        offset_y,
+                        offset_y + (max_fish_height - fish_height) / 2.,
                         WHITE,
                         DrawTextureParams {
                             dest_size: Some(vec2(Self::FISH_SIZE, fish_height)),
@@ -701,9 +701,11 @@ impl ShowLegend {
 
                     let text_dim =
                         measure_text(&fish_legend.description, None, Self::FONT_SIZE as u16, 1.0);
+                    let text_middle = text_dim.height / 2.0;
+                    let below_baseline = text_dim.height - text_dim.offset_y;
                     self.draw_line(
                         Self::MARGIN * 2. + Self::FISH_SIZE * 1.5,
-                        offset_y + text_dim.offset_y,
+                        offset_y - below_baseline + text_middle + max_fish_height / 2.,
                         &fish_legend.description,
                     );
 
