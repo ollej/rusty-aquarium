@@ -1,0 +1,13 @@
+Shortcuts
+
+ESC / Q - Quit program
+Left arrow - Toggle shader
+Right arrow - Switch to next background
+Space - Toggle locked background
+Enter - Repopulate aquarium with new fishes
+Up - Add a random fish
+Down - Remove a fish from the aquarium
+C - Reload configuration file
+D - Reload input data
+L / I - Show legend with fish descriptions
+H - Show this help screen

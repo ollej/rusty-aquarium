@@ -628,6 +628,50 @@ impl ShowText {
     }
 }
 
+struct ShowHelp {
+    pub showing: bool,
+}
+
+impl ShowHelp {
+    const BACKGROUND_COLOR: Color = Color::new(0.1, 0.1, 0.1, 0.5);
+    const FONT_COLOR: Color = WHITE;
+    const MARGIN: f32 = 50.;
+    const FONT_SIZE: f32 = 40.;
+    const LINE_OFFSET: f32 = 10.;
+    const HELP_TEXT: &'static str = include_str!("helptext.txt");
+
+    fn new() -> Self {
+        Self { showing: false }
+    }
+
+    fn draw(&self) {
+        if !self.showing {
+            return;
+        }
+        draw_rectangle(
+            Self::MARGIN,
+            Self::MARGIN,
+            screen_width() - Self::MARGIN * 2.,
+            screen_height() - Self::MARGIN * 2.,
+            Self::BACKGROUND_COLOR,
+        );
+
+        let mut offset_y = Self::MARGIN * 2.;
+        for line in Self::HELP_TEXT.split("\n") {
+            offset_y = self.draw_line(Self::MARGIN * 2., offset_y, &line);
+        }
+    }
+
+    fn draw_line(&self, offset_x: f32, offset_y: f32, text: &str) -> f32 {
+        draw_text(text, offset_x, offset_y, Self::FONT_SIZE, Self::FONT_COLOR);
+        offset_y + Self::FONT_SIZE + Self::LINE_OFFSET
+    }
+
+    fn toggle_show(&mut self) {
+        self.showing = !self.showing
+    }
+}
+
 struct ShowLegend {
     pub showing: bool,
 }
@@ -1082,8 +1126,9 @@ async fn main() {
     let mut shader_activated = false;
 
     let mut fish_tank = FishTank::new();
-    let mut show_text: ShowText = ShowText::empty();
-    let mut show_legend: ShowLegend = ShowLegend::new();
+    let mut show_text = ShowText::empty();
+    let mut show_legend = ShowLegend::new();
+    let mut show_help = ShowHelp::new();
 
     loop {
         if !fish_tank.loaded {
@@ -1133,6 +1178,9 @@ async fn main() {
         }
         if is_key_pressed(KeyCode::L) || is_key_pressed(KeyCode::I) {
             show_legend.toggle_show();
+        }
+        if is_key_pressed(KeyCode::H) {
+            show_help.toggle_show();
         }
 
         // Update fish positions
@@ -1214,6 +1262,7 @@ async fn main() {
 
         show_text.draw(delta);
         show_legend.draw();
+        show_help.draw();
 
         next_frame().await
     }
