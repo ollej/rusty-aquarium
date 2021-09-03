@@ -1091,7 +1091,7 @@ async fn main() {
             fish_tank.add_resources();
         }
 
-        if is_key_pressed(KeyCode::Escape) {
+        if is_key_pressed(KeyCode::Escape) || is_key_pressed(KeyCode::Q) {
             return;
         }
         if is_key_pressed(KeyCode::Left) || is_mouse_button_pressed(MouseButton::Middle) {

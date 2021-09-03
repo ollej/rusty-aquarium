@@ -1,11 +1,27 @@
 {
     "background": 0,
     "legend": {
-        "description": "Nothing here",
+        "description": "These are the different fishes in this aquarium.",
         "fish_legends": [
             {
+                "fish": "crab",
+                "description": "A happy rustacean!"
+            },
+            {
                 "fish": "clownfish",
-                "description": "Nemo"
+                "description": "You've found Nemo!"
+            },
+            {
+                "fish": "angelfish",
+                "description": "An angel from heaven above."
+            },
+            {
+                "fish": "goldfish",
+                "description": "There's gold in them thar hills!"
+            },
+            {
+                "fish": "seahorse",
+                "description": "A horse is a horse of course of course."
             }
         ]
     },
