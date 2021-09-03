@@ -720,14 +720,11 @@ impl ShowLegend {
     }
 
     fn find_max_height(&self, fish_textures: &HashMap<String, Texture2D>) -> f32 {
-        let mut max_height = 0.;
-        for (_key, texture) in fish_textures.into_iter() {
-            let height = Self::FISH_SIZE / (texture.width() / texture.height());
-            if height > max_height {
-                max_height = height;
-            }
-        }
-        max_height
+        fish_textures
+            .values()
+            .map(|texture| Self::FISH_SIZE / (texture.width() / texture.height()))
+            .max_by(|a, b| a.partial_cmp(&b).unwrap())
+            .unwrap()
     }
 
     fn toggle_show(&mut self) {
