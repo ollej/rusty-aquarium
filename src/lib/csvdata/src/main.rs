@@ -41,6 +41,10 @@ struct CliOptions {
     /// Path to output file to store json data
     #[structopt(short, long, parse(from_os_str), default_value = "inputdata.json")]
     pub output: PathBuf,
+
+    /// Listen to changes in file and automatically update output file
+    #[structopt(short, long)]
+    pub listen: bool,
 }
 
 fn parse_csv(path: &Path) -> Result<String, Box<dyn Error>> {
@@ -80,7 +84,7 @@ fn convert_file(input: &Path, output: &Path) {
 
 fn watch_file(input: &Path, output: &Path) {
     let (tx, rx) = channel();
-    let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
+    let mut watcher = watcher(tx, Duration::from_secs(10)).unwrap();
     watcher.watch(input, RecursiveMode::NonRecursive).unwrap();
 
     eprintln!("Watching file: {:?}", input);
@@ -94,5 +98,9 @@ fn watch_file(input: &Path, output: &Path) {
 
 fn main() {
     let opt = CliOptions::from_args();
-    watch_file(opt.file.as_path(), opt.output.as_path());
+    if opt.listen {
+        watch_file(opt.file.as_path(), opt.output.as_path());
+    } else {
+        convert_file(opt.file.as_path(), opt.output.as_path());
+    }
 }
