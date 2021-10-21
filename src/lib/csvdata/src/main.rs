@@ -1,5 +1,9 @@
+extern crate notify;
 use std::error::Error;
-use std::process;
+
+use notify::{watcher, RecursiveMode, Watcher};
+use std::sync::mpsc::channel;
+use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use serde_json;
@@ -23,9 +27,8 @@ struct Record {
     description: String,
 }
 
-fn convert_path() -> Result<(), Box<dyn Error>> {
+fn convert_path(path: String) -> Result<(), Box<dyn Error>> {
     let mut fishes = Vec::new();
-    let path = "fishdata.csv".to_string();
 
     let mut rdr = csv::Reader::from_path(path)?;
     for result in rdr.deserialize() {
@@ -46,9 +49,28 @@ fn convert_path() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn main() {
-    if let Err(err) = convert_path() {
-        println!("error converting csv: {}", err);
-        process::exit(1);
+fn watch_path(path: String) {
+    let (tx, rx) = channel();
+    let mut watcher = watcher(tx, Duration::from_secs(10)).unwrap();
+    watcher
+        .watch(path.to_string(), RecursiveMode::Recursive)
+        .unwrap();
+
+    loop {
+        match rx.recv() {
+            Ok(_event) => {
+                if let Err(err) = convert_path(path.to_string()) {
+                    eprintln!("error converting csv: {}", err);
+                } else {
+                    eprintln!("converted csv...");
+                }
+            }
+            Err(e) => eprintln!("watch error: {:?}", e),
+        }
     }
+}
+
+fn main() {
+    let path = "fishdata.csv";
+    watch_path(path.to_string());
 }
