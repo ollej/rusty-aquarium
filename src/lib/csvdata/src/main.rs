@@ -1,12 +1,13 @@
 extern crate notify;
-use std::error::Error;
-
 use notify::{watcher, RecursiveMode, Watcher};
-use std::sync::mpsc::channel;
-use std::time::Duration;
-
 use serde::{Deserialize, Serialize};
 use serde_json;
+use std::error::Error;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::sync::mpsc::channel;
+use std::time::Duration;
+use structopt::StructOpt;
 
 #[derive(Debug, Serialize)]
 pub struct FishData {
@@ -27,7 +28,22 @@ struct Record {
     description: String,
 }
 
-fn convert_path(path: String) -> Result<(), Box<dyn Error>> {
+#[derive(StructOpt, Debug)]
+#[structopt(
+    name = "rusty-slider",
+    about = "A small tool to display markdown files as a slideshow."
+)]
+struct CliOptions {
+    /// Path to input CSV file to convert
+    #[structopt(short, long, parse(from_os_str), default_value = "fishdata.csv")]
+    pub file: PathBuf,
+
+    /// Path to output file to store json data
+    #[structopt(short, long, parse(from_os_str), default_value = "inputdata.json")]
+    pub output: PathBuf,
+}
+
+fn parse_csv(path: &Path) -> Result<String, Box<dyn Error>> {
     let mut fishes = Vec::new();
 
     let mut rdr = csv::Reader::from_path(path)?;
@@ -44,33 +60,39 @@ fn convert_path(path: String) -> Result<(), Box<dyn Error>> {
 
     let data = InputData { school: fishes };
     let json = serde_json::to_string(&data)?;
-    println!("{}", json);
 
-    Ok(())
+    Ok(json)
 }
 
-fn watch_path(path: String) {
-    let (tx, rx) = channel();
-    let mut watcher = watcher(tx, Duration::from_secs(10)).unwrap();
-    watcher
-        .watch(path.to_string(), RecursiveMode::Recursive)
-        .unwrap();
+fn write_file(path: &Path, data: String) {
+    match fs::write(path, data) {
+        Ok(_) => eprintln!("Wrote file {:?}", path),
+        Err(err) => eprintln!("Couldn't write file to {:?}: {}", path, err),
+    }
+}
 
+fn convert_file(input: &Path, output: &Path) {
+    match parse_csv(input) {
+        Ok(json) => write_file(output, json),
+        Err(err) => eprintln!("error converting csv: {}", err),
+    }
+}
+
+fn watch_file(input: &Path, output: &Path) {
+    let (tx, rx) = channel();
+    let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
+    watcher.watch(input, RecursiveMode::NonRecursive).unwrap();
+
+    eprintln!("Watching file: {:?}", input);
     loop {
         match rx.recv() {
-            Ok(_event) => {
-                if let Err(err) = convert_path(path.to_string()) {
-                    eprintln!("error converting csv: {}", err);
-                } else {
-                    eprintln!("converted csv...");
-                }
-            }
+            Ok(_event) => convert_file(input, output),
             Err(e) => eprintln!("watch error: {:?}", e),
         }
     }
 }
 
 fn main() {
-    let path = "fishdata.csv";
-    watch_path(path.to_string());
+    let opt = CliOptions::from_args();
+    watch_file(opt.file.as_path(), opt.output.as_path());
 }
