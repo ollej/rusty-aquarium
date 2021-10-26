@@ -2,12 +2,15 @@ extern crate google_sheets4 as sheets4;
 extern crate hyper;
 extern crate hyper_rustls;
 extern crate yup_oauth2 as oauth2;
+use core::num::ParseIntError;
 use serde::Serialize;
 use sheets4::api::ValueRange;
 use sheets4::Sheets;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 use structopt::StructOpt;
+use tokio::{task, time};
 
 #[derive(Debug, Serialize)]
 pub struct FishData {
@@ -39,6 +42,28 @@ async fn connect_to_sheets_api() -> Sheets {
         hyper::Client::builder().build(hyper_rustls::HttpsConnector::with_native_roots()),
         auth,
     )
+}
+
+async fn get_spreadsheet_data(
+    hub: &Sheets,
+    spreadsheet: &String,
+) -> Result<ValueRange, Box<dyn std::error::Error>> {
+    let result = hub
+        .spreadsheets()
+        .values_get(spreadsheet, "Sheet1")
+        .doit()
+        .await;
+
+    match result {
+        Err(e) => Err(format!("Couldn't read spreadsheet: {:?}", e).into()),
+        Ok((_res, value)) => Ok(value),
+    }
+}
+
+async fn fetch_and_convert(hub: &Sheets, spreadsheet: &String, output_path: &Path) {
+    if let Ok(values) = get_spreadsheet_data(hub, &spreadsheet).await {
+        convert_data(values, output_path);
+    }
 }
 
 fn convert_data(data: ValueRange, output_path: &Path) {
@@ -74,6 +99,11 @@ fn write_file(path: &Path, data: String) {
     }
 }
 
+fn parse_duration(src: &str) -> Result<Duration, ParseIntError> {
+    let s: u64 = src.parse()?;
+    Ok(Duration::from_secs(s))
+}
+
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "googlesheetsdata",
@@ -87,22 +117,10 @@ struct CliOptions {
     /// Path to output file to store json data
     #[structopt(short, long, parse(from_os_str), default_value = "inputdata.json")]
     pub output: PathBuf,
-}
 
-async fn get_spreadsheet_data(
-    hub: Sheets,
-    spreadsheet: &String,
-) -> Result<ValueRange, Box<dyn std::error::Error>> {
-    let result = hub
-        .spreadsheets()
-        .values_get(spreadsheet, "Sheet1")
-        .doit()
-        .await;
-
-    match result {
-        Err(e) => Err(format!("Couldn't read spreadsheet: {:?}", e).into()),
-        Ok((_res, value)) => Ok(value),
-    }
+    /// Automatically regenerate the JSON file every N seconds
+    #[structopt(short, long, parse(try_from_str = parse_duration))]
+    pub interval: Option<Duration>,
 }
 
 #[tokio::main]
@@ -111,7 +129,18 @@ async fn main() {
 
     let hub: Sheets = connect_to_sheets_api().await;
 
-    if let Ok(values) = get_spreadsheet_data(hub, &opt.spreadsheet).await {
-        convert_data(values, opt.output.as_path());
+    if let Some(seconds) = opt.interval {
+        let forever = task::spawn(async move {
+            let mut interval = time::interval(seconds);
+
+            loop {
+                interval.tick().await;
+                fetch_and_convert(&hub, &opt.spreadsheet, opt.output.as_path()).await;
+            }
+        });
+
+        forever.await.expect("Forever failure");
+    } else {
+        fetch_and_convert(&hub, &opt.spreadsheet, opt.output.as_path()).await;
     }
 }
