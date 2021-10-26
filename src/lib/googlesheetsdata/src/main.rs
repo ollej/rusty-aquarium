@@ -4,7 +4,6 @@ extern crate hyper_rustls;
 extern crate yup_oauth2 as oauth2;
 use serde::Serialize;
 use sheets4::api::ValueRange;
-use sheets4::Error;
 use sheets4::Sheets;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -22,9 +21,28 @@ pub struct InputData {
     school: Vec<FishData>,
 }
 
+async fn connect_to_sheets_api() -> Sheets {
+    let secret = yup_oauth2::read_application_secret("credentials.json")
+        .await
+        .expect("client secret could not be read");
+
+    let auth = yup_oauth2::InstalledFlowAuthenticator::builder(
+        secret,
+        yup_oauth2::InstalledFlowReturnMethod::HTTPRedirect,
+    )
+    .persist_tokens_to_disk("tokencache.json")
+    .build()
+    .await
+    .unwrap();
+
+    Sheets::new(
+        hyper::Client::builder().build(hyper_rustls::HttpsConnector::with_native_roots()),
+        auth,
+    )
+}
+
 fn convert_data(data: ValueRange, output_path: &Path) {
     if let Some(input_data) = parse_data(data) {
-        println!("Fishes: {:?}", input_data);
         let json = serde_json::to_string(&input_data).expect("Failed generating JSON");
         write_file(output_path, json);
     }
@@ -71,46 +89,29 @@ struct CliOptions {
     pub output: PathBuf,
 }
 
-#[tokio::main]
-async fn main() {
-    let secret = yup_oauth2::read_application_secret("credentials.json")
-        .await
-        .expect("client secret could not be read");
-
-    let auth = yup_oauth2::InstalledFlowAuthenticator::builder(
-        secret,
-        yup_oauth2::InstalledFlowReturnMethod::HTTPRedirect,
-    )
-    .persist_tokens_to_disk("tokencache.json")
-    .build()
-    .await
-    .unwrap();
-
-    let hub = Sheets::new(
-        hyper::Client::builder().build(hyper_rustls::HttpsConnector::with_native_roots()),
-        auth,
-    );
-
-    let opt = CliOptions::from_args();
+async fn get_spreadsheet_data(
+    hub: Sheets,
+    spreadsheet: &String,
+) -> Result<ValueRange, Box<dyn std::error::Error>> {
     let result = hub
         .spreadsheets()
-        .values_get(&opt.spreadsheet, "Sheet1")
+        .values_get(spreadsheet, "Sheet1")
         .doit()
         .await;
 
     match result {
-        Err(e) => match e {
-            Error::HttpError(_)
-            | Error::Io(_)
-            | Error::MissingAPIKey
-            | Error::MissingToken(_)
-            | Error::Cancelled
-            | Error::UploadSizeLimitExceeded(_, _)
-            | Error::Failure(_)
-            | Error::BadRequest(_)
-            | Error::FieldClash(_)
-            | Error::JsonDecodeError(_, _) => println!("{}", e),
-        },
-        Ok((_res, value)) => convert_data(value, opt.output.as_path()),
+        Err(e) => Err(format!("Couldn't read spreadsheet: {:?}", e).into()),
+        Ok((_res, value)) => Ok(value),
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    let opt = CliOptions::from_args();
+
+    let hub: Sheets = connect_to_sheets_api().await;
+
+    if let Ok(values) = get_spreadsheet_data(hub, &opt.spreadsheet).await {
+        convert_data(values, opt.output.as_path());
     }
 }
