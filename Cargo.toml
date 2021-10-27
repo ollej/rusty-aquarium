@@ -2,7 +2,7 @@
 name = "rusty-aquarium"
 version = "0.12.0"
 authors = ["Olle Wreede <olle@wreede.se>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 macroquad = "0.3.9"
