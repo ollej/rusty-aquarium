@@ -40,8 +40,8 @@ pub struct InputData {
     school: Vec<FishData>,
 }
 
-async fn connect_to_sheets_api() -> Sheets {
-    let secret = yup_oauth2::read_application_secret("credentials.json")
+async fn connect_to_sheets_api(credentials: &PathBuf, tokencache: &PathBuf) -> Sheets {
+    let secret = yup_oauth2::read_application_secret(credentials)
         .await
         .expect("client secret could not be read");
 
@@ -49,7 +49,7 @@ async fn connect_to_sheets_api() -> Sheets {
         secret,
         yup_oauth2::InstalledFlowReturnMethod::HTTPRedirect,
     )
-    .persist_tokens_to_disk("tokencache.json")
+    .persist_tokens_to_disk(tokencache)
     .build()
     .await
     .unwrap();
@@ -137,13 +137,21 @@ struct CliOptions {
     /// Range of values to get from spreadsheet, like the name of a sheet
     #[structopt(short, long, default_value = "Sheet1")]
     pub range: String,
+
+    /// Path to Google OAuth2 credentials json file
+    #[structopt(short, long, parse(from_os_str), default_value = "credentials.json")]
+    pub credentials: PathBuf,
+
+    /// Path to file to store token authentication cache
+    #[structopt(short, long, parse(from_os_str), default_value = "tokencache.json")]
+    pub tokencache: PathBuf,
 }
 
 #[tokio::main]
 async fn main() {
     let opt = CliOptions::from_args();
 
-    let hub: Sheets = connect_to_sheets_api().await;
+    let hub: Sheets = connect_to_sheets_api(&opt.credentials, &opt.tokencache).await;
 
     if let Some(seconds) = opt.interval {
         let forever = task::spawn(async move {
