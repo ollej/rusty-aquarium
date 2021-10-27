@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Build release for mac
-cargo build --release
+cargo build --release --target x86_64-apple-darwin
 
 # Package mac zip
 mkdir -p ./target/RustyAquarium.app/Contents/MacOS
