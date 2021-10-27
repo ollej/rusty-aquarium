@@ -113,8 +113,7 @@ fn write_file(path: &Path, data: String) {
 }
 
 fn parse_duration(src: &str) -> Result<Duration, ParseIntError> {
-    let s: u64 = src.parse()?;
-    Ok(Duration::from_secs(s))
+    src.parse::<u64>().map(Duration::from_secs)
 }
 
 #[derive(StructOpt, Debug)]
