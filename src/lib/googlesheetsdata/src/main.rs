@@ -12,11 +12,27 @@ use std::time::Duration;
 use structopt::StructOpt;
 use tokio::{task, time};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct FishData {
     fish: String,
     size: f32,
     speed: f32,
+    bubbles: f32,
+}
+
+impl FishData {
+    fn from_vec(cells: &Vec<String>) -> Option<Self> {
+        cells.get(2).map(|fish| FishData {
+            fish: fish.to_string(),
+            size: cells.get(3).map_or(1.0, Self::parse),
+            speed: cells.get(4).map_or(1.0, Self::parse),
+            bubbles: cells.get(5).map_or(1.0, Self::parse),
+        })
+    }
+
+    fn parse(value: &String) -> f32 {
+        value.parse::<f32>().unwrap_or(1.0)
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -74,22 +90,18 @@ fn convert_data(data: ValueRange, output_path: &Path) {
 }
 
 fn parse_data(data: ValueRange) -> Option<InputData> {
-    if let Some(values) = data.values {
+    data.values.map(|values| {
         let mut fishes = Vec::new();
         for row in values.iter().skip(1) {
-            let count: usize = row[1].parse().unwrap();
-            for _ in 0..count {
-                fishes.push(FishData {
-                    fish: row[0].to_string(),
-                    size: 1.0,
-                    speed: 1.0,
-                });
+            let count: usize = row[1].parse().unwrap_or(1);
+            if let Some(fish) = FishData::from_vec(row) {
+                for _ in 0..count {
+                    fishes.push(fish.clone());
+                }
             }
         }
-        let data = InputData { school: fishes };
-        return Some(data);
-    }
-    None
+        InputData { school: fishes }
+    })
 }
 
 fn write_file(path: &Path, data: String) {
