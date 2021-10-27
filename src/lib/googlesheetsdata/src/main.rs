@@ -63,10 +63,11 @@ async fn connect_to_sheets_api() -> Sheets {
 async fn get_spreadsheet_data(
     hub: &Sheets,
     spreadsheet: &String,
+    range: &String,
 ) -> Result<ValueRange, Box<dyn std::error::Error>> {
     let result = hub
         .spreadsheets()
-        .values_get(spreadsheet, "Sheet1")
+        .values_get(spreadsheet, range)
         .doit()
         .await;
 
@@ -76,8 +77,8 @@ async fn get_spreadsheet_data(
     }
 }
 
-async fn fetch_and_convert(hub: &Sheets, spreadsheet: &String, output_path: &Path) {
-    if let Ok(values) = get_spreadsheet_data(hub, &spreadsheet).await {
+async fn fetch_and_convert(hub: &Sheets, spreadsheet: &String, range: &String, output_path: &Path) {
+    if let Ok(values) = get_spreadsheet_data(hub, spreadsheet, range).await {
         convert_data(values, output_path);
     }
 }
@@ -133,6 +134,10 @@ struct CliOptions {
     /// Automatically regenerate the JSON file every N seconds
     #[structopt(short, long, parse(try_from_str = parse_duration))]
     pub interval: Option<Duration>,
+
+    /// Range of values to get from spreadsheet, like the name of a sheet
+    #[structopt(short, long, default_value = "Sheet1")]
+    pub range: String,
 }
 
 #[tokio::main]
@@ -147,12 +152,12 @@ async fn main() {
 
             loop {
                 interval.tick().await;
-                fetch_and_convert(&hub, &opt.spreadsheet, opt.output.as_path()).await;
+                fetch_and_convert(&hub, &opt.spreadsheet, &opt.range, opt.output.as_path()).await;
             }
         });
 
         forever.await.expect("Forever failure");
     } else {
-        fetch_and_convert(&hub, &opt.spreadsheet, opt.output.as_path()).await;
+        fetch_and_convert(&hub, &opt.spreadsheet, &opt.range, opt.output.as_path()).await;
     }
 }
