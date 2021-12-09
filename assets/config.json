@@ -1,4 +1,5 @@
 {
+    "input_data_path": "assets/inputdata.json",
     "data_reload_time": 0,
     "background_switch_time": 60,
     "backgrounds": [
@@ -15,7 +16,7 @@
             "texture": "assets/ferris.png",
             "size": 7.0,
             "size_randomness": 1.0,
-            "movement": { "Crab": [] },
+            "movement": "Crab",
             "bubbles": 0,
             "collision_aversion": 0,
             "speed": {
@@ -37,7 +38,7 @@
             "texture": "assets/clownfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "AcceleratingEdgeIdling": [] },
+            "movement": "AcceleratingEdgeIdling",
             "bubbles": 25,
             "collision_aversion": 0.25,
             "speed": {
@@ -59,7 +60,7 @@
             "texture": "assets/angelfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "SingleSpeed": [] },
+            "movement": "SingleSpeed",
             "bubbles": 25,
             "collision_aversion": 0.1,
             "speed": {
@@ -81,7 +82,7 @@
             "texture": "assets/goldfish.png",
             "size": 6.0,
             "size_randomness": 1.0,
-            "movement": { "SingleSpeed": [] },
+            "movement": "SingleSpeed",
             "bubbles": 25,
             "collision_aversion": 0.25,
             "speed": {
@@ -103,7 +104,7 @@
             "texture": "assets/yellowfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "Random": [] },
+            "movement": "Random",
             "bubbles": 25,
             "collision_aversion": 0.3,
             "speed": {
@@ -125,7 +126,7 @@
             "texture": "assets/seahorse.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "Accelerating": [] },
+            "movement": "Accelerating",
             "bubbles": 5,
             "collision_aversion": 0.05,
             "speed": {
@@ -147,7 +148,7 @@
             "texture": "assets/royalgramma.png",
             "size": 5.0,
             "size_randomness": 0.5,
-            "movement": { "AcceleratingEdgeIdling": [] },
+            "movement": "AcceleratingEdgeIdling",
             "bubbles": 25,
             "collision_aversion": 0.4,
             "speed": {
@@ -169,7 +170,7 @@
             "texture": "assets/butterflyfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "Random": [] },
+            "movement": "Random",
             "bubbles": 25,
             "collision_aversion": 0.2,
             "speed": {
@@ -191,7 +192,7 @@
             "texture": "assets/lionfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "Accelerating": [] },
+            "movement": "Accelerating",
             "bubbles": 25,
             "collision_aversion": 0.6,
             "speed": {
@@ -213,7 +214,7 @@
             "texture": "assets/turtle.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "SingleSpeed": [] },
+            "movement": "SingleSpeed",
             "bubbles": 0,
             "collision_aversion": 0,
             "speed": {
@@ -235,7 +236,7 @@
             "texture": "assets/neontetra.png",
             "size": 4.0,
             "size_randomness": 0.5,
-            "movement": { "Accelerating": [] },
+            "movement": "Accelerating",
             "bubbles": 0,
             "collision_aversion": 0.95,
             "speed": {
@@ -257,7 +258,7 @@
             "texture": "assets/yellowangelfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "Random": [] },
+            "movement": "Random",
             "bubbles": 25,
             "collision_aversion": 0.3,
             "speed": {
@@ -279,7 +280,7 @@
             "texture": "assets/zebrafish.png",
             "size": 7.0,
             "size_randomness": 0.5,
-            "movement": { "AcceleratingEdgeIdling": [] },
+            "movement": "AcceleratingEdgeIdling",
             "bubbles": 10,
             "collision_aversion": 0.3,
             "speed": {

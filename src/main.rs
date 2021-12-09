@@ -134,7 +134,7 @@ impl Motion {
     }
 }
 
-#[derive(Copy, Clone, DeJson)]
+#[derive(Debug, Copy, Clone, DeJson)]
 pub enum Movement {
     SingleSpeed,
     Accelerating,
@@ -412,6 +412,7 @@ impl Fish {
 }
 
 struct FishTank {
+    input_data_path: Option<String>,
     fishes: Vec<Fish>,
     fish_configs: HashMap<String, FishConfig>,
     fish_keys: Vec<String>,
@@ -428,6 +429,7 @@ struct FishTank {
 impl FishTank {
     fn new() -> Self {
         Self {
+            input_data_path: None,
             fishes: Vec::new(),
             fish_keys: Vec::new(),
             fish_configs: HashMap::new(),
@@ -445,6 +447,7 @@ impl FishTank {
     fn add_resources(&mut self) {
         let resources = storage::get::<Resources>();
         storage::store(resources.input_data.clone());
+        self.input_data_path = resources.config.input_data_path.to_owned();
         self.bubble_texture = Some(resources.bubble_texture);
         self.fish_keys = Vec::from_iter(resources.config.fishes.keys().cloned());
         self.data_reload_time = resources.config.data_reload_time;
@@ -480,10 +483,12 @@ impl FishTank {
     }
 
     fn reload_data(&mut self) {
-        self.reloader = Some(start_coroutine(async move {
-            let data = InputData::load().await;
-            storage::store(data);
-        }));
+        if let Some(path) = self.input_data_path.to_owned() {
+            self.reloader = Some(start_coroutine(async move {
+                let data = InputData::load(path).await;
+                storage::store(data);
+            }));
+        }
     }
 
     fn update_data(&mut self) {
@@ -895,7 +900,11 @@ struct Resources {
 impl Resources {
     async fn new() -> Result<Resources, macroquad::prelude::FileError> {
         let config = Config::load().await;
-        let input_data = InputData::load().await;
+        let input_data_path = config
+            .input_data_path
+            .to_owned()
+            .expect("input_data_path missing");
+        let input_data = InputData::load(input_data_path).await;
         let bubble_texture: Texture2D = load_texture(Fish::SPRITE_WATER).await?;
         let backgrounds = config.background_textures().await;
         let mut fish_textures = HashMap::new();
@@ -937,7 +946,7 @@ impl Resources {
     }
 }
 
-#[derive(Clone, DeJson)]
+#[derive(Clone, DeJson, Debug)]
 #[nserde(default)]
 pub struct FishConfig {
     pub texture: String,
@@ -993,9 +1002,10 @@ impl FishConfig {
     }
 }
 
-#[derive(DeJson)]
-#[nserde(default)]
+#[derive(DeJson, Debug)]
 pub struct Config {
+    #[nserde(default = "assets/inputdata.json")]
+    pub input_data_path: Option<String>,
     pub data_reload_time: u32,
     pub background_switch_time: u32,
     pub backgrounds: Vec<String>,
@@ -1003,8 +1013,9 @@ pub struct Config {
 }
 
 impl Default for Config {
-    fn default() -> Config {
-        Config {
+    fn default() -> Self {
+        Self {
+            input_data_path: Some("assets/inputdata.json".to_string()),
             data_reload_time: 0,
             background_switch_time: 0,
             backgrounds: vec![],
@@ -1018,7 +1029,7 @@ impl Config {
         let json = load_string("assets/config.json")
             .await
             .unwrap_or("{}".to_string());
-        DeJson::deserialize_json(&json).unwrap_or(Config::default())
+        DeJson::deserialize_json(&json).expect("Failed parsing config")
     }
 
     async fn background_textures(&self) -> Vec<Texture2D> {
@@ -1074,8 +1085,8 @@ pub struct InputData {
 }
 
 impl Default for InputData {
-    fn default() -> InputData {
-        InputData {
+    fn default() -> Self {
+        Self {
             background: None,
             legend: None,
             school: vec![],
@@ -1084,11 +1095,9 @@ impl Default for InputData {
 }
 
 impl InputData {
-    async fn load() -> Self {
-        let json = load_string("assets/inputdata.json")
-            .await
-            .unwrap_or("{}".to_string());
-        DeJson::deserialize_json(&json).unwrap_or(InputData::default())
+    async fn load(path: String) -> Self {
+        let json = load_string(path.as_str()).await.unwrap_or("{}".to_string());
+        DeJson::deserialize_json(&json).unwrap_or(Self::default())
     }
 }
 

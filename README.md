@@ -97,6 +97,7 @@ with default values for them.
 
 ```json
 {
+    "input_data_path": "assets/inputdata.json",
     "data_reload_time": 10,
     "background_switch_time": 0,
     "backgrounds": [
@@ -107,7 +108,7 @@ with default values for them.
             "texture": "assets/ferris.png",
             "size": 7.0,
             "size_randomness": 1.0,
-            "movement": { "Crab": [] },
+            "movement": "Crab",
             "bubbles": 0,
             "collision_aversion": 0.3,
             "speed": {
