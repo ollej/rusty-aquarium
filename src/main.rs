@@ -1136,6 +1136,7 @@ async fn main() {
             fish_tank.add_resources();
         }
 
+        #[cfg(not(target_arch = "wasm32"))]
         if is_key_pressed(KeyCode::Escape) || is_key_pressed(KeyCode::Q) {
             return;
         }
