@@ -6,6 +6,7 @@ use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
 use macroquad_particles::{AtlasConfig, BlendMode, Emitter, EmitterConfig};
 use nanoserde::DeJson;
+use quad_net::http_request::RequestBuilder;
 use std::collections::HashMap;
 use std::iter::FromIterator;
 
@@ -1096,8 +1097,27 @@ impl Default for InputData {
 
 impl InputData {
     async fn load(path: String) -> Self {
-        let json = load_string(path.as_str()).await.unwrap_or("{}".to_string());
-        DeJson::deserialize_json(&json).unwrap_or(Self::default())
+        let json = if Self::is_url(&path) {
+            Self::load_url(path).await
+        } else {
+            load_string(path.as_str()).await.ok()
+        };
+        DeJson::deserialize_json(&json.unwrap_or("{}".to_string())).unwrap_or(Self::default())
+    }
+
+    fn is_url(path: &str) -> bool {
+        path.starts_with("http://") || path.starts_with("https://")
+    }
+
+    async fn load_url(path: String) -> Option<String> {
+        debug!("Loading URL: {}", path);
+        let mut request = RequestBuilder::new(path.as_str()).send();
+        loop {
+            if let Some(data) = request.try_recv() {
+                return data.ok();
+            }
+            next_frame().await;
+        }
     }
 }
 

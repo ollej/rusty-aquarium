@@ -22,7 +22,7 @@ Usage
 
 Use these keys to control the fish tank.
 
-* **Escape** - Exit the program.
+* **Escape** - Exit the program. Not available on web.
 * **Left** - Toggle shader.
 * **Right** - Switch to next background.
 * **Space** - Lock/Unlock automatic background switching.
@@ -92,6 +92,8 @@ The file `assets/config.json` can be used to configure the fish tank. It has
 some general configuration values, paths to PNG files to load for background
 images and fish sprites. It also defines which fish types are available,
 with default values for them.
+
+* `input_data_path` - Path to local file or full URL to inputdata.json file.
 
 ### File format
 
