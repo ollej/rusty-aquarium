@@ -63,8 +63,8 @@ jobs:
       - name: Zip release archive
         if: matrix.config.target == 'wasm32-unknown-unknown'
         run: |
-          cp target/${{ matrix.config.target }}/release/${{ matrix.config.artifact_name }} demo/index.html demo/gl.js demo/manifest.json .
-          zip ${{ matrix.config.zip_file }} ${{ matrix.config.artifact_name }} index.html gl.js manifest.json assets/*
+          cp target/${{ matrix.config.target }}/release/${{ matrix.config.artifact_name }} demo/index.html demo/mq_js_bundle.js demo/manifest.json .
+          zip ${{ matrix.config.zip_file }} ${{ matrix.config.artifact_name }} index.html mq_js_bundle.js manifest.json assets/*
       - name: Zip release archive
         if: matrix.config.target == 'x86_64-unknown-linux-gnu'
         run: tar -zcf ${{ matrix.config.zip_file }} assets/ -C target/${{ matrix.config.target }}/release/ ${{ matrix.config.artifact_name }}
