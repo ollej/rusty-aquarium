@@ -41,8 +41,7 @@ jobs:
       - name: Workaround MinGW issue # https://github.com/rust-lang/rust/issues/47048
         if: runner.os == 'Linux' && matrix.config.target == 'x86_64-pc-windows-gnu'
         run: |
-          sudo cp /usr/x86_64-w64-mingw32/lib/dllcrt2.o  ~/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/dllcrt2.o
-          sudo cp /usr/x86_64-w64-mingw32/lib/crt2.o  ~/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/crt2.o
+          sudo cp /usr/x86_64-w64-mingw32/lib/{*.a,*.o} ~/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-pc-windows-gnu/lib/
           echo "[target.x86_64-pc-windows-gnu]" >> ~/.cargo/config
           echo "linker = \"/usr/bin/x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
       - uses: actions-rs/cargo@v1
