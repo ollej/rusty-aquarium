@@ -35,7 +35,7 @@ jobs:
             target: 'wasm32-unknown-unknown'
         include:
           - os: ubuntu-latest
-            packages: libx11-dev libxi-dev libgl1-mesa-dev gcc-mingw-w64 libasound2-dev libssl-dev pkg-config mingw-w64-openssl
+            packages: libx11-dev libxi-dev libgl1-mesa-dev gcc-mingw-w64 libasound2-dev libssl-dev pkg-config
 
     steps:
       - uses: actions/checkout@v2
