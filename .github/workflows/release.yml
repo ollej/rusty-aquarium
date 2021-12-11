@@ -35,7 +35,7 @@ jobs:
             target: 'wasm32-unknown-unknown'
         include:
           - os: ubuntu-latest
-            packages: libx11-dev libxi-dev libgl1-mesa-dev gcc-mingw-w64 libasound2-dev libssl-dev pkg-config clang
+            packages: libx11-dev libxi-dev libgl1-mesa-dev gcc-mingw-w64 libasound2-dev libssl-dev pkg-config mingw-w64-openssl
 
     steps:
       - uses: actions/checkout@v2
@@ -57,8 +57,6 @@ jobs:
           echo "[target.x86_64-pc-windows-gnu]" >> ~/.cargo/config
           echo "linker = \"/usr/bin/x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
       - uses: actions-rs/cargo@v1
-        env:
-          TARGET_CC: clang
         with:
           command: build
           args: --release --locked --all-targets --target=${{ matrix.config.target }}
