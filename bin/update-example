@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+set -eu
+
+EXAMPLE_PATH=../../agical/rusty-aquarium-example/public/
+cp -pR demo/* "$EXAMPLE_PATH"
+cd "$EXAMPLE_PATH"
+if [[ -n $(git status -s) ]]; then
+    git add .
+    git commit -m "Update example"
+    git push
+fi

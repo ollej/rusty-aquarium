@@ -24,6 +24,7 @@ build-win = "bin/build-win"
 build-mac = "bin/build-mac"
 build-apk = "bin/build-apk"
 build-linux = "bin/build-linux"
+update-example = "bin/update-example"
 
 [package.metadata.android]
 assets = "assets"
