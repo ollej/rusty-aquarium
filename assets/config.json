@@ -1,19 +1,19 @@
 {
-    "input_data_path": "assets/inputdata.json",
+    "input_data_path": "inputdata.json",
     "data_reload_time": 0,
     "background_switch_time": 60,
     "backgrounds": [
-        "assets/background.png",
-        "assets/background2.png",
-        "assets/background3.png",
-        "assets/background4.png",
-        "assets/background5.png",
-        "assets/background6.png",
-        "assets/background7.png"
+        "background.png",
+        "background2.png",
+        "background3.png",
+        "background4.png",
+        "background5.png",
+        "background6.png",
+        "background7.png"
     ],
     "fishes": {
         "crab": {
-            "texture": "assets/ferris.png",
+            "texture": "ferris.png",
             "size": 7.0,
             "size_randomness": 1.0,
             "movement": "Crab",
@@ -35,7 +35,7 @@
             }
         },
         "clownfish": {
-            "texture": "assets/clownfish.png",
+            "texture": "clownfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "AcceleratingEdgeIdling",
@@ -57,7 +57,7 @@
             }
         },
         "angelfish": {
-            "texture": "assets/angelfish.png",
+            "texture": "angelfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "SingleSpeed",
@@ -79,7 +79,7 @@
             }
         },
         "goldfish": {
-            "texture": "assets/goldfish.png",
+            "texture": "goldfish.png",
             "size": 6.0,
             "size_randomness": 1.0,
             "movement": "SingleSpeed",
@@ -101,7 +101,7 @@
             }
         },
         "yellowfish": {
-            "texture": "assets/yellowfish.png",
+            "texture": "yellowfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "Random",
@@ -123,7 +123,7 @@
             }
         },
         "seahorse": {
-            "texture": "assets/seahorse.png",
+            "texture": "seahorse.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "Accelerating",
@@ -145,7 +145,7 @@
             }
         },
         "royalgramma": {
-            "texture": "assets/royalgramma.png",
+            "texture": "royalgramma.png",
             "size": 5.0,
             "size_randomness": 0.5,
             "movement": "AcceleratingEdgeIdling",
@@ -167,7 +167,7 @@
             }
         },
         "butterflyfish": {
-            "texture": "assets/butterflyfish.png",
+            "texture": "butterflyfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "Random",
@@ -189,7 +189,7 @@
             }
         },
         "lionfish": {
-            "texture": "assets/lionfish.png",
+            "texture": "lionfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "Accelerating",
@@ -211,7 +211,7 @@
             }
         },
         "turtle": {
-            "texture": "assets/turtle.png",
+            "texture": "turtle.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "SingleSpeed",
@@ -233,7 +233,7 @@
             }
         },
         "neontetra": {
-            "texture": "assets/neontetra.png",
+            "texture": "neontetra.png",
             "size": 4.0,
             "size_randomness": 0.5,
             "movement": "Accelerating",
@@ -255,7 +255,7 @@
             }
         },
         "yellowangelfish": {
-            "texture": "assets/yellowangelfish.png",
+            "texture": "yellowangelfish.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "Random",
@@ -277,7 +277,7 @@
             }
         },
         "zebrafish": {
-            "texture": "assets/zebrafish.png",
+            "texture": "zebrafish.png",
             "size": 7.0,
             "size_randomness": 0.5,
             "movement": "AcceleratingEdgeIdling",

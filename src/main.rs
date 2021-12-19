@@ -241,9 +241,9 @@ pub struct Fish {
 
 impl Fish {
     const COLLISION_SIZE_DIFFERENCE: f32 = 2.0;
-    //const SPRITE_BUBBLE: &'static str = "assets/bubble.png";
-    const SPRITE_WATER: &'static str = "assets/water.png";
-    //const SPRITE_YELLOWSUBMARINE: &'static str = "assets/yellowsubmarine.png";
+    //const SPRITE_BUBBLE: &'static str = "bubble.png";
+    const SPRITE_WATER: &'static str = "water.png";
+    //const SPRITE_YELLOWSUBMARINE: &'static str = "yellowsubmarine.png";
 
     fn new(
         fish_size: f32,
@@ -967,7 +967,7 @@ pub struct FishConfig {
 impl Default for FishConfig {
     fn default() -> FishConfig {
         FishConfig {
-            texture: "assets/ferris.png".to_string(),
+            texture: "ferris.png".to_string(),
             size: 7.,
             size_randomness: 0.5,
             movement: Movement::Accelerating,
@@ -1005,7 +1005,7 @@ impl FishConfig {
 
 #[derive(DeJson, Debug)]
 pub struct Config {
-    #[nserde(default = "assets/inputdata.json")]
+    #[nserde(default = "inputdata.json")]
     pub input_data_path: Option<String>,
     pub data_reload_time: u32,
     pub background_switch_time: u32,
@@ -1016,7 +1016,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            input_data_path: Some("assets/inputdata.json".to_string()),
+            input_data_path: Some("inputdata.json".to_string()),
             data_reload_time: 0,
             background_switch_time: 0,
             backgrounds: vec![],
@@ -1027,9 +1027,7 @@ impl Default for Config {
 
 impl Config {
     async fn load() -> Self {
-        let json = load_string("assets/config.json")
-            .await
-            .unwrap_or("{}".to_string());
+        let json = load_string("config.json").await.unwrap_or("{}".to_string());
         DeJson::deserialize_json(&json).expect("Failed parsing config")
     }
 
@@ -1136,6 +1134,7 @@ async fn main() {
 
     //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
 
+    macroquad::file::set_pc_assets_folder("assets");
     let crt_render_target = render_target(screen_width() as u32, screen_height() as u32);
     crt_render_target.texture.set_filter(FilterMode::Linear);
     let water_render_target = render_target(screen_width() as u32, screen_height() as u32);
