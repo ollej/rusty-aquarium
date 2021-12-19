@@ -28,6 +28,11 @@ update-example = "bin/update-example"
 
 [package.metadata.android]
 assets = "assets"
+version_code = 2
+version_name = "Abstract Abacus"
+
+[package.metadata.android.activity_attributes]
+"android:screenOrientation" = "userLandscape"
 
 [profile.release]
 opt-level = 'z'
