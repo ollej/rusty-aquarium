@@ -420,9 +420,9 @@ dependencies = [
 
 [[package]]
 name = "macroquad"
-version = "0.3.12"
+version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2cc6cf9b95c709d4fe49eeefb73f8a82a85c0a5eae71451a498b52692a99821"
+checksum = "8bbc44698249e98c7aedb8eef94b8806b5d68187c0c3d8c2a0912cb9efab1950"
 dependencies = [
  "bumpalo",
  "fontdue",
@@ -469,9 +469,9 @@ checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
 
 [[package]]
 name = "miniquad"
-version = "0.3.0-alpha.41"
+version = "0.3.0-alpha.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "84ce43265dbb9508bfe0f9713d84f468184e94e9930ea3ef7019887ee08c82b5"
+checksum = "75bba73cbdaa1cb8f7889fcbb083941eae39ad4257d47e0d8e819d1de9963ba0"
 dependencies = [
  "sapp-android",
  "sapp-darwin",
@@ -856,9 +856,9 @@ dependencies = [
 
 [[package]]
 name = "sapp-android"
-version = "0.1.10"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c0d0e6f562c01c533f693ac9c045d69cbeab24d2e16caaaa0e67d06ae6e0940"
+checksum = "27c54dc8d8fc38874a0e5cca3a8fba35c7db8e46a3d65f47d0fc999aa48d6a9f"
 dependencies = [
  "libc",
  "ndk-sys",
