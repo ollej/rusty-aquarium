@@ -7,8 +7,8 @@ edition = "2021"
 [dependencies]
 macroquad = "0.3.13"
 macroquad-particles = "0.1.1"
-futures = "0.3.*"
-nanoserde = "0.1.*"
+futures = "0.3.19"
+nanoserde = "0.1.29"
 quad-net = "0.1.1"
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 openssl = { version = "0.10.38", features = ["vendored"] }
