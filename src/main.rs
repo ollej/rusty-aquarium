@@ -1111,8 +1111,17 @@ impl InputData {
         debug!("Loading URL: {}", path);
         let mut request = RequestBuilder::new(path.as_str()).send();
         loop {
-            if let Some(data) = request.try_recv() {
-                return data.ok();
+            if let Some(result) = request.try_recv() {
+                return match result {
+                    Ok(data) => {
+                        debug!("Received inputdata");
+                        Some(data)
+                    }
+                    Err(error) => {
+                        debug!("Error reading inputdata: {}", error);
+                        None
+                    }
+                };
             }
             next_frame().await;
         }
