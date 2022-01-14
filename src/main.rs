@@ -413,53 +413,52 @@ impl Fish {
 }
 
 struct FishTank {
-    input_data_path: Option<String>,
     fishes: Vec<Fish>,
     fish_configs: HashMap<String, FishConfig>,
     fish_keys: Vec<String>,
     school: Vec<FishData>,
     bubble_texture: Option<Texture2D>,
     fish_textures: HashMap<String, Texture2D>,
-    backgrounds: ShowBackground,
-    time_since_reload: f32,
-    data_reload_time: u32,
+    scenes: Scenes,
     reloader: Option<Coroutine>,
     loaded: bool,
+    show_legend: ShowLegend,
 }
 
 impl FishTank {
     fn new() -> Self {
         Self {
-            input_data_path: None,
-            fishes: Vec::new(),
-            fish_keys: Vec::new(),
+            fishes: vec![],
+            fish_keys: vec![],
             fish_configs: HashMap::new(),
-            school: Vec::new(),
+            school: vec![],
             bubble_texture: None,
             fish_textures: HashMap::new(),
-            backgrounds: ShowBackground::empty(),
-            time_since_reload: 0.,
-            data_reload_time: 0,
+            scenes: Scenes::empty(),
             reloader: None,
             loaded: false,
+            show_legend: ShowLegend::empty(),
         }
     }
 
     fn add_resources(&mut self) {
         let resources = storage::get::<Resources>();
         storage::store(resources.input_data.clone());
-        self.input_data_path = resources.config.input_data_path.to_owned();
         self.bubble_texture = Some(resources.bubble_texture);
         self.fish_keys = Vec::from_iter(resources.config.fishes.keys().cloned());
-        self.data_reload_time = resources.config.data_reload_time;
         self.fish_configs = resources.config.fishes.clone();
         self.school = (*resources.input_data.school).to_vec();
         self.fish_textures = resources.fish_textures.clone();
-        self.backgrounds = ShowBackground::new(
-            resources.input_data.background,
-            resources.config.background_switch_time,
-            (*resources.backgrounds).to_vec(),
-        );
+        let scenes = resources
+            .config
+            .scenes
+            .clone()
+            .unwrap_or(vec![SceneConfig::new(
+                resources.config.input_data_path.clone(),
+                resources.config.display_time.clone(),
+            )]);
+        self.scenes = Scenes::new(scenes, (*resources.backgrounds).to_vec());
+        self.show_legend = ShowLegend::new(resources.input_data.legend.clone());
         self.populate();
         self.loaded = true;
     }
@@ -469,22 +468,21 @@ impl FishTank {
             if reloader.is_done() {
                 self.update_data();
                 self.reloader = None;
-                self.time_since_reload = 0.;
             } else {
                 return;
             }
         }
-        if self.data_reload_time == 0 {
+        if !self.scenes.is_switching() {
             return;
         }
-        self.time_since_reload += delta;
-        if self.time_since_reload > self.data_reload_time as f32 {
-            self.reload_data();
+        self.scenes.tick(delta);
+        if self.scenes.needs_reloading() {
+            self.next_scene();
         }
     }
 
     fn reload_data(&mut self) {
-        if let Some(path) = self.input_data_path.to_owned() {
+        if let Some(path) = self.scenes.input_data_path() {
             self.reloader = Some(start_coroutine(async move {
                 let data = InputData::load(path).await;
                 storage::store(data);
@@ -495,29 +493,33 @@ impl FishTank {
     fn update_data(&mut self) {
         let input_data = storage::get_mut::<InputData>();
         self.school = (*input_data.school).to_vec();
-        if let Some(background) = input_data.background {
-            self.backgrounds.set(background);
-        }
+        self.show_legend = ShowLegend::new(input_data.legend.clone());
         self.repopulate();
     }
 
     fn update_config(&mut self, config: Config) {
         self.fish_configs = config.fishes;
-        self.data_reload_time = config.data_reload_time;
         self.repopulate();
     }
 
-    fn next_background(&mut self) {
-        self.backgrounds.next();
+    fn next_scene(&mut self) {
+        if self.show_legend.showing {
+            self.show_legend.hide();
+        }
+        self.scenes.next();
+        self.reload_data();
     }
 
-    fn toggle_switching_backgrounds(&mut self) -> bool {
-        self.backgrounds.toggle_switching()
+    fn toggle_switching_scenes(&mut self) -> bool {
+        self.scenes.toggle_switching()
+    }
+
+    fn toggle_legend(&mut self) {
+        self.show_legend.toggle_show(self.scenes.legend());
     }
 
     fn tick(&mut self, delta: f32) {
         self.tick_data_reloading(delta);
-        self.backgrounds.tick(delta);
         let collision_boxes = self
             .fishes
             .iter()
@@ -529,10 +531,14 @@ impl FishTank {
     }
 
     fn draw(&mut self, rect: Vec2) {
-        self.backgrounds.draw(rect);
+        self.scenes.draw(rect);
         for fish in self.fishes.iter_mut() {
             fish.draw();
         }
+    }
+
+    fn draw_legend(&self) {
+        self.show_legend.draw();
     }
 
     fn populate(&mut self) {
@@ -680,6 +686,8 @@ impl ShowHelp {
 
 struct ShowLegend {
     pub showing: bool,
+    default_legend: Option<Legend>,
+    current_legend: Option<Legend>,
 }
 
 impl ShowLegend {
@@ -690,16 +698,27 @@ impl ShowLegend {
     const LINE_OFFSET: f32 = 10.;
     const FISH_SIZE: f32 = 75.;
 
-    fn new() -> Self {
-        Self { showing: false }
+    fn new(legend: Option<Legend>) -> Self {
+        Self {
+            showing: false,
+            default_legend: legend,
+            current_legend: None,
+        }
+    }
+
+    fn empty() -> Self {
+        Self {
+            showing: false,
+            default_legend: None,
+            current_legend: None,
+        }
     }
 
     fn draw(&self) {
         if !self.showing {
             return;
         }
-        let input_data = storage::get_mut::<InputData>();
-        if let Some(legend) = &input_data.legend {
+        if let Some(legend) = &self.current_legend {
             draw_rectangle(
                 Self::MARGIN,
                 Self::MARGIN,
@@ -777,55 +796,63 @@ impl ShowLegend {
             .unwrap()
     }
 
-    fn toggle_show(&mut self) {
-        self.showing = !self.showing
+    fn hide(&mut self) {
+        self.showing = false;
+        self.current_legend = None;
+    }
+
+    fn toggle_show(&mut self, scene_legend: Option<Legend>) {
+        self.showing = !self.showing;
+        if self.showing {
+            self.current_legend = self.default_legend.clone().or(scene_legend);
+        }
     }
 }
 
-struct ShowBackground {
-    background: usize,
+struct Scenes {
+    current_scene: usize,
+    scenes: Vec<SceneConfig>,
     backgrounds: Vec<Texture2D>,
     time: f32,
-    switch_time: f32,
     switching: bool,
 }
 
-impl ShowBackground {
-    fn new(
-        selected_background: Option<usize>,
-        switch_time: u32,
-        backgrounds: Vec<Texture2D>,
-    ) -> Self {
+impl Scenes {
+    fn new(scenes: Vec<SceneConfig>, backgrounds: Vec<Texture2D>) -> Self {
         Self {
-            background: selected_background.unwrap_or(0),
+            current_scene: 0,
+            scenes,
             backgrounds,
             time: 0.,
-            switch_time: switch_time as f32,
-            switching: switch_time > 0,
+            switching: true,
         }
     }
 
     fn empty() -> Self {
-        ShowBackground {
-            background: 0,
+        Scenes {
+            current_scene: 0,
+            scenes: vec![SceneConfig::default()],
             backgrounds: vec![],
             time: 0.,
-            switch_time: 0.,
             switching: false,
         }
     }
 
+    fn is_switching(&self) -> bool {
+        self.switching && self.display_time() > 0
+    }
+
     fn tick(&mut self, delta: f32) {
         self.time += delta;
+    }
 
-        if self.time > self.switch_time && self.switching && self.switch_time > 0. {
-            self.next();
-        }
+    fn needs_reloading(&self) -> bool {
+        self.is_switching() && self.time > self.display_time() as f32
     }
 
     fn draw(&self, rect: Vec2) {
         draw_texture_ex(
-            self.backgrounds[self.background],
+            self.backgrounds[self.scene_background()],
             0.,
             0.,
             WHITE,
@@ -836,19 +863,27 @@ impl ShowBackground {
         );
     }
 
-    fn set(&mut self, background: usize) {
-        if background < self.backgrounds.len() {
-            self.background = background;
-            self.time = 0.0;
-            self.switching = false;
-        }
+    fn display_time(&self) -> u32 {
+        self.scenes[self.current_scene].display_time
+    }
+
+    fn scene_background(&self) -> usize {
+        self.scenes[self.current_scene].background.unwrap_or(0)
+    }
+
+    fn input_data_path(&self) -> Option<String> {
+        self.scenes[self.current_scene].input_data_path.clone()
+    }
+
+    fn legend(&self) -> Option<Legend> {
+        self.scenes[self.current_scene].legend.clone()
     }
 
     fn next(&mut self) {
         self.time = 0.;
-        self.background += 1;
-        if self.background == self.backgrounds.len() {
-            self.background = 0;
+        self.current_scene += 1;
+        if self.current_scene == self.scenes.len() {
+            self.current_scene = 0;
         }
     }
 
@@ -965,8 +1000,8 @@ pub struct FishConfig {
 }
 
 impl Default for FishConfig {
-    fn default() -> FishConfig {
-        FishConfig {
+    fn default() -> Self {
+        Self {
             texture: "ferris.png".to_string(),
             size: 7.,
             size_randomness: 0.5,
@@ -1003,13 +1038,44 @@ impl FishConfig {
     }
 }
 
+#[derive(Clone, DeJson, Debug)]
+#[nserde(default)]
+pub struct SceneConfig {
+    pub input_data_path: Option<String>,
+    pub display_time: u32,
+    pub background: Option<usize>,
+    pub legend: Option<Legend>,
+}
+
+impl Default for SceneConfig {
+    fn default() -> Self {
+        Self {
+            input_data_path: None,
+            display_time: 30,
+            background: None,
+            legend: None,
+        }
+    }
+}
+
+impl SceneConfig {
+    fn new(input_data_path: Option<String>, display_time: u32) -> Self {
+        Self {
+            input_data_path,
+            display_time,
+            background: None,
+            legend: None,
+        }
+    }
+}
+
 #[derive(DeJson, Debug)]
 pub struct Config {
     #[nserde(default = "inputdata.json")]
     pub input_data_path: Option<String>,
-    pub data_reload_time: u32,
-    pub background_switch_time: u32,
+    pub display_time: u32,
     pub backgrounds: Vec<String>,
+    pub scenes: Option<Vec<SceneConfig>>,
     pub fishes: HashMap<String, FishConfig>,
 }
 
@@ -1017,9 +1083,9 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             input_data_path: Some("inputdata.json".to_string()),
-            data_reload_time: 0,
-            background_switch_time: 0,
+            display_time: 0,
             backgrounds: vec![],
+            scenes: None,
             fishes: HashMap::new(),
         }
     }
@@ -1064,13 +1130,13 @@ impl Default for FishData {
     }
 }
 
-#[derive(Clone, DeJson)]
+#[derive(Clone, DeJson, Debug)]
 pub struct FishLegend {
     pub fish: String,
     pub description: String,
 }
 
-#[derive(Clone, DeJson)]
+#[derive(Clone, DeJson, Debug)]
 pub struct Legend {
     pub description: String,
     pub fish_legends: Vec<FishLegend>,
@@ -1078,7 +1144,6 @@ pub struct Legend {
 
 #[derive(Clone, DeJson)]
 pub struct InputData {
-    pub background: Option<usize>,
     pub legend: Option<Legend>,
     pub school: Vec<FishData>,
 }
@@ -1086,7 +1151,6 @@ pub struct InputData {
 impl Default for InputData {
     fn default() -> Self {
         Self {
-            background: None,
             legend: None,
             school: vec![],
         }
@@ -1108,17 +1172,13 @@ impl InputData {
     }
 
     async fn load_url(path: String) -> Option<String> {
-        debug!("Loading URL: {}", path);
         let mut request = RequestBuilder::new(path.as_str()).send();
         loop {
             if let Some(result) = request.try_recv() {
                 return match result {
-                    Ok(data) => {
-                        debug!("Received inputdata");
-                        Some(data)
-                    }
+                    Ok(data) => Some(data),
                     Err(error) => {
-                        debug!("Error reading inputdata: {}", error);
+                        error!("Error reading inputdata: {}", error);
                         None
                     }
                 };
@@ -1142,8 +1202,6 @@ async fn main() {
     const SCR_W: f32 = 100.0;
     const SCR_H: f32 = 62.5;
 
-    //let submarine: Texture2D = load_texture(Fish::SPRITE_YELLOWSUBMARINE).await;
-
     macroquad::file::set_pc_assets_folder("assets");
     let crt_render_target = render_target(screen_width() as u32, screen_height() as u32);
     crt_render_target.texture.set_filter(FilterMode::Linear);
@@ -1165,7 +1223,6 @@ async fn main() {
 
     let mut fish_tank = FishTank::new();
     let mut show_text = ShowText::empty();
-    let mut show_legend = ShowLegend::new();
     let mut show_help = ShowHelp::new();
 
     loop {
@@ -1187,14 +1244,14 @@ async fn main() {
             };
         }
         if is_key_pressed(KeyCode::Right) || is_mouse_button_pressed(MouseButton::Left) {
-            fish_tank.next_background();
-            show_text = ShowText::new("Next background");
+            fish_tank.next_scene();
+            show_text = ShowText::new("Next scene");
         }
         if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Right) {
-            show_text = if fish_tank.toggle_switching_backgrounds() {
-                ShowText::new("Switching backgrounds")
+            show_text = if fish_tank.toggle_switching_scenes() {
+                ShowText::new("Switching scenes")
             } else {
-                ShowText::new("Background locked")
+                ShowText::new("Scene locked")
             };
         }
         if is_key_pressed(KeyCode::Enter) {
@@ -1216,7 +1273,7 @@ async fn main() {
             fish_tank.reload_data();
         }
         if is_key_pressed(KeyCode::L) || is_key_pressed(KeyCode::I) {
-            show_legend.toggle_show();
+            fish_tank.toggle_legend();
         }
         if is_key_pressed(KeyCode::H) {
             show_help.toggle_show();
@@ -1300,7 +1357,7 @@ async fn main() {
         }
 
         show_text.draw(delta);
-        show_legend.draw();
+        fish_tank.draw_legend();
         show_help.draw();
 
         next_frame().await

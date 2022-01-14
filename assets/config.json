@@ -1,7 +1,6 @@
 {
     "input_data_path": "inputdata.json",
-    "data_reload_time": 0,
-    "background_switch_time": 60,
+    "display_time": 60,
     "backgrounds": [
         "background.png",
         "background2.png",
@@ -10,6 +9,31 @@
         "background5.png",
         "background6.png",
         "background7.png"
+    ],
+    "scenes": [
+        {
+            "input_data_path": "inputdata.json",
+            "display_time": 5,
+            "background": 3,
+            "legend": {
+                "description": "This will be overridden by the inputdata",
+                "fish_legends": []
+            }
+        },
+        {
+            "input_data_path": "inputdata2.json",
+            "display_time": 5,
+            "background": 2,
+            "legend": {
+                "description": "These are the different fishes in this aquarium.",
+                "fish_legends": [
+                    {
+                        "fish": "crab",
+                        "description": "A happy rustacean!"
+                    }
+                ]
+            }
+        }
     ],
     "fishes": {
         "crab": {
