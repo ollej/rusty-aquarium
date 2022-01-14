@@ -1,0 +1,6 @@
+{
+    "school": [
+        { "fish": "crab", "size": 1.0, "speed": 1.0, "bubbles": 0.0 },
+        { "fish": "clownfish", "size": 5.0, "speed": 2.0, "bubbles": 1.0 },
+    ]
+}
