@@ -117,7 +117,7 @@ pub mod water_particle {
     use super::*;
 
     pub fn material() -> ParticleMaterial {
-        return ParticleMaterial::new(water_particle::VERTEX, water_particle::PARTICLE);
+        ParticleMaterial::new(water_particle::VERTEX, water_particle::PARTICLE)
     }
 
     pub const VERTEX: &str = r#"#version 100

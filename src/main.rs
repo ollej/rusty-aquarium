@@ -78,9 +78,9 @@ impl Motion {
 
     fn random_idling(&mut self) {
         if self.idle {
-            self.idle = self.idle ^ (Self::random_percent() < Movement::CHANCE_IDLE_END);
+            self.idle ^= Self::random_percent() < Movement::CHANCE_IDLE_END;
         } else {
-            self.idle = self.idle ^ (Self::random_percent() < Movement::CHANCE_IDLE_START);
+            self.idle ^= Self::random_percent() < Movement::CHANCE_IDLE_START;
         }
     }
 
@@ -323,7 +323,7 @@ impl Fish {
         vec2(rand::gen_range(0.1, 0.2), rand::gen_range(0.1, 0.2))
     }
 
-    fn tick(&mut self, delta: f32, collision_boxes: &Vec<Rect>) {
+    fn tick(&mut self, delta: f32, collision_boxes: &[Rect]) {
         let collision = self.collided(collision_boxes);
         let collision_box = self.collision_box();
         self.already_collided = collision_boxes
@@ -337,7 +337,7 @@ impl Fish {
             .move_position(delta, motion, self.bounding_box_adjusted);
     }
 
-    fn collided(&self, collision_boxes: &Vec<Rect>) -> Collision {
+    fn collided(&self, collision_boxes: &[Rect]) -> Collision {
         if self.already_collided {
             return Collision::No;
         }
@@ -449,14 +449,12 @@ impl FishTank {
         self.fish_configs = resources.config.fishes.clone();
         self.school = (*resources.input_data.school).to_vec();
         self.fish_textures = resources.fish_textures.clone();
-        let scenes = resources
-            .config
-            .scenes
-            .clone()
-            .unwrap_or(vec![SceneConfig::new(
+        let scenes = resources.config.scenes.clone().unwrap_or_else(|| {
+            vec![SceneConfig::new(
                 resources.config.input_data_path.clone(),
-                resources.config.display_time.clone(),
-            )]);
+                resources.config.display_time,
+            )]
+        });
         self.scenes = Scenes::new(scenes, (*resources.backgrounds).to_vec());
         self.show_legend = ShowLegend::new(resources.input_data.legend.clone());
         self.populate();
@@ -524,7 +522,7 @@ impl FishTank {
             .fishes
             .iter()
             .map(|fish| fish.collision_box())
-            .collect();
+            .collect::<Vec<macroquad::math::Rect>>();
         for fish in self.fishes.iter_mut() {
             fish.tick(delta, &collision_boxes);
         }
@@ -564,7 +562,7 @@ impl FishTank {
     }
 
     fn remove_fish(&mut self) {
-        if self.fishes.len() > 0 {
+        if !self.fishes.is_empty() {
             self.fishes.pop();
         }
     }
@@ -669,8 +667,8 @@ impl ShowHelp {
         );
 
         let mut offset_y = Self::MARGIN * 2.;
-        for line in Self::HELP_TEXT.split("\n") {
-            offset_y = self.draw_line(Self::MARGIN * 2., offset_y, &line);
+        for line in Self::HELP_TEXT.split('\n') {
+            offset_y = self.draw_line(Self::MARGIN * 2., offset_y, line);
         }
     }
 
@@ -728,8 +726,8 @@ impl ShowLegend {
             );
 
             let mut offset_y = Self::MARGIN * 2.;
-            for line in legend.description.split("\n") {
-                offset_y = self.draw_line(Self::MARGIN * 2., offset_y, &line);
+            for line in legend.description.split('\n') {
+                offset_y = self.draw_line(Self::MARGIN * 2., offset_y, line);
             }
 
             self.draw_fishes(offset_y, &legend.fish_legends);
@@ -741,7 +739,7 @@ impl ShowLegend {
         offset_y + Self::FONT_SIZE + Self::LINE_OFFSET
     }
 
-    fn draw_fishes(&self, start_y: f32, fish_legends: &Vec<FishLegend>) {
+    fn draw_fishes(&self, start_y: f32, fish_legends: &[FishLegend]) {
         let resources = storage::get::<Resources>();
         let fish_textures = &resources.fish_textures;
         let fish_configs = &resources.config.fishes;
@@ -792,7 +790,7 @@ impl ShowLegend {
         fish_textures
             .values()
             .map(|texture| Self::FISH_SIZE / (texture.width() / texture.height()))
-            .max_by(|a, b| a.partial_cmp(&b).unwrap())
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap()
     }
 
@@ -964,7 +962,7 @@ impl Resources {
         });
 
         let text_dim = measure_text("Filling up fish tank ...", None, 40, 1.0);
-        while resources_loading.is_done() == false {
+        while !resources_loading.is_done() {
             clear_background(BLACK);
             draw_text(
                 &format!(
@@ -1022,7 +1020,7 @@ impl Default for FishConfig {
 
 impl FishConfig {
     fn randomized_size(&self) -> f32 {
-        return self.size - self.size * rand::gen_range(0.0, self.size_randomness);
+        self.size - self.size * rand::gen_range(0.0, self.size_randomness)
     }
 
     fn randomized_speed(&self) -> Vec2 {
@@ -1030,7 +1028,7 @@ impl FishConfig {
             rand::gen_range(0., self.speed_randomness.x),
             rand::gen_range(0., self.speed_randomness.y),
         );
-        return self.speed - self.speed * random_speed;
+        self.speed - self.speed * random_speed
     }
 
     fn randomized_bubble_amount(&self) -> u32 {
@@ -1093,7 +1091,9 @@ impl Default for Config {
 
 impl Config {
     async fn load() -> Self {
-        let json = load_string("config.json").await.unwrap_or("{}".to_string());
+        let json = load_string("config.json")
+            .await
+            .unwrap_or_else(|_| "{}".to_string());
         DeJson::deserialize_json(&json).expect("Failed parsing config")
     }
 
@@ -1102,11 +1102,11 @@ impl Config {
             .backgrounds
             .iter()
             .map(|background| load_texture(background));
-        return join_all(background_futures)
+        join_all(background_futures)
             .await
             .into_iter()
             .flatten()
-            .collect();
+            .collect()
     }
 }
 
@@ -1142,19 +1142,10 @@ pub struct Legend {
     pub fish_legends: Vec<FishLegend>,
 }
 
-#[derive(Clone, DeJson)]
+#[derive(Clone, DeJson, Default)]
 pub struct InputData {
     pub legend: Option<Legend>,
     pub school: Vec<FishData>,
-}
-
-impl Default for InputData {
-    fn default() -> Self {
-        Self {
-            legend: None,
-            school: vec![],
-        }
-    }
 }
 
 impl InputData {
@@ -1164,7 +1155,7 @@ impl InputData {
         } else {
             load_string(path.as_str()).await.ok()
         };
-        DeJson::deserialize_json(&json.unwrap_or("{}".to_string())).unwrap_or(Self::default())
+        DeJson::deserialize_json(&json.unwrap_or_else(|| "{}".to_string())).unwrap_or_default()
     }
 
     fn is_url(path: &str) -> bool {
