@@ -92,11 +92,9 @@ with default values for them.
 ### File format
 
  * **input_data_path** - Path to local file or full URL to inputdata.json file.
- * **display_time** - Reload `inputdata.json` after this number of
- seconds. Set to `0` to never reload data.
+ * **display_time** - Number of seconds between data reloads (0 to never reload)
  * **backgrounds** - An array of strings with filenames of PNG images to use as
  background images, loaded from the `assets` directory.
- * **display_time** - Number of seconds between data reloads (0 to never reload)
  * **scenes** - An array of scene configurations. If no scenes are configured,
    the top level values for `input_data_path` and `display_time` will be used
    instead
