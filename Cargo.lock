@@ -1535,6 +1535,7 @@ dependencies = [
 name = "rusty-aquarium"
 version = "0.16.0"
 dependencies = [
+ "chrono",
  "csv",
  "futures",
  "google-sheets4",

@@ -35,11 +35,14 @@ notify = { version = "4.0.17", optional = true }
 #serde = { version = "1.0.130", features = ["derive"], optional = true }
 #serde_json = { version = "1.0.68", optional = true }
 #structopt = { version = "0.3.25", optional = true }
+# For bandata bin
+chrono = { version = "0.4.*", optional = true }
 
 [features]
 build-systemdata = ["sysinfo"]
 build-googlesheetsdata = ["structopt", "google-sheets4", "rustls", "hyper", "hyper-rustls", "yup-oauth2", "tokio", "serde", "serde_json"]
 build-csvdata = ["csv", "notify", "serde", "serde_json", "structopt"]
+build-bandata = ["chrono"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 openssl = { version = "0.10.38", features = ["vendored"] }
@@ -89,3 +92,7 @@ required-features = ["build-googlesheetsdata"]
 [[bin]]
 name = "csvdata"
 required-features = ["build-csvdata"]
+
+[[bin]]
+name = "bandata"
+required-features = ["build-bandata"]
