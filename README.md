@@ -95,6 +95,7 @@ with default values for them.
  * **display_time** - Number of seconds between data reloads (0 to never reload)
  * **backgrounds** - An array of strings with filenames of PNG images to use as
  background images, loaded from the `assets` directory.
+ * **water_sprite** - Path to PNG image of water bubbles.
  * **scenes** - An array of scene configurations. If no scenes are configured,
    the top level values for `input_data_path` and `display_time` will be used
    instead
@@ -129,6 +130,7 @@ with default values for them.
     "backgrounds": [
         "assets/background.png",
     ],
+    "water_sprite": "assets/water.png",
     "scenes": [
         {
             "input_data_path": "inputdata.json",

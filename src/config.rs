@@ -14,6 +14,8 @@ pub struct Config {
     pub backgrounds: Vec<String>,
     pub scenes: Option<Vec<SceneConfig>>,
     pub fishes: HashMap<String, FishConfig>,
+    #[nserde(default = "water.png")]
+    pub water_sprite: Option<String>,
 }
 
 impl Default for Config {
@@ -24,6 +26,7 @@ impl Default for Config {
             backgrounds: vec![],
             scenes: None,
             fishes: HashMap::new(),
+            water_sprite: Some("water.png".to_string()),
         }
     }
 }
