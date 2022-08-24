@@ -116,10 +116,12 @@ pub mod water_wave {
 pub mod water_particle {
     use super::*;
 
+    #[allow(dead_code)]
     pub fn material() -> ParticleMaterial {
         ParticleMaterial::new(water_particle::VERTEX, water_particle::PARTICLE)
     }
 
+    #[allow(dead_code)]
     pub const VERTEX: &str = r#"#version 100
         #define DEF_VERTEX_ATTRIBUTES
         #include "particles.glsl"
@@ -134,6 +136,7 @@ pub mod water_particle {
         }
     "#;
 
+    #[allow(dead_code)]
     pub const PARTICLE: &str = r#"#version 100
         #include "particles.glsl"
 
