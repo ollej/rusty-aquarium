@@ -78,9 +78,6 @@ jobs:
           mkdir ${{ matrix.config.directory }}
           cp -pR assets ${{ matrix.config.directory }}/
           cp target/${{ matrix.config.target }}/release/${{ matrix.config.artifact_name }} demo/index.html demo/mq_js_bundle.js demo/manifest.json ${{ matrix.config.directory }}/
-          cp target/${{ matrix.config.target }}/release/googlesheetsdata ${{ matrix.config.directory }}/
-          cp target/${{ matrix.config.target }}/release/csvdata ${{ matrix.config.directory }}/
-          cp target/${{ matrix.config.target }}/release/systemdata ${{ matrix.config.directory }}/
           zip -r ${{ matrix.config.zip_file }} ${{ matrix.config.directory }}
       - name: Zip release archive
         if: matrix.config.target == 'x86_64-unknown-linux-gnu'
