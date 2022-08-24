@@ -885,9 +885,9 @@ dependencies = [
 
 [[package]]
 name = "macroquad"
-version = "0.3.13"
+version = "0.3.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8bbc44698249e98c7aedb8eef94b8806b5d68187c0c3d8c2a0912cb9efab1950"
+checksum = "0af486d7c9bdd05d158ebbef435500be09997fb427d7ad1fddc90cf3e66d0a1a"
 dependencies = [
  "bumpalo",
  "fontdue",
@@ -913,6 +913,15 @@ name = "macroquad_macro"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f5cecfede1e530599c8686f7f2d609489101d3d63741a6dc423afc997ce3fcc8"
+
+[[package]]
+name = "malloc_buf"
+version = "0.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62bb907fe88d54d8d9ce32a3cceab4218ed2f6b7d35617cafe9adf84e43919cb"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "matches"
@@ -952,17 +961,14 @@ dependencies = [
 
 [[package]]
 name = "miniquad"
-version = "0.3.0-alpha.42"
+version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75bba73cbdaa1cb8f7889fcbb083941eae39ad4257d47e0d8e819d1de9963ba0"
+checksum = "e01c469043954b236f84621946c5567ce3df52bbaa075dd853b07bc19766f610"
 dependencies = [
- "sapp-android",
- "sapp-darwin",
- "sapp-dummy",
- "sapp-ios",
- "sapp-linux",
- "sapp-wasm",
- "sapp-windows",
+ "libc",
+ "ndk-sys",
+ "objc",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -1166,6 +1172,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2819ce041d2ee131036f4fc9d6ae7ae125a3a40e97ba64d04fe799ad9dabbb44"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "objc"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "915b1b472bc21c53464d6c8461c9d3af805ba1ef837e1cac254428f4a77177b1"
+dependencies = [
+ "malloc_buf",
 ]
 
 [[package]]
@@ -1574,71 +1589,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "sapp-android"
-version = "0.1.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "27c54dc8d8fc38874a0e5cca3a8fba35c7db8e46a3d65f47d0fc999aa48d6a9f"
-dependencies = [
- "libc",
- "ndk-sys",
-]
-
-[[package]]
-name = "sapp-darwin"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0310e2445f307468aa13f1cde94d6fba6b8fd329afbb642dedbe3faf1a145f31"
-dependencies = [
- "cc",
-]
-
-[[package]]
-name = "sapp-dummy"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66f1ad26a5b6c682b9ca27c66db9aa91002b8d98a82ac7101ded57285215a478"
-dependencies = [
- "libc",
-]
-
-[[package]]
-name = "sapp-ios"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "081e6e5261c9ac2e938979b6a854a53b439f065fc3c897205ce7e69d3028b4a9"
-dependencies = [
- "cc",
-]
-
-[[package]]
 name = "sapp-jsutils"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb8ababa867431fa6c0a178248bfe7e77b5d1de357c9848883ba8e3946bb21d4"
-
-[[package]]
-name = "sapp-linux"
-version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbdb2f8011955c62544d9e626a58333e788810d00bd7411d52b81611b92af142"
-dependencies = [
- "libc",
-]
-
-[[package]]
-name = "sapp-wasm"
-version = "0.1.26"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00e859e8645a3bcb85aecd40bab883438e4105f21b21bccbeac2348760f508bb"
-
-[[package]]
-name = "sapp-windows"
-version = "0.2.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3e9a4ab4682752ffcbbacf87b44c75373479331dfe408432280d305e0563c9c"
-dependencies = [
- "winapi 0.3.9",
-]
 
 [[package]]
 name = "schannel"
