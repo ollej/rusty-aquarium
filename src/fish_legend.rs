@@ -1,6 +1,6 @@
-use nanoserde::DeJson;
+use nanoserde::{DeJson, SerJson};
 
-#[derive(Clone, DeJson, Debug)]
+#[derive(Clone, Debug, DeJson, SerJson)]
 pub struct FishLegend {
     pub fish: String,
     pub description: String,

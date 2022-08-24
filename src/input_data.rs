@@ -1,9 +1,9 @@
 use crate::{fish_data::FishData, legend::Legend};
 use macroquad::{file::load_string, prelude::error, window::next_frame};
-use nanoserde::DeJson;
+use nanoserde::{DeJson, SerJson};
 use quad_net::http_request::RequestBuilder;
 
-#[derive(Clone, Default, DeJson)]
+#[derive(Clone, Default, DeJson, SerJson)]
 pub struct InputData {
     pub legend: Option<Legend>,
     pub school: Vec<FishData>,

@@ -1,6 +1,6 @@
-use nanoserde::DeJson;
+use nanoserde::{DeJson, SerJson};
 
-#[derive(Clone, DeJson)]
+#[derive(Clone, DeJson, SerJson)]
 #[nserde(default)]
 pub struct FishData {
     pub fish: String,
