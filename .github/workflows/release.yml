@@ -63,13 +63,16 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --locked --all-targets --target=${{ matrix.config.target }}
+          args: --bins --all-features --release --locked --all-targets --target=${{ matrix.config.target }}
       - name: Zip release archive
         if: matrix.config.target == 'wasm32-unknown-unknown'
         run: |
           mkdir ${{ matrix.config.directory }}
           cp -pR assets ${{ matrix.config.directory }}/
-          cp -pR target/${{ matrix.config.target }}/release/${{ matrix.config.artifact_name }} demo/index.html demo/mq_js_bundle.js demo/manifest.json ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/${{ matrix.config.artifact_name }} demo/index.html demo/mq_js_bundle.js demo/manifest.json ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/googlesheetsdata ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/csvdata ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/systemdata ${{ matrix.config.directory }}/
           zip -r ${{ matrix.config.zip_file }} ${{ matrix.config.directory }}
       - name: Zip release archive
         if: matrix.config.target == 'x86_64-unknown-linux-gnu'
@@ -77,6 +80,9 @@ jobs:
           mkdir ${{ matrix.config.directory }}
           cp -pR assets ${{ matrix.config.directory }}/
           cp target/${{ matrix.config.target }}/release/${{ matrix.config.artifact_name }} ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/googlesheetsdata ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/csvdata ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/systemdata ${{ matrix.config.directory }}/
           tar -zcf ${{ matrix.config.zip_file }} ${{ matrix.config.directory }}
       - name: Zip release archive
         if: runner.os == 'Windows' || runner.os == 'macOS'
@@ -84,6 +90,9 @@ jobs:
           mkdir -p ${{ matrix.config.directory }}
           cp -R assets ${{ matrix.config.directory }}/
           cp target/${{ matrix.config.target }}/release/${{ matrix.config.artifact_name }} ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/googlesheetsdata ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/csvdata ${{ matrix.config.directory }}/
+          cp target/${{ matrix.config.target }}/release/systemdata ${{ matrix.config.directory }}/
           7z a -tzip ${{ matrix.config.zip_file }} ${{ matrix.config.directory }}
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2

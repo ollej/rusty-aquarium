@@ -47,4 +47,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all-targets --target=${{ matrix.config.target }}
+          args: --bins --all-features --all-targets --target=${{ matrix.config.target }}
