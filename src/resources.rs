@@ -1,4 +1,4 @@
-use crate::{config::Config, fish::Fish, input_data::InputData};
+use crate::{config::Config, input_data::InputData};
 use macroquad::{
     color::colors::{BLACK, WHITE},
     experimental::{collections::storage, coroutines::start_coroutine},
@@ -25,7 +25,8 @@ impl Resources {
             .to_owned()
             .expect("input_data_path missing");
         let input_data = InputData::load(input_data_path).await;
-        let bubble_texture: Texture2D = load_texture(Fish::SPRITE_WATER).await?;
+        let bubble_texture: Texture2D =
+            load_texture(&config.water_sprite.to_owned().unwrap_or_default()).await?;
         let backgrounds = config.background_textures().await;
         let mut fish_textures = HashMap::new();
         for (_key, fish) in config.fishes.iter() {

@@ -21,9 +21,6 @@ pub struct Fish {
 
 impl Fish {
     const COLLISION_SIZE_DIFFERENCE: f32 = 2.0;
-    //const SPRITE_BUBBLE: &'static str = "bubble.png";
-    pub const SPRITE_WATER: &'static str = "water.png";
-    //const SPRITE_YELLOWSUBMARINE: &'static str = "yellowsubmarine.png";
 
     pub fn new(
         fish_size: f32,

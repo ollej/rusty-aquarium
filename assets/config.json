@@ -10,6 +10,7 @@
         "background6.png",
         "background7.png"
     ],
+    "water_sprite": "water.png",
     "scenes": [
         {
             "input_data_path": "inputdata.json",
