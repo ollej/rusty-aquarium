@@ -78,7 +78,7 @@ The `systemdata` binary generates an inputdata.json file based on CPU,
 processes and disks.
 
 ```bash
-cargo run --bin systemdata > assets/inputdata.json
+cargo run --features build-systemdata --bin systemdata > assets/inputdata.json
 ```
 
 Configuration
