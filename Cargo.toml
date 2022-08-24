@@ -3,6 +3,7 @@ name = "rusty-aquarium"
 version = "0.16.0"
 authors = ["Olle Wreede <olle@wreede.se>"]
 edition = "2021"
+default-run = "rusty-aquarium"
 
 [dependencies]
 macroquad = "0.3.13"
@@ -11,7 +12,27 @@ futures = "0.3.19"
 nanoserde = "0.1.29"
 quad-net = "0.1.1"
 # For systemdata bin
-sysinfo = "0.16.*"
+sysinfo = { version = "0.16.*", optional = true }
+# For googlesheetsdata bin
+structopt = { version = "0.3.25", optional = true }
+google-sheets4 = { version = "*", optional = true }
+rustls = { version = "0.16.0", optional = true }
+hyper = { version = "^0.14", optional = true }
+hyper-rustls = { version = "^0.22", optional = true }
+serde = { version = "^1.0", optional = true }
+serde_json = { version = "^1.0", optional = true }
+yup-oauth2 = { version = "^5.0", optional = true }
+tokio = { version = "~1.2", features = [
+    "macros",
+    "io-util",
+    "rt",
+    "rt-multi-thread",
+    "fs",
+], optional = true }
+
+[features]
+build-systemdata = ["sysinfo"]
+build-googlesheetsdata = ["structopt", "google-sheets4", "rustls", "hyper", "hyper-rustls", "serde", "serde_json", "yup-oauth2", "tokio"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 openssl = { version = "0.10.38", features = ["vendored"] }
@@ -49,3 +70,11 @@ opt-level = 'z'
 lto = true
 panic = 'abort'
 codegen-units = 1
+
+[[bin]]
+name = "systemdata"
+required-features = ["build-systemdata"]
+
+[[bin]]
+name = "googlesheetsdata"
+required-features = ["build-googlesheetsdata"]

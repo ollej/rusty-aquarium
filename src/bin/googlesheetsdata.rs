@@ -1,14 +1,14 @@
 extern crate google_sheets4 as sheets4;
 extern crate hyper;
 extern crate hyper_rustls;
-extern crate yup_oauth2 as oauth2;
 use core::num::ParseIntError;
 use serde::Serialize;
-use sheets4::api::ValueRange;
-use sheets4::Sheets;
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::time::Duration;
+use sheets4::{api::ValueRange, oauth2, Sheets};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    time::Duration,
+};
 use structopt::StructOpt;
 use tokio::{task, time};
 
@@ -41,13 +41,13 @@ pub struct InputData {
 }
 
 async fn connect_to_sheets_api(credentials: &PathBuf, tokencache: &PathBuf) -> Sheets {
-    let secret = yup_oauth2::read_application_secret(credentials)
+    let secret = oauth2::read_application_secret(credentials)
         .await
         .expect("client secret could not be read");
 
-    let auth = yup_oauth2::InstalledFlowAuthenticator::builder(
+    let auth = oauth2::InstalledFlowAuthenticator::builder(
         secret,
-        yup_oauth2::InstalledFlowReturnMethod::HTTPRedirect,
+        oauth2::InstalledFlowReturnMethod::HTTPRedirect,
     )
     .persist_tokens_to_disk(tokencache)
     .build()
