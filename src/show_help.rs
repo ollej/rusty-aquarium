@@ -9,6 +9,12 @@ pub struct ShowHelp {
     pub showing: bool,
 }
 
+impl Default for ShowHelp {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ShowHelp {
     const BACKGROUND_COLOR: Color = Color::new(0.1, 0.1, 0.1, 0.5);
     const FONT_COLOR: Color = WHITE;

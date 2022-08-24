@@ -1,3 +1,5 @@
+#![allow(clippy::question_mark)]
+
 use crate::{fish_config::FishConfig, scene_config::SceneConfig};
 use macroquad::{
     file::load_string,

@@ -1,3 +1,5 @@
+#![allow(clippy::question_mark)]
+
 use crate::{fish_data::FishData, legend::Legend};
 use macroquad::{file::load_string, prelude::error, window::next_frame};
 use nanoserde::{DeJson, SerJson};

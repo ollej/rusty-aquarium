@@ -22,6 +22,7 @@ pub struct Fish {
 impl Fish {
     const COLLISION_SIZE_DIFFERENCE: f32 = 2.0;
 
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         fish_size: f32,
         max_speed: Vec2,

@@ -27,6 +27,12 @@ pub struct FishTank {
     show_legend: ShowLegend,
 }
 
+impl Default for FishTank {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FishTank {
     pub fn new() -> Self {
         Self {
