@@ -6,7 +6,7 @@ edition = "2021"
 default-run = "rusty-aquarium"
 
 [dependencies]
-macroquad = "0.3.23"
+macroquad = "0.3.24"
 macroquad-particles = "0.1.1"
 futures = "0.3.19"
 nanoserde = "0.1.30"
