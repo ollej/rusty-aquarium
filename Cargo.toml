@@ -8,35 +8,35 @@ default-run = "rusty-aquarium"
 [dependencies]
 macroquad = "0.3.24"
 macroquad-particles = "0.1.1"
-futures = "0.3.19"
+futures = "0.3.24"
 nanoserde = "0.1.30"
 quad-net = "0.1.1"
 # For systemdata bin
-sysinfo = { version = "0.16.*", optional = true }
+sysinfo = { version = "0.26.2", optional = true }
 # For googlesheetsdata bin
-structopt = { version = "0.3.25", optional = true }
-google-sheets4 = { version = "*", optional = true }
-rustls = { version = "0.16.0", optional = true }
-hyper = { version = "^0.14", optional = true }
-hyper-rustls = { version = "^0.22", optional = true }
-yup-oauth2 = { version = "^5.0", optional = true }
-tokio = { version = "~1.2", features = [
+structopt = { version = "0.3.26", optional = true }
+google-sheets4 = { version = "4.0.1", optional = true }
+rustls = { version = "0.20.6", optional = true }
+hyper = { version = "0.14.20", optional = true }
+hyper-rustls = { version = "0.23.0", optional = true }
+yup-oauth2 = { version = "7.0.1", optional = true }
+tokio = { version = "1.21.1", features = [
     "macros",
     "io-util",
     "rt",
     "rt-multi-thread",
     "fs",
 ], optional = true }
-serde = { version = "1.0.130", features = ["derive"], optional = true }
-serde_json = { version = "1.0.68", optional = true }
+serde = { version = "1.0.145", features = ["derive"], optional = true }
+serde_json = { version = "1.0.85", optional = true }
 # For csvdata bin
-csv = { version = "1.1", optional = true }
-notify = { version = "4.0.17", optional = true }
+csv = { version = "1.1.6", optional = true }
+notify = { version = "5.0.0", optional = true }
 #serde = { version = "1.0.130", features = ["derive"], optional = true }
 #serde_json = { version = "1.0.68", optional = true }
 #structopt = { version = "0.3.25", optional = true }
 # For bandata bin
-chrono = { version = "0.4.*", optional = true }
+chrono = { version = "0.4.22", optional = true }
 
 [features]
 build-systemdata = ["sysinfo"]
@@ -45,13 +45,13 @@ build-csvdata = ["csv", "notify", "serde", "serde_json", "structopt"]
 build-bandata = ["chrono"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-openssl = { version = "0.10.38", features = ["vendored"] }
+openssl = { version = "0.10.41", features = ["vendored"] }
 # Support reading OS root certs
-rustls-native-certs = "0.6.1"
+rustls-native-certs = "0.6.2"
 
 # Support reading OS root certs
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.ureq]
-version = "2.4"
+version = "2.5.0"
 features = ["native-certs"]
 
 # Doesn't work with android build
