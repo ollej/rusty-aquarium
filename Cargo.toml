@@ -4,6 +4,7 @@ version = "0.17.0"
 authors = ["Olle Wreede <olle@wreede.se>"]
 edition = "2021"
 default-run = "rusty-aquarium"
+description = "Data visualization as a fish tank"
 
 [dependencies]
 macroquad = "0.3.24"
@@ -80,6 +81,7 @@ opt-level = 'z'
 lto = true
 panic = 'abort'
 codegen-units = 1
+strip = true
 
 [[bin]]
 name = "systemdata"
