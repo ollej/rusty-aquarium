@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 mod shaders;
 use macroquad::{
     camera::{set_camera, set_default_camera, Camera2D},
