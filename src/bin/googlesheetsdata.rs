@@ -1,9 +1,7 @@
 extern crate google_sheets4 as sheets4;
-extern crate hyper;
-extern crate hyper_rustls;
 use core::num::ParseIntError;
 use serde::Serialize;
-use sheets4::{api::ValueRange, oauth2, Sheets};
+use sheets4::{api::ValueRange, hyper, hyper_rustls, oauth2, Sheets};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -55,7 +53,14 @@ async fn connect_to_sheets_api(credentials: &PathBuf, tokencache: &PathBuf) -> S
     .unwrap();
 
     Sheets::new(
-        hyper::Client::builder().build(hyper_rustls::HttpsConnector::with_native_roots()),
+        hyper::Client::builder().build(
+            hyper_rustls::HttpsConnectorBuilder::new()
+                .with_native_roots()
+                .https_only()
+                .enable_http1()
+                .enable_http2()
+                .build(),
+        ),
         auth,
     )
 }

@@ -16,12 +16,8 @@ quad-net = "0.1.1"
 sysinfo = { version = "0.26.2", optional = true }
 # For googlesheetsdata bin
 structopt = { version = "0.3.26", optional = true }
-google-sheets4 = { version = "4.0.1", optional = true }
-rustls = { version = "0.20.6", optional = true }
-hyper = { version = "0.14.20", optional = true }
-hyper-rustls = { version = "0.23.0", optional = true }
-yup-oauth2 = { version = "7.0.1", optional = true }
-tokio = { version = "1.21.1", features = [
+google-sheets4 = { version = "=3.1.0", optional = true }
+tokio = { version = "=1.2.0", features = [
     "macros",
     "io-util",
     "rt",
@@ -33,15 +29,12 @@ serde_json = { version = "1.0.85", optional = true }
 # For csvdata bin
 csv = { version = "1.1.6", optional = true }
 notify = { version = "5.0.0", optional = true }
-#serde = { version = "1.0.130", features = ["derive"], optional = true }
-#serde_json = { version = "1.0.68", optional = true }
-#structopt = { version = "0.3.25", optional = true }
 # For bandata bin
 chrono = { version = "0.4.22", optional = true }
 
 [features]
 build-systemdata = ["sysinfo"]
-build-googlesheetsdata = ["structopt", "google-sheets4", "rustls", "hyper", "hyper-rustls", "yup-oauth2", "tokio", "serde", "serde_json"]
+build-googlesheetsdata = ["structopt", "google-sheets4", "tokio", "serde", "serde_json"]
 build-csvdata = ["csv", "notify", "serde", "serde_json", "structopt"]
 build-bandata = ["chrono"]
 
