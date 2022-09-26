@@ -34,7 +34,7 @@ chrono = { version = "0.4.22", optional = true }
 
 [features]
 build-systemdata = ["sysinfo"]
-build-googlesheetsdata = ["structopt", "google-sheets4", "tokio", "serde", "serde_json"]
+build-googlesheetsdata = ["structopt", "google-sheets4", "tokio"]
 build-csvdata = ["csv", "notify", "serde", "serde_json", "structopt"]
 build-bandata = ["chrono"]
 
