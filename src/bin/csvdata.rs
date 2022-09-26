@@ -1,25 +1,14 @@
 extern crate notify;
+use nanoserde::SerJson;
 use notify::{recommended_watcher, Config, RecursiveMode, Watcher};
-use serde::{Deserialize, Serialize};
-use serde_json;
+use rusty_aquarium::{fish_data::FishData, input_data::InputData};
+use serde::Deserialize;
 use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 use structopt::StructOpt;
-
-#[derive(Debug, Serialize)]
-pub struct FishData {
-    fish: String,
-    size: f32,
-    speed: f32,
-}
-
-#[derive(Debug, Serialize)]
-pub struct InputData {
-    school: Vec<FishData>,
-}
 
 #[derive(Debug, Deserialize)]
 struct Record {
@@ -59,12 +48,16 @@ fn parse_csv(path: &Path) -> Result<String, Box<dyn Error>> {
                 fish: record.fish.to_string(),
                 size: 1.0,
                 speed: 1.0,
+                bubbles: 1.0,
             });
         }
     }
 
-    let data = InputData { school: fishes };
-    let json = serde_json::to_string(&data)?;
+    let data = InputData {
+        school: fishes,
+        legend: None,
+    };
+    let json = SerJson::serialize_json(&data);
 
     Ok(json)
 }
