@@ -1,5 +1,5 @@
 extern crate notify;
-use notify::{watcher, RecursiveMode, Watcher};
+use notify::{recommended_watcher, Config, RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::error::Error;
@@ -25,6 +25,7 @@ pub struct InputData {
 struct Record {
     fish: String,
     count: u64,
+    #[allow(dead_code)]
     description: String,
 }
 
@@ -84,7 +85,10 @@ fn convert_file(input: &Path, output: &Path) {
 
 fn watch_file(input: &Path, output: &Path) {
     let (tx, rx) = channel();
-    let mut watcher = watcher(tx, Duration::from_secs(10)).unwrap();
+    let mut watcher = recommended_watcher(tx).unwrap();
+    watcher
+        .configure(Config::default().with_poll_interval(Duration::from_secs(10)))
+        .expect("Failed to configure watcher");
     watcher.watch(input, RecursiveMode::NonRecursive).unwrap();
 
     eprintln!("Watching file: {:?}", input);
