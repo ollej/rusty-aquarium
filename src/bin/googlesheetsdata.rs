@@ -1,15 +1,17 @@
 extern crate google_sheets4 as sheets4;
-use core::num::ParseIntError;
-use nanoserde::SerJson;
 use rusty_aquarium::{fish_data::FishData, input_data::InputData};
-use sheets4::{api::ValueRange, hyper, hyper_rustls, oauth2, Sheets};
 use std::{
     fs,
     path::{Path, PathBuf},
     time::Duration,
 };
-use structopt::StructOpt;
-use tokio::{task, time};
+use {
+    clap::Parser,
+    core::num::ParseIntError,
+    nanoserde::SerJson,
+    sheets4::{api::ValueRange, hyper, hyper_rustls, oauth2, Sheets},
+    tokio::{task, time},
+};
 
 fn fish_data_from_vec(cells: &Vec<String>) -> Option<FishData> {
     cells.get(2).map(|fish| FishData {
@@ -110,40 +112,40 @@ fn parse_duration(src: &str) -> Result<Duration, ParseIntError> {
     src.parse::<u64>().map(Duration::from_secs)
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(
+#[derive(Parser, Debug)]
+#[command(
     name = "googlesheetsdata",
     about = "A small tool to read data from Google Sheets and export to Rusty Aquarium"
 )]
 struct CliOptions {
     /// Spreadsheet ID to read
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub spreadsheet: String,
 
     /// Path to output file to store json data
-    #[structopt(short, long, parse(from_os_str), default_value = "inputdata.json")]
+    #[arg(short, long, default_value = "inputdata.json")]
     pub output: PathBuf,
 
     /// Automatically regenerate the JSON file every N seconds
-    #[structopt(short, long, parse(try_from_str = parse_duration))]
+    #[arg(short, long, value_parser = parse_duration)]
     pub interval: Option<Duration>,
 
     /// Range of values to get from spreadsheet, like the name of a sheet
-    #[structopt(short, long, default_value = "Sheet1")]
+    #[arg(short, long, default_value = "Sheet1")]
     pub range: String,
 
     /// Path to Google OAuth2 credentials json file
-    #[structopt(short, long, parse(from_os_str), default_value = "credentials.json")]
+    #[arg(short, long, default_value = "credentials.json")]
     pub credentials: PathBuf,
 
     /// Path to file to store token authentication cache
-    #[structopt(short, long, parse(from_os_str), default_value = "tokencache.json")]
+    #[arg(short, long, default_value = "tokencache.json")]
     pub tokencache: PathBuf,
 }
 
 #[tokio::main]
 async fn main() {
-    let opt = CliOptions::from_args();
+    let opt = CliOptions::parse();
 
     let hub: Sheets = connect_to_sheets_api(&opt.credentials, &opt.tokencache).await;
 

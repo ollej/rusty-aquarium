@@ -1,4 +1,5 @@
 extern crate notify;
+use clap::Parser;
 use nanoserde::SerJson;
 use notify::{recommended_watcher, Config, RecursiveMode, Watcher};
 use rusty_aquarium::{fish_data::FishData, input_data::InputData};
@@ -8,7 +9,6 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::time::Duration;
-use structopt::StructOpt;
 
 #[derive(Debug, Deserialize)]
 struct Record {
@@ -18,22 +18,23 @@ struct Record {
     description: String,
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(
-    name = "rusty-slider",
-    about = "A small tool to display markdown files as a slideshow."
+#[derive(Parser, Debug)]
+#[command(
+    name = "csvdata",
+    about = "Generate fishdata for Rusty Aquarium file from a csv file",
+    author
 )]
 struct CliOptions {
     /// Path to input CSV file to convert
-    #[structopt(short, long, parse(from_os_str), default_value = "fishdata.csv")]
+    #[arg(short, long, default_value = "fishdata.csv")]
     pub file: PathBuf,
 
     /// Path to output file to store json data
-    #[structopt(short, long, parse(from_os_str), default_value = "inputdata.json")]
+    #[arg(short, long, default_value = "inputdata.json")]
     pub output: PathBuf,
 
     /// Listen to changes in file and automatically update output file
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub listen: bool,
 }
 
@@ -94,7 +95,7 @@ fn watch_file(input: &Path, output: &Path) {
 }
 
 fn main() {
-    let opt = CliOptions::from_args();
+    let opt = CliOptions::parse();
     if opt.listen {
         watch_file(opt.file.as_path(), opt.output.as_path());
     } else {
