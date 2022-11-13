@@ -217,3 +217,9 @@ cargo run-script build-win
 cargo run-script build-apk
 ```
 
+Related links
+=============
+
+* <a rel="me" href="https://hachyderm.io/@ollej">ollej @ mastodon</a>
+* [Rusty Slider](https://ollej.github.io/rusty-slider/)
+* [Olle's portfolio](https://olle.wreede.se/)
