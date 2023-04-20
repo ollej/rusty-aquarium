@@ -22,7 +22,7 @@ fn main() {
         let size = clamp(1. - disk.available_space() as f32 / disk.total_space() as f32);
         fishes.push(FishData {
             fish: "clownfish".to_string(),
-            size: size,
+            size,
             speed: 1.0,
             bubbles: 1.0,
         });
@@ -42,7 +42,7 @@ fn main() {
         let size = clamp(cpu.cpu_usage() / 100.);
         fishes.push(FishData {
             fish: "goldfish".to_string(),
-            size: size,
+            size,
             speed: 1.0,
             bubbles: 1.0,
         });
