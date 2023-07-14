@@ -48,7 +48,7 @@ impl Scenes {
 
     pub fn draw(&self, rect: Vec2) {
         draw_texture_ex(
-            self.backgrounds[self.scene_background()],
+            &self.backgrounds[self.scene_background()],
             0.,
             0.,
             WHITE,

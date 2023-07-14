@@ -5,7 +5,7 @@ use macroquad::{
     camera::{set_camera, set_default_camera, Camera2D},
     color::colors::{DARKBLUE, WHITE},
     input::{is_key_pressed, is_mouse_button_pressed, KeyCode, MouseButton},
-    material::{gl_use_default_material, gl_use_material, load_material},
+    material::{gl_use_default_material, gl_use_material},
     math::vec2,
     texture::{draw_texture_ex, render_target, DrawTextureParams, FilterMode},
     time::get_frame_time,
@@ -36,18 +36,8 @@ async fn main() {
     crt_render_target.texture.set_filter(FilterMode::Linear);
     let water_render_target = render_target(screen_width() as u32, screen_height() as u32);
     water_render_target.texture.set_filter(FilterMode::Linear);
-    let water_material = load_material(
-        shaders::water_wave::VERTEX,
-        shaders::water_wave::FRAGMENT,
-        Default::default(),
-    )
-    .unwrap();
-    let crt_material = load_material(
-        shaders::crt::VERTEX,
-        shaders::crt::FRAGMENT,
-        Default::default(),
-    )
-    .unwrap();
+    let water_material = shaders::water_wave::material().unwrap();
+    let crt_material = shaders::crt::material().unwrap();
     let mut shader_activated = false;
 
     let mut fish_tank = FishTank::new();
@@ -119,7 +109,7 @@ async fn main() {
         set_camera(&Camera2D {
             zoom: vec2(1. / SCR_W * 2., -1. / SCR_H * 2.),
             target: vec2(SCR_W / 2., SCR_H / 2.),
-            render_target: Some(water_render_target),
+            render_target: Some(water_render_target.clone()),
             ..Default::default()
         });
         clear_background(DARKBLUE);
@@ -132,14 +122,14 @@ async fn main() {
             set_camera(&Camera2D {
                 zoom: vec2(1. / SCR_W * 2., -1. / SCR_H * 2.),
                 target: vec2(SCR_W / 2., SCR_H / 2.),
-                render_target: Some(crt_render_target),
+                render_target: Some(crt_render_target.clone()),
                 ..Default::default()
             });
             clear_background(DARKBLUE);
-            gl_use_material(water_material);
+            gl_use_material(&water_material);
 
             draw_texture_ex(
-                water_render_target.texture,
+                &water_render_target.texture.clone(),
                 0.,
                 0.,
                 WHITE,
@@ -154,10 +144,10 @@ async fn main() {
             set_default_camera();
             clear_background(DARKBLUE);
 
-            gl_use_material(crt_material);
+            gl_use_material(&crt_material);
 
             draw_texture_ex(
-                crt_render_target.texture,
+                &crt_render_target.texture.clone(),
                 0.,
                 0.,
                 WHITE,
@@ -173,7 +163,7 @@ async fn main() {
             clear_background(DARKBLUE);
 
             draw_texture_ex(
-                water_render_target.texture,
+                &water_render_target.texture,
                 0.,
                 0.,
                 WHITE,

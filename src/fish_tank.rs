@@ -52,7 +52,7 @@ impl FishTank {
     pub fn add_resources(&mut self) {
         let resources = storage::get::<Resources>();
         storage::store(resources.input_data.clone());
-        self.bubble_texture = Some(resources.bubble_texture);
+        self.bubble_texture = Some(resources.bubble_texture.clone());
         self.fish_keys = Vec::from_iter(resources.config.fishes.keys().cloned());
         self.fish_configs = resources.config.fishes.clone();
         self.school = (*resources.input_data.school).to_vec();
@@ -188,8 +188,11 @@ impl FishTank {
             fish_config.collision_aversion,
             fish_config.area,
             fish_config.movement,
-            *self.fish_textures.get(&fish_config.texture).unwrap(),
-            self.bubble_texture.unwrap(),
+            self.fish_textures
+                .get(&fish_config.texture)
+                .unwrap()
+                .clone(),
+            self.bubble_texture.clone().unwrap(),
             fish_config.randomized_bubble_amount(),
         )
     }
@@ -205,8 +208,11 @@ impl FishTank {
             fish_config.collision_aversion,
             fish_config.area,
             fish_config.movement,
-            *self.fish_textures.get(&fish_config.texture).unwrap(),
-            self.bubble_texture.unwrap(),
+            self.fish_textures
+                .get(&fish_config.texture)
+                .unwrap()
+                .clone(),
+            self.bubble_texture.clone().unwrap(),
             fish_config.bubbles * fish_data.bubbles as u32,
         ))
     }

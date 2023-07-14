@@ -104,7 +104,7 @@ impl ShowLegend {
     ) -> f32 {
         let fish_height = Self::FISH_SIZE / (texture.width() / texture.height());
         draw_texture_ex(
-            *texture,
+            texture,
             Self::MARGIN * 2.,
             offset_y + (max_fish_height - fish_height) / 2.,
             WHITE,

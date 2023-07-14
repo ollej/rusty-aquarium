@@ -65,7 +65,7 @@ impl Fish {
                 initial_direction_spread: 0.5,
                 gravity: vec2(0.0, -5.0),
                 atlas: Some(AtlasConfig::new(4, 2, 0..8)),
-                texture: Some(bubble_texture),
+                texture: Some(bubble_texture.clone()),
                 material: Some(water_particle::material()),
                 blend_mode: BlendMode::Additive,
                 ..Default::default()
@@ -92,7 +92,7 @@ impl Fish {
             self.emit();
         }
         draw_texture_ex(
-            self.texture,
+            &self.texture,
             self.motion.position.x,
             self.motion.position.y,
             WHITE,

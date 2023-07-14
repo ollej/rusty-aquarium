@@ -1,7 +1,20 @@
+use macroquad::prelude::{load_material, Material, ShaderSource};
 use macroquad_particles::ParticleMaterial;
 
 pub mod crt {
-    pub const FRAGMENT: &str = r#"#version 100
+    use super::*;
+
+    pub fn material() -> Result<Material, macroquad::Error> {
+        load_material(SHADER_SOURCE, Default::default())
+    }
+
+    const SHADER_SOURCE: ShaderSource = ShaderSource {
+        glsl_vertex: Some(crt::VERTEX),
+        glsl_fragment: Some(crt::FRAGMENT),
+        metal_shader: None,
+    };
+
+    const FRAGMENT: &str = r#"#version 100
         precision lowp float;
         varying vec4 color;
         varying vec2 uv;
@@ -45,7 +58,7 @@ pub mod crt {
         }
     "#;
 
-    pub const VERTEX: &str = r#"#version 100
+    const VERTEX: &str = r#"#version 100
         attribute vec3 position;
         attribute vec2 texcoord;
         attribute vec4 color0;
@@ -62,7 +75,19 @@ pub mod crt {
 }
 
 pub mod water_wave {
-    pub const FRAGMENT: &str = r#"#version 100
+    use super::*;
+
+    pub fn material() -> Result<Material, macroquad::Error> {
+        load_material(SHADER_SOURCE, Default::default())
+    }
+
+    const SHADER_SOURCE: ShaderSource = ShaderSource {
+        glsl_vertex: Some(water_wave::VERTEX),
+        glsl_fragment: Some(water_wave::FRAGMENT),
+        metal_shader: None,
+    };
+
+    const FRAGMENT: &str = r#"#version 100
         precision lowp float;
 
         varying vec2 uv;
@@ -91,7 +116,7 @@ pub mod water_wave {
         }
     "#;
 
-    pub const VERTEX: &str = r#"#version 100
+    const VERTEX: &str = r#"#version 100
         attribute vec3 position;
         attribute vec2 texcoord;
 
@@ -122,7 +147,7 @@ pub mod water_particle {
     }
 
     #[allow(dead_code)]
-    pub const VERTEX: &str = r#"#version 100
+    const VERTEX: &str = r#"#version 100
         #define DEF_VERTEX_ATTRIBUTES
         #include "particles.glsl"
 
@@ -137,7 +162,7 @@ pub mod water_particle {
     "#;
 
     #[allow(dead_code)]
-    pub const PARTICLE: &str = r#"#version 100
+    const PARTICLE: &str = r#"#version 100
         #include "particles.glsl"
 
         precision lowp float;

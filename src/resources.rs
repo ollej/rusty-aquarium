@@ -18,7 +18,7 @@ pub struct Resources {
 }
 
 impl Resources {
-    pub async fn new() -> Result<Resources, macroquad::prelude::FileError> {
+    pub async fn new() -> Result<Resources, macroquad::Error> {
         let config = Config::load().await;
         let input_data_path = config
             .input_data_path

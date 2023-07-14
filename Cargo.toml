@@ -8,8 +8,8 @@ description = "Data visualization as a fish tank"
 
 [dependencies]
 futures = "0.3"
-macroquad = "0.3"
-macroquad-particles = "0.1"
+macroquad = { version = "0.4", git = "https://github.com/not-fl3/macroquad/" }
+macroquad-particles = { version = "0.1.1", git = "https://github.com/not-fl3/macroquad/" }
 nanoserde = "0.1"
 quad-net = "0.1"
 # For systemdata bin
