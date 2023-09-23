@@ -78,8 +78,17 @@ The `systemdata` binary generates an inputdata.json file based on CPU,
 processes and disks.
 
 ```bash
-cargo run --features build-systemdata --bin systemdata > assets/inputdata.json
+bin/systemdata > assets/inputdata.json
 ```
+
+### Build
+
+Use this command line if you want to compile the binary yourself.
+
+```bash
+cargo build --features build-systemdata --bin systemdata  
+```
+
 
 ### Google Sheets Data
 
@@ -97,7 +106,7 @@ Information on how to create a `credentials.json` file can be found here:
 https://developers.google.com/workspace/guides/configure-oauth-consent
 
 ```bash
-cargo run --features build-googlesheetsdata --bin googlesheetsdata -- --spreadsheet SPREADSHEET-ID --output assets/inputdata.json
+bin/googlesheetsdata --spreadsheet SPREADSHEET-ID --output assets/inputdata.json
 ```
 
 #### Usage
@@ -119,19 +128,30 @@ Options:
   -h, --help                       Print help
 ```
 
+### Build
+
+Use this command line if you want to compile the binary yourself.
+
+```bash
+cargo build --features build-googlesheetsdata --bin googlesheetsdata 
+```
+
 ### CSV Data
 
 The `csvdata` binary generates an inputdata.json file from a comma separated
 file of data. Use the flag `--listen` to keep the program running and update
-the `inputdata.json` file every time the CSV file is changed. Use the flag
-`--help` for more options.
+the `inputdata.json` file every time the CSV file is changed. The flag
+`--description` can be used to set the description in the `legend` data to
+show at the top of the legend screen. Use the flag `--help` for more options.
 
-The columns in the CSV files are `fishname`, `count`, and `description`. The
-`count` defines how many fishes of the type `fishname` to create. The
-`description` field is not used.
+The columns in the CSV files are `fishname`, `count`, `size`, `speed`,
+`bubbles`, and `description`. The `count` defines how many fishes of the type
+`fishname` to create. The columns `size`, `speed`, and `bubbles` are decimal
+numbers which will be used as multipliers for those values. Each row will
+generate a legend row, with the fish name and the text from `description`.
 
 ```bash
-cargo run --features build-csvdata --bin csvdata -- --file csvfile.csv --output assets/inputdata.json
+bin/csvdata --file csvfile.csv --output assets/inputdata.json --description "A short description for the legend screen"
 ```
 
 #### Usage
@@ -142,10 +162,19 @@ These are the available options:
 Usage: csvdata [OPTIONS]
 
 Options:
-  -f, --file <FILE>      Path to input CSV file to convert [default: fishdata.csv]
-  -o, --output <OUTPUT>  Path to output file to store json data [default: inputdata.json]
-  -l, --listen           Listen to changes in file and automatically update output file
-  -h, --help             Print help
+  -f, --file <FILE>                Path to input CSV file to convert [default: fishdata.csv]
+  -o, --output <OUTPUT>            Path to output file to store json data [default: inputdata.json]
+  -l, --listen                     Listen to changes in file and automatically update output file
+  -d, --description <DESCRIPTION>  Description for the Legend data
+  -h, --help                       Print help
+```
+
+### Build
+
+Use this command line if you want to compile the binary yourself.
+
+```bash
+cargo build --features build-csvdata --bin csvdata
 ```
 
 Configuration

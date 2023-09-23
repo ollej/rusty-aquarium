@@ -1,5 +1,5 @@
-fish,count,description
-goldfish,5,sponsorer
-ferris,1,ola
-clownfish,56,rum 1
-butterflyfish,67,rum 2
+fish,count,size,speed,bubbles,description
+goldfish,5,1.0,1.0,1.0,sponsorer
+ferris,1,1.0,1.0,1.0,ola
+clownfish,56,1.0,1.0,1.0,rum 1
+butterflyfish,67,1.0,1.0,1.0,rum 2
