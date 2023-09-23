@@ -81,6 +81,72 @@ processes and disks.
 cargo run --features build-systemdata --bin systemdata > assets/inputdata.json
 ```
 
+### Google Sheets Data
+
+The `googlesheetsdata` binary generates an inputdata.json file from a Google
+Sheets spreadsheet. A file called `credentials.json` is needed that contains
+Google API credientials. Use the flag `--help` for more options.
+
+The sheet needs to have a row for every fish to show. The columns need to be
+`fishname`, `size`, `speed`, and `bubbles`. The `fishname` need to match the
+name of a configured fish, and the other values need to be a number.
+
+Information on how to create a `credentials.json` file can be found here:
+https://developers.google.com/sheets/api/quickstart/go
+
+```bash
+cargo run --features build-googlesheetsdata --bin googlesheetsdata -- --spreadsheet SPREADSHEET-ID --output assets/inputdata.json
+```
+
+#### Usage
+
+These are the available options:
+
+```
+A small tool to read data from Google Sheets and export to Rusty Aquarium
+
+Usage: googlesheetsdata [OPTIONS] --spreadsheet <SPREADSHEET>
+
+Options:
+  -s, --spreadsheet <SPREADSHEET>  Spreadsheet ID to read
+  -o, --output <OUTPUT>            Path to output file to store json data [default: inputdata.json]
+  -i, --interval <INTERVAL>        Automatically regenerate the JSON file every N seconds
+  -r, --range <RANGE>              Range of values to get from spreadsheet, like the name of a sheet [default: Sheet1]
+  -c, --credentials <CREDENTIALS>  Path to Google OAuth2 credentials json file [default: credentials.json]
+  -t, --tokencache <TOKENCACHE>    Path to file to store token authentication cache [default: tokencache.json]
+  -h, --help                       Print help
+```
+
+### CSV Data
+
+The `csvdata` binary generates an inputdata.json file from a comma separated
+file of data. Use the flag `--listen` to keep the program running and update
+the `inputdata.json` file every time the CSV file is changed. Use the flag
+`--help` for more options.
+
+The columns in the CSV files are `fishname`, `count`, and `description`. The
+`count` defines how many fishes of the type `fishname` to create. The
+`description` field is not used.
+
+```bash
+cargo run --features build-csvdata --bin csvdata -- --file csvfile.csv --output assets/inputdata.json
+```
+
+#### Usage
+
+These are the available options:
+
+```
+Usage: csvdata [OPTIONS]
+
+Options:
+  -f, --file <FILE>      Path to input CSV file to convert [default: fishdata.csv]
+  -o, --output <OUTPUT>  Path to output file to store json data [default: inputdata.json]
+  -l, --listen           Listen to changes in file and automatically update output file
+  -h, --help             Print help
+```
+
+
 Configuration
 -------------
 
