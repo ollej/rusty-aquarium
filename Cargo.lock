@@ -1548,7 +1548,6 @@ dependencies = [
  "quad-net",
  "rustls-native-certs",
  "serde",
- "serde_json",
  "sysinfo",
  "tokio",
  "ureq",
