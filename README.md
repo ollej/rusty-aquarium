@@ -85,14 +85,16 @@ cargo run --features build-systemdata --bin systemdata > assets/inputdata.json
 
 The `googlesheetsdata` binary generates an inputdata.json file from a Google
 Sheets spreadsheet. A file called `credentials.json` is needed that contains
-Google API credientials. Use the flag `--help` for more options.
+Google API credientials. Use the flag `--interval N` to keep the program
+running and recreate the `inputdata.json` file every N seconds. Use the flag
+`--help` for more options.
 
 The sheet needs to have a row for every fish to show. The columns need to be
 `fishname`, `size`, `speed`, and `bubbles`. The `fishname` need to match the
 name of a configured fish, and the other values need to be a number.
 
 Information on how to create a `credentials.json` file can be found here:
-https://developers.google.com/sheets/api/quickstart/go
+https://developers.google.com/workspace/guides/configure-oauth-consent
 
 ```bash
 cargo run --features build-googlesheetsdata --bin googlesheetsdata -- --spreadsheet SPREADSHEET-ID --output assets/inputdata.json
@@ -145,7 +147,6 @@ Options:
   -l, --listen           Listen to changes in file and automatically update output file
   -h, --help             Print help
 ```
-
 
 Configuration
 -------------
