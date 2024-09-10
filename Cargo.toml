@@ -8,7 +8,7 @@ description = "Data visualization as a fish tank"
 
 [dependencies]
 futures = "0.3"
-macroquad = "0.4"
+macroquad = "=0.4.13"
 macroquad-particles = "0.2"
 nanoserde = "0.1"
 quad-net = "0.1"
@@ -24,6 +24,11 @@ csv = { version = "1.1", optional = true }
 notify = { version = "5.0", optional = true }
 # For bandata bin
 chrono = { version = "0.4.22", optional = true }
+
+[patch.crates-io]
+# Needed since macroquad-particles isn't updated on crates.io
+macroquad-particles = { git = "https://github.com/not-fl3/macroquad.git" }
+macroquad = { git = "https://github.com/not-fl3/macroquad.git" }
 
 [features]
 build-bandata = ["chrono"]

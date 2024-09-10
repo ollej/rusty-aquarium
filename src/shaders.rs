@@ -8,10 +8,9 @@ pub mod crt {
         load_material(SHADER_SOURCE, Default::default())
     }
 
-    const SHADER_SOURCE: ShaderSource = ShaderSource {
-        glsl_vertex: Some(crt::VERTEX),
-        glsl_fragment: Some(crt::FRAGMENT),
-        metal_shader: None,
+    const SHADER_SOURCE: ShaderSource = ShaderSource::Glsl {
+        vertex: crt::VERTEX,
+        fragment: crt::FRAGMENT,
     };
 
     const FRAGMENT: &str = r#"#version 100
@@ -81,10 +80,9 @@ pub mod water_wave {
         load_material(SHADER_SOURCE, Default::default())
     }
 
-    const SHADER_SOURCE: ShaderSource = ShaderSource {
-        glsl_vertex: Some(water_wave::VERTEX),
-        glsl_fragment: Some(water_wave::FRAGMENT),
-        metal_shader: None,
+    const SHADER_SOURCE: ShaderSource = ShaderSource::Glsl {
+        vertex: water_wave::VERTEX,
+        fragment: water_wave::FRAGMENT,
     };
 
     const FRAGMENT: &str = r#"#version 100

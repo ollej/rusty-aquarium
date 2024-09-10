@@ -29,6 +29,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "allocator-api2"
+version = "0.2.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c6cb57a04249c6480766f7f7cef5467412af1490f8d1e243141daddada3264f"
+
+[[package]]
 name = "android-tzdata"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -429,11 +435,11 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "fontdue"
-version = "0.7.3"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0793f5137567643cf65ea42043a538804ff0fbf288649e2141442b602d81f9bc"
+checksum = "efe23d02309319171d00d794c9ff48d4f903c0e481375b1b04b017470838af04"
 dependencies = [
- "hashbrown 0.13.2",
+ "hashbrown 0.14.2",
  "ttf-parser",
 ]
 
@@ -589,9 +595,9 @@ checksum = "b6c80984affa11d98d1b88b66ac8853f143217b399d3c74116778ff8fdb4ed2e"
 
 [[package]]
 name = "glam"
-version = "0.21.3"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "518faa5064866338b013ff9b2350dc318e14cc4fcd6cb8206d7e7c9886c98815"
+checksum = "9e05e7e6723e3455f4818c7b26e855439f7546cf617ef669d1adedb8669e5cb9"
 
 [[package]]
 name = "google-sheets4"
@@ -637,11 +643,12 @@ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 
 [[package]]
 name = "hashbrown"
-version = "0.13.2"
+version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
+checksum = "f93e7192158dbcda357bdec5fb5788eebf8bbac027f3f33e719d29135ae84156"
 dependencies = [
  "ahash",
+ "allocator-api2",
 ]
 
 [[package]]
@@ -926,34 +933,29 @@ checksum = "b06a4cde4c0f271a446782e3eff8de789548ce57dbc8eca9292c27f4a42004b4"
 
 [[package]]
 name = "macroquad"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd3e7dde4aeec81c8eadf9783033eebb6a02b4b01311417ded1c0fe46dcbaefa"
+version = "0.4.13"
+source = "git+https://github.com/not-fl3/macroquad.git#dc88b13a0b1492a70cb669b0d5a04166aeac6100"
 dependencies = [
- "bumpalo",
  "fontdue",
  "glam",
  "image",
  "macroquad_macro",
  "miniquad",
  "quad-rand",
- "slotmap",
 ]
 
 [[package]]
 name = "macroquad-particles"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88aaaca261af84793761b251afbd503ab3f30a47cc6375f8313cdd7307eea30c"
+version = "0.2.1"
+source = "git+https://github.com/not-fl3/macroquad.git#dc88b13a0b1492a70cb669b0d5a04166aeac6100"
 dependencies = [
  "macroquad",
 ]
 
 [[package]]
 name = "macroquad_macro"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5cecfede1e530599c8686f7f2d609489101d3d63741a6dc423afc997ce3fcc8"
+version = "0.1.8"
+source = "git+https://github.com/not-fl3/macroquad.git#dc88b13a0b1492a70cb669b0d5a04166aeac6100"
 
 [[package]]
 name = "malloc_buf"
@@ -996,9 +998,9 @@ dependencies = [
 
 [[package]]
 name = "miniquad"
-version = "0.4.0-alpha.5"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fb3ea4fad981a4f020c5992531684a3281d7a3483f9c003cb4a23145cc197a2"
+checksum = "2124e5e6bab86d96f263d78dc763c29e0da4c4f7ff0e1bb33f1d3905d1121262"
 dependencies = [
  "libc",
  "ndk-sys",
@@ -1323,9 +1325,9 @@ dependencies = [
 
 [[package]]
 name = "quad-rand"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "658fa1faf7a4cc5f057c9ee5ef560f717ad9d8dc66d975267f709624d6e1ab88"
+checksum = "b76f1009795ca44bb5aaae8fd3f18953e209259c33d9b059b1f53d58ab7511db"
 
 [[package]]
 name = "quote"
@@ -1690,15 +1692,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "slotmap"
-version = "1.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1e08e261d0e8f5c43123b7adf3e4ca1690d655377ac93a03b2c9d3e98de1342"
-dependencies = [
- "version_check",
-]
-
-[[package]]
 name = "socket2"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1888,9 +1881,9 @@ checksum = "3528ecfd12c466c6f163363caf2d02a71161dd5e1cc6ae7b34207ea2d42d81ed"
 
 [[package]]
 name = "ttf-parser"
-version = "0.15.2"
+version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b3e06c9b9d80ed6b745c7159c40b311ad2916abb34a49e9be2653b90db0d8dd"
+checksum = "2c591d83f69777866b9126b24c6dd9a18351f177e49d625920d19f989fd31cf8"
 
 [[package]]
 name = "unicode-bidi"
