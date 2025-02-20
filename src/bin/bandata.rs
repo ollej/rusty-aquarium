@@ -16,6 +16,7 @@ pub struct InputData {
 }
 
 #[derive(Clone, DeJson)]
+#[allow(non_snake_case)]
 pub struct Bandata {
     pub boardings: Option<u32>,
     pub alightings: Option<u32>,
@@ -57,12 +58,10 @@ impl From<&Option<NaiveDateTime>> for DateTimeProxy {
     }
 }
 
-impl From<&DateTimeProxy> for Option<NaiveDateTime> {
-    fn from(date: &DateTimeProxy) -> Option<NaiveDateTime> {
-        match NaiveDateTime::parse_from_str(date.as_str(), "%Y-%m-%d %H:%M:%S") {
-            Ok(d) => Some(d),
-            Err(_) => None,
-        }
+impl From<&DateTimeProxy> for NaiveDateTime {
+    fn from(date: &DateTimeProxy) -> NaiveDateTime {
+        NaiveDateTime::parse_from_str(date.as_str(), "%Y-%m-%d %H:%M:%S")
+            .unwrap_or(NaiveDateTime::UNIX_EPOCH)
     }
 }
 
