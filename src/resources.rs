@@ -3,7 +3,7 @@ use macroquad::{
     color::colors::{BLACK, WHITE},
     experimental::{collections::storage, coroutines::start_coroutine},
     text::{draw_text, measure_text},
-    texture::{load_texture, Texture2D},
+    texture::{Texture2D, load_texture},
     time::get_time,
     window::{clear_background, next_frame, screen_height, screen_width},
 };

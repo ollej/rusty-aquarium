@@ -6,7 +6,7 @@ use crate::{
 use macroquad::{
     experimental::{
         collections::storage,
-        coroutines::{start_coroutine, Coroutine},
+        coroutines::{Coroutine, start_coroutine},
     },
     math::{Rect, Vec2},
     rand::ChooseRandom,

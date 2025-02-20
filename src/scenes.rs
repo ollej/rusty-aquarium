@@ -2,7 +2,7 @@ use crate::{legend::Legend, scene_config::SceneConfig};
 use macroquad::{
     color::colors::WHITE,
     math::Vec2,
-    texture::{draw_texture_ex, DrawTextureParams, Texture2D},
+    texture::{DrawTextureParams, Texture2D, draw_texture_ex},
 };
 
 pub struct Scenes {

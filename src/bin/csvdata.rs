@@ -1,7 +1,7 @@
 extern crate notify;
 use clap::Parser;
 use nanoserde::SerJson;
-use notify::{recommended_watcher, Config, RecursiveMode, Watcher};
+use notify::{Config, RecursiveMode, Watcher, recommended_watcher};
 use rusty_aquarium::{
     fish_data::FishData, fish_legend::FishLegend, input_data::InputData, legend::Legend,
 };

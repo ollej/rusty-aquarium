@@ -2,7 +2,7 @@
 name = "rusty-aquarium"
 version = "0.19.0"
 authors = ["Olle Wreede <olle@wreede.se>"]
-edition = "2021"
+edition = "2024"
 default-run = "rusty-aquarium"
 description = "Data visualization as a fish tank"
 

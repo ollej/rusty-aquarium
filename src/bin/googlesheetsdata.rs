@@ -9,7 +9,7 @@ use {
     clap::Parser,
     core::num::ParseIntError,
     nanoserde::SerJson,
-    sheets4::{api::ValueRange, hyper, hyper_rustls, oauth2, Sheets},
+    sheets4::{Sheets, api::ValueRange, hyper, hyper_rustls, oauth2},
     tokio::{task, time},
 };
 

@@ -2,14 +2,14 @@
 
 mod shaders;
 use macroquad::{
-    camera::{set_camera, set_default_camera, Camera2D},
+    camera::{Camera2D, set_camera, set_default_camera},
     color::colors::{DARKBLUE, WHITE},
-    input::{is_key_pressed, is_mouse_button_pressed, KeyCode, MouseButton},
+    input::{KeyCode, MouseButton, is_key_pressed, is_mouse_button_pressed},
     material::{gl_use_default_material, gl_use_material},
     math::vec2,
-    texture::{draw_texture_ex, render_target, DrawTextureParams, FilterMode},
+    texture::{DrawTextureParams, FilterMode, draw_texture_ex, render_target},
     time::get_frame_time,
-    window::{clear_background, next_frame, screen_height, screen_width, Conf},
+    window::{Conf, clear_background, next_frame, screen_height, screen_width},
 };
 
 use rusty_aquarium::{

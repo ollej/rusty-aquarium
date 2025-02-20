@@ -1,9 +1,9 @@
 use crate::{collision::Collision, motion::Motion, movement::Movement, shaders::water_particle};
 use macroquad::{
     color::colors::WHITE,
-    math::{vec2, Rect, Vec2},
-    rand::{gen_range, ChooseRandom},
-    texture::{draw_texture_ex, DrawTextureParams, Texture2D},
+    math::{Rect, Vec2, vec2},
+    rand::{ChooseRandom, gen_range},
+    texture::{DrawTextureParams, Texture2D, draw_texture_ex},
 };
 use macroquad_particles::{AtlasConfig, BlendMode, Emitter, EmitterConfig};
 

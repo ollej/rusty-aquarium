@@ -3,7 +3,7 @@
 use crate::{fish_config::FishConfig, scene_config::SceneConfig};
 use macroquad::{
     file::load_string,
-    texture::{load_texture, Texture2D},
+    texture::{Texture2D, load_texture},
 };
 use nanoserde::DeJson;
 use std::collections::HashMap;

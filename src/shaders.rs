@@ -1,4 +1,4 @@
-use macroquad::prelude::{load_material, Material, ShaderSource};
+use macroquad::prelude::{Material, ShaderSource, load_material};
 use macroquad_particles::ParticleMaterial;
 
 pub mod crt {

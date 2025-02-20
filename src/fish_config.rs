@@ -1,6 +1,6 @@
 use crate::{fish_area::FishArea, fish_speed::FishSpeed, movement::Movement};
 use macroquad::{
-    math::{vec2, Rect, Vec2},
+    math::{Rect, Vec2, vec2},
     rand::gen_range,
 };
 use nanoserde::DeJson;

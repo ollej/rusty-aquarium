@@ -1,11 +1,11 @@
 use crate::{fish_legend::FishLegend, legend::Legend, resources::Resources};
 use macroquad::{
-    color::{colors::WHITE, Color},
+    color::{Color, colors::WHITE},
     experimental::collections::storage,
     math::vec2,
     shapes::draw_rectangle,
     text::{draw_text, measure_text},
-    texture::{draw_texture_ex, DrawTextureParams, Texture2D},
+    texture::{DrawTextureParams, Texture2D, draw_texture_ex},
     window::{screen_height, screen_width},
 };
 use std::collections::HashMap;
